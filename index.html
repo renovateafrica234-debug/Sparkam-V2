@@ -1,99 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sparkam - Autonomous AI Music Label</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sparkam - AI Music Label</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; }
         .spark-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
-        .glass { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-        }
-        input[type=range] { -webkit-appearance: none; background: rgba(255,255,255,0.1); border-radius: 10px; height: 8px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #ff00cc; cursor: pointer; }
-        .hidden { display: none; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
-<body>
-    <nav class="flex justify-between items-center p-6 max-w-7xl mx-auto">
-        <div class="text-2xl font-bold tracking-tighter">SPARKAM<span class="text-pink-500">.</span></div>
-    </nav>
-
-    <main id="main-view" class="max-w-5xl mx-auto text-center mt-12 px-6">
-        <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tight">Your AI <span class="text-transparent bg-clip-text spark-gradient">Mini Record Label</span></h1>
-        
-        <div class="glass p-10 rounded-[2.5rem] max-w-2xl mx-auto mb-12">
-            <h3 class="text-xl font-bold mb-6">Set Your Promo Budget</h3>
-            <div class="text-5xl font-black mb-6"><span class="currency-symbol">$</span><span id="budgetValue">9</span></div>
-            <input type="range" min="9" max="10000" value="9" class="w-full mb-8" id="budgetSlider">
-            
-            <input type="text" id="musicLink" placeholder="Paste Spotify or Apple Music Link..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-center outline-none focus:border-pink-500">
-            <button onclick="launchAI()" id="launch-btn" class="spark-gradient w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-lg shadow-pink-500/20">Analyze & Launch Campaign</button>
-        </div>
-    </main>
-
-    <section id="results-view" class="max-w-4xl mx-auto mt-12 px-6 hidden">
-        <div class="glass p-8 rounded-[2.5rem]">
-            <h2 class="text-2xl font-black mb-6">AI STRATEGY GENERATED</h2>
-            <div id="ai-response-text" class="text-gray-300 whitespace-pre-wrap leading-relaxed text-sm bg-black/20 p-6 rounded-2xl">
-                Analyzing your sound...
-            </div>
-            <button onclick="location.reload()" class="mt-8 text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100">← Back to Budget</button>
-        </div>
-    </section>
-
-    <script>
-        const slider = document.getElementById('budgetSlider');
-        const budgetVal = document.getElementById('budgetValue');
-        let currentCurrency = "$";
-
-        async function init() {
-            try {
-                const res = await fetch('https://ipapi.co/json/');
-                const data = await res.json();
-                if (data.country_code === 'NG') {
-                    currentCurrency = "₦";
-                    document.querySelectorAll('.currency-symbol').forEach(el => el.innerText = '₦');
-                    slider.min = 14000; slider.max = 15000000; slider.value = 14000;
-                    budgetVal.innerText = "14,000";
-                }
-            } catch (e) { console.log("Defaulting to USD"); }
-        }
-
-        slider.oninput = function() { budgetVal.innerText = new Intl.NumberFormat().format(this.value); }
-
-        async function launchAI() {
-            const link = document.getElementById('musicLink').value;
-            const btn = document.getElementById('launch-btn');
-            if (!link) return alert("Please paste your link!");
-
-            btn.innerText = "AI BRAIN ANALYZING...";
-            btn.disabled = true;
-
-            try {
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ musicLink: link, budget: budgetVal.innerText, currency: currentCurrency })
-                });
-
-                const data = await response.json();
-                document.getElementById('main-view').classList.add('hidden');
-                document.getElementById('results-view').classList.remove('hidden');
-                document.getElementById('ai-response-text').innerText = data.strategy || data.error;
-            } catch (error) {
-                alert("AI Brain is offline.");
-            } finally {
-                btn.innerText = "Analyze & Launch Campaign";
-                btn.disabled = false;
-            }
-        }
-        init();
-    </script>
+<body class="flex flex-col items-center justify-center min-h-screen text-center px-6">
+    <div class="text-3xl font-bold mb-8">SPARKAM<span class="text-pink-500">.</span></div>
+    <h1 class="text-5xl md:text-7xl font-black mb-6">Your AI <span class="text-transparent bg-clip-text spark-gradient">Mini Label</span></h1>
+    <p class="text-gray-400 mb-10 max-w-xl">Join the 360° AI music promotion revolution. Analyze your reach in real-time.</p>
+    <a href="/signup.html" class="spark-gradient px-12 py-4 rounded-full font-black uppercase tracking-widest shadow-lg shadow-pink-500/20">Start Free Campaign</a>
 </body>
 </html>
