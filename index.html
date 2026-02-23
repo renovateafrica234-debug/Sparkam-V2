@@ -1,19 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sparkam - AI Music Label</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sparkam - Autonomous AI Music Label</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; }
+        body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .spark-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass { 
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
+        .hero-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(255, 0, 204, 0.15) 0%, rgba(51, 51, 255, 0) 70%); z-index: -1; }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen text-center px-6">
-    <div class="text-3xl font-bold mb-8">SPARKAM<span class="text-pink-500">.</span></div>
-    <h1 class="text-5xl md:text-7xl font-black mb-6">Your AI <span class="text-transparent bg-clip-text spark-gradient">Mini Label</span></h1>
-    <p class="text-gray-400 mb-10 max-w-xl">Join the 360° AI music promotion revolution. Analyze your reach in real-time.</p>
-    <a href="/signup.html" class="spark-gradient px-12 py-4 rounded-full font-black uppercase tracking-widest shadow-lg shadow-pink-500/20">Start Free Campaign</a>
+<body>
+    <div class="hero-glow"></div>
+
+    <nav class="flex justify-between items-center p-6 max-w-7xl mx-auto sticky top-0 z-50 glass rounded-full mt-4">
+        <div class="text-2xl font-bold tracking-tighter">SPARKAM<span class="text-pink-500">.</span></div>
+        <div class="hidden md:flex gap-8 text-xs font-bold uppercase tracking-widest opacity-70">
+            <a href="#how-it-works" class="hover:text-pink-500 transition">How it Works</a>
+            <a href="#pricing" class="hover:text-pink-500 transition">Pricing</a>
+        </div>
+        <a href="/signup.html" class="spark-gradient px-6 py-2 rounded-full font-bold text-xs uppercase">Launch Brain —></a>
+    </nav>
+
+    <header class="max-w-5xl mx-auto text-center mt-24 px-6 pb-32">
+        <div class="inline-block glass px-4 py-1 rounded-full text-[10px] mb-6 tracking-[0.2em] uppercase font-bold text-pink-500">
+            <i class="fa-solid fa-brain mr-2"></i> Autonomous AI Promotion
+        </div>
+        <h1 class="text-5xl md:text-8xl font-black leading-tight mb-6 tracking-tight">Your Mini Record Label, <span class="text-transparent bg-clip-text spark-gradient">Powered by AI</span></h1>
+        <p class="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">Paste your music link. Our AI Brain analyzes your sound, finds your audience, and autonomously handles your entire 360° promotion campaign [cite: 2026-02-06].</p>
+        <div class="flex flex-col md:flex-row justify-center gap-4">
+            <a href="/signup.html" class="spark-gradient px-12 py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-lg shadow-pink-500/20">Start Free Campaign</a>
+            <a href="#how-it-works" class="glass px-12 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-white/5 transition">See How It Works</a>
+        </div>
+    </header>
+
+    <section id="how-it-works" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="glass p-10 rounded-[2.5rem] hover:border-pink-500/50 transition">
+                <i class="fa-solid fa-magnifying-glass-chart text-3xl text-pink-500 mb-6"></i>
+                <h3 class="text-xl font-bold mb-4">Smart Analysis</h3>
+                <p class="text-gray-400 text-sm">AI Brain identifies your genre and target audience instantly [cite: 2026-02-06].</p>
+            </div>
+            <div class="glass p-10 rounded-[2.5rem] hover:border-pink-500/50 transition">
+                <i class="fa-solid fa-bullseye text-3xl text-pink-500 mb-6"></i>
+                <h3 class="text-xl font-bold mb-4">Auto-Targeting</h3>
+                <p class="text-gray-400 text-sm">Reach the fans most likely to save your tracks and follow.</p>
+            </div>
+            <div class="glass p-10 rounded-[2.5rem] hover:border-pink-500/50 transition">
+                <i class="fa-solid fa-chart-line text-3xl text-pink-500 mb-6"></i>
+                <h3 class="text-xl font-bold mb-4">Real-time Growth</h3>
+                <p class="text-gray-400 text-sm">Watch your streams grow with data-driven label insights.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing" class="max-w-5xl mx-auto px-6 py-24">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-black mb-4">Simple, Transparent Pricing</h2>
+            <p class="text-gray-400">Choose the plan that fits your career stage.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="glass p-8 rounded-3xl text-left">
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Free</h4>
+                <div class="text-4xl font-black my-4">₦0</div>
+                <ul class="space-y-4 text-xs text-gray-400">
+                    <li><i class="fa-solid fa-check text-pink-500 mr-2"></i> Content creation tools</li>
+                    <li><i class="fa-solid fa-check text-pink-500 mr-2"></i> Artist page setup</li>
+                    <li><i class="fa-solid fa-check text-pink-500 mr-2"></i> Campaign planning</li>
+                </ul>
+            </div>
+            <div class="glass p-8 rounded-3xl text-left border-pink-500 border-2 relative scale-105 bg-white/[0.05]">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-pink-500 text-[10px] font-black px-4 py-1 rounded-full uppercase">Most Popular</div>
+                <h4 class="text-xs font-bold text-pink-500 uppercase tracking-widest">Regular</h4>
+                <div class="text-4xl font-black my-4">₦14,000<span class="text-xs font-normal text-gray-500">/campaign</span></div>
+                <ul class="space-y-4 text-xs text-gray-400">
+                    <li><i class="fa-solid fa-bolt text-pink-500 mr-2"></i> Full AI music analysis</li>
+                    <li><i class="fa-solid fa-bolt text-pink-500 mr-2"></i> 1 song campaign rollout</li>
+                    <li><i class="fa-solid fa-bolt text-pink-500 mr-2"></i> Autonomous social media</li>
+                </ul>
+            </div>
+            <div class="glass p-8 rounded-3xl text-left">
+                <h4 class="text-xs font-bold text-blue-400 uppercase tracking-widest">Pro</h4>
+                <div class="text-4xl font-black my-4">₦60,000<span class="text-xs font-normal text-gray-400">/month</span></div>
+                <ul class="space-y-4 text-xs text-gray-400">
+                    <li><i class="fa-solid fa-star text-blue-400 mr-2"></i> Unlimited song campaigns</li>
+                    <li><i class="fa-solid fa-star text-blue-400 mr-2"></i> Multiple artist profiles</li>
+                    <li><i class="fa-solid fa-star text-blue-400 mr-2"></i> Advanced analytics</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center p-20 border-t border-white/5 glass mt-24">
+        <div class="mb-8 font-black text-2xl tracking-tighter">SPARKAM<span class="text-pink-500">.</span></div>
+        <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] mb-4">© 2026 Sparkam — Autonomous Music Promotion Platform</p>
+        <div class="flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest font-bold">
+            <span class="opacity-60">Made in Nigeria with AI</span> <span>🇳🇬</span> <span>⚡️</span>
+        </div>
+    </footer>
 </body>
-</html>
+                </html>
+    
