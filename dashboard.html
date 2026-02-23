@@ -1,99 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artist Dashboard - Sparkam</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sparkam Dashboard | AI Analysis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0d0415; color: white; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .spark-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
-        .active-tab { border-bottom: 2px solid #ff00cc; color: white !important; }
+        body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; }
+        .sidebar { width: 260px; background: rgba(255, 255, 255, 0.02); border-right: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .spark-gradient-text { background: linear-gradient(90deg, #ff00cc, #3333ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
     </style>
 </head>
-<body class="flex">
-    <aside class="w-20 lg:w-64 h-screen glass sticky top-0 flex flex-col p-6">
-        <div class="font-black text-xl mb-12 hidden lg:block">SPARKAM<span class="text-pink-500">.</span></div>
-        <nav class="space-y-8 flex-1">
-            <button onclick="switchTab('analysis')" class="flex items-center gap-4 text-gray-500 hover:text-white transition w-full">
-                <i class="fa-solid fa-chart-pie"></i> <span class="hidden lg:block text-xs font-bold uppercase">AI Analysis</span>
-            </button>
-            <button onclick="switchTab('content')" class="flex items-center gap-4 text-gray-500 hover:text-white transition w-full">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="hidden lg:block text-xs font-bold uppercase">Content Creator</span>
-            </button>
-            <button onclick="switchTab('social')" class="flex items-center gap-4 text-gray-500 hover:text-white transition w-full">
-                <i class="fa-solid fa-share-nodes"></i> <span class="hidden lg:block text-xs font-bold uppercase">Social Media</span>
-            </button>
+<body class="flex min-h-screen">
+
+    <aside class="sidebar p-6 flex flex-col hidden md:flex">
+        <div class="mb-10">
+            <h1 class="text-xl font-black tracking-tighter">SPARKAM<span class="text-pink-500">.</span></h1>
+        </div>
+        <nav class="space-y-6">
+            <a href="#" class="flex items-center space-x-3 text-sm font-bold opacity-100"><i class="fa-solid fa-chart-pie text-pink-500"></i> <span>AI ANALYSIS</span></a>
+            <a href="#" class="flex items-center space-x-3 text-sm font-bold opacity-50 hover:opacity-100 transition"><i class="fa-solid fa-wand-magic-sparkles"></i> <span>CONTENT CREATOR</span></a>
+            <a href="#" class="flex items-center space-x-3 text-sm font-bold opacity-50 hover:opacity-100 transition"><i class="fa-solid fa-share-nodes"></i> <span>SOCIAL MEDIA</span></a>
         </nav>
     </aside>
 
-    <main class="flex-1 p-8">
-        <header class="flex justify-between items-center mb-12">
-            <h1 id="tab-title" class="text-2xl font-black uppercase tracking-tight">AI Strategy Analysis</h1>
-            <div class="glass px-4 py-2 rounded-full text-[10px] font-bold text-pink-500">BETA MODE</div>
+    <main class="flex-1 p-4 md:p-10">
+        <header class="flex justify-between items-center mb-10">
+            <h2 class="text-2xl font-black uppercase tracking-tight">AI Strategy Analysis</h2>
+            <div class="bg-white/5 border border-white/10 px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Beta Mode</div>
         </header>
 
-        <div class="grid lg:grid-cols-3 gap-8">
-            <div class="glass p-8 rounded-3xl h-fit">
-                <div class="space-y-4 mb-8">
-                    <input type="text" id="artist" placeholder="Artist Name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-pink-500 text-sm">
-                    <input type="text" id="track" placeholder="Track Title" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-pink-500 text-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-4 space-y-4">
+                <div class="glass-card p-6 rounded-[2rem]">
+                    <div class="space-y-4">
+                        <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                            <p id="displayFullName" class="text-sm font-medium opacity-80">Loading...</p>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                            <p id="displayArtistName" class="text-sm font-medium opacity-80">Loading...</p>
+                        </div>
+                        
+                        <div class="pt-4">
+                            <label class="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Promo Budget</label>
+                            <div class="text-4xl font-black mt-2">₦<span id="budgetValue">14,000</span></div>
+                            <input type="range" min="5000" max="500000" value="14000" step="1000" class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer mt-6 accent-blue-500" id="budgetSlider">
+                        </div>
+
+                        <button class="btn-gradient w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs mt-6 shadow-lg shadow-pink-500/20 hover:scale-[1.02] transition">
+                            Calibrate Brain
+                        </button>
+                    </div>
                 </div>
-                <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-4">Promo Budget</h4>
-                <div class="text-4xl font-black mb-4">₦<span id="budgetValue">14,000</span></div>
-                <input type="range" min="14000" max="15000000" step="1000" value="14000" class="w-full mb-8" id="budgetSlider">
-                <button onclick="runAI()" id="run-btn" class="spark-gradient w-full py-4 rounded-xl font-black uppercase text-xs tracking-widest">Calibrate Brain</button>
             </div>
 
-            <div class="lg:col-span-2 glass p-8 rounded-3xl min-h-[500px] relative overflow-hidden">
-                <div id="ai-response" class="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
-                    The AI Brain is ready. Enter your music details to generate your 360° blueprint...
+            <div class="lg:col-span-8">
+                <div class="glass-card p-8 rounded-[2rem] min-h-[400px] flex items-center justify-center text-center">
+                    <div id="aiResponseContainer">
+                        <p class="text-gray-500 max-w-xs text-sm leading-relaxed">
+                            The AI Brain is ready. Enter your music details to generate your 360° blueprint...
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
     <script>
-        const slider = document.getElementById('budgetSlider');
-        const budgetVal = document.getElementById('budgetValue');
-        slider.oninput = () => { budgetVal.innerText = new Intl.NumberFormat().format(slider.value); }
+        // 1. The "Brain" Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pull data from local storage saved during signup
+            const fullName = localStorage.getItem('sparkam_name') || "User";
+            const artistName = localStorage.getItem('sparkam_artist') || "Independent Artist";
 
-        async function runAI() {
-            const artist = document.getElementById('artist').value;
-            const track = document.getElementById('track').value;
-            const output = document.getElementById('ai-response');
-            const btn = document.getElementById('run-btn');
+            // Update UI with real data
+            document.getElementById('displayFullName').innerText = fullName;
+            document.getElementById('displayArtistName').innerText = artistName;
 
-            if(!artist || !track) return alert("Please fill details!");
+            // 2. Dynamic Budget Slider Logic
+            const slider = document.getElementById('budgetSlider');
+            const display = document.getElementById('budgetValue');
 
-            btn.disabled = true;
-            btn.innerText = "CALIBRATING...";
-            output.innerHTML = "<div class='animate-pulse'>AI Brain is analyzing your reach and creating content variables...</div>";
-
-            try {
-                const res = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ artist, track, budget: slider.value })
-                });
-                const data = await res.json();
-                // FIX: Ensure we access the correct key from the API response
-                output.innerText = data.strategy || "Error: Brain returned no data.";
-            } catch (e) {
-                output.innerText = "Brain offline. Check API key.";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Calibrate Brain";
-            }
-        }
-
-        function switchTab(tab) {
-            const title = document.getElementById('tab-title');
-            if(tab === 'content') title.innerText = "AI Content Creator";
-            if(tab === 'analysis') title.innerText = "AI Strategy Analysis";
-            if(tab === 'social') title.innerText = "Social Media Planner";
-        }
+            slider.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value).toLocaleString();
+                display.innerText = val;
+            });
+        });
     </script>
 </body>
 </html>
+    
