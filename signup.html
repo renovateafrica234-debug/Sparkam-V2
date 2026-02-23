@@ -41,39 +41,31 @@
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
-            const emailValue = document.getElementById('email').value;
-            const fullNameValue = document.getElementById('fullName').value;
-            const artistNameValue = document.getElementById('artistName').value;
+            const email = document.getElementById('email').value;
+            const name = document.getElementById('fullName').value;
+            const artist = document.getElementById('artistName').value;
 
             btn.innerText = "CONNECTING BRAIN...";
             btn.disabled = true;
 
-            // 1. Save data for Dashboard use (Required for your "Personal Space" logic)
-            localStorage.setItem('sparkam_email', emailValue);
-            localStorage.setItem('sparkam_name', fullNameValue);
-            localStorage.setItem('sparkam_artist', artistNameValue);
+            // Save for Dashboard Use
+            localStorage.setItem('sparkam_email', email);
+            localStorage.setItem('sparkam_name', name);
+            localStorage.setItem('sparkam_artist', artist);
 
-            // 2. Prepare Lead Data for the AI Brain
-            const leadData = {
-                fullName: fullNameValue,
-                email: emailValue,
-                artistName: artistNameValue,
-                timestamp: new Date().toISOString()
-            };
+            const leadData = { name, email, artist, timestamp: new Date().toISOString() };
 
             try {
-                // THE HANDSHAKE: Sending data to your Sub-Zap "Catch Hook"
-                // Replace 'https://hooks.zapier.com/hooks/catch/XXXXXX/XXXXXX/' with your actual Webhook URL from Step 1 of your Zap.
+                // IMPORTANT: Removed 'no-cors' to ensure data actually sends. 
+                // Replace with your URL from
                 await fetch('https://hooks.zapier.com/hooks/catch/21578502/27vsqx1/', {
                     method: 'POST',
-                    mode: 'no-cors',
                     body: JSON.stringify(leadData)
                 });
             } catch (error) {
-                console.warn("AI Brain is analyzing offline. Data saved locally.");
+                console.warn("External Brain link slow, proceeding with local cache.");
             } finally {
-                // 3. Seamless Transition to the next stage of the rollout
-                window.location.href = '/plan-selection.html';
+                window.location.href = 'plan-selection.html';
             }
         });
     </script>
