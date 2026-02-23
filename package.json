@@ -5,6 +5,6 @@
     "node": "22.x"
   },
   "dependencies": {
-    "groq-sdk": "^0.3.3"
+    "@google/generative-ai": "^0.21.0"
   }
 }
