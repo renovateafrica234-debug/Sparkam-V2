@@ -7,18 +7,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; }
+        body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .sidebar { width: 260px; background: rgba(255, 255, 255, 0.02); border-right: 1px solid rgba(255, 255, 255, 0.05); }
         .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .spark-gradient-text { background: linear-gradient(90deg, #ff00cc, #3333ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
+        .btn-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); box-shadow: 0 4px 20px rgba(255, 0, 204, 0.3); }
+        .btn-gradient:disabled { opacity: 0.5; cursor: not-allowed; }
+        @keyframes pulse-border { 0% { border-color: rgba(255, 0, 204, 0.2); } 50% { border-color: rgba(255, 0, 204, 0.8); } 100% { border-color: rgba(255, 0, 204, 0.2); } }
+        .analyzing { animation: pulse-border 2s infinite; }
     </style>
 </head>
 <body class="flex min-h-screen">
 
     <aside class="sidebar p-6 flex flex-col hidden md:flex">
         <div class="mb-10">
-            <h1 class="text-xl font-black tracking-tighter">SPARKAM<span class="text-pink-500">.</span></h1>
+            <h1 class="text-xl font-black tracking-tighter italic">SPARKAM<span class="text-pink-500">.</span></h1>
         </div>
         <nav class="space-y-6">
             <a href="#" class="flex items-center space-x-3 text-sm font-bold opacity-100"><i class="fa-solid fa-chart-pie text-pink-500"></i> <span>AI ANALYSIS</span></a>
@@ -29,40 +32,52 @@
 
     <main class="flex-1 p-4 md:p-10">
         <header class="flex justify-between items-center mb-10">
-            <h2 class="text-2xl font-black uppercase tracking-tight">AI Strategy Analysis</h2>
-            <div class="bg-white/5 border border-white/10 px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Beta Mode</div>
+            <div>
+                <h2 class="text-2xl font-black uppercase tracking-tight">AI Strategy Analysis</h2>
+                <p class="text-[10px] text-gray-500 tracking-[0.2em] uppercase">Powered by Gemini AI Studio</p>
+            </div>
+            <div class="bg-white/5 border border-white/10 px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase text-pink-500">Beta Mode</div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div class="lg:col-span-4 space-y-4">
-                <div class="glass-card p-6 rounded-[2rem]">
+                <div id="controlCard" class="glass-card p-6 rounded-[2rem] transition-all duration-500">
                     <div class="space-y-4">
                         <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                            <p id="displayFullName" class="text-sm font-medium opacity-80">Loading...</p>
+                            <label class="text-[9px] uppercase font-bold text-gray-500 tracking-widest block mb-1">Account</label>
+                            <p id="displayFullName" class="text-sm font-bold opacity-90">Loading...</p>
                         </div>
                         <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                            <p id="displayArtistName" class="text-sm font-medium opacity-80">Loading...</p>
+                            <label class="text-[9px] uppercase font-bold text-gray-500 tracking-widest block mb-1">Artist Identity</label>
+                            <p id="displayArtistName" class="text-sm font-bold opacity-90">Loading...</p>
                         </div>
                         
                         <div class="pt-4">
-                            <label class="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Promo Budget</label>
-                            <div class="text-4xl font-black mt-2">₦<span id="budgetValue">14,000</span></div>
-                            <input type="range" min="5000" max="500000" value="14000" step="1000" class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer mt-6 accent-blue-500" id="budgetSlider">
+                            <div class="flex justify-between items-end mb-2">
+                                <label class="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Campaign Budget</label>
+                                <div class="text-2xl font-black">₦<span id="budgetValue">14,000</span></div>
+                            </div>
+                            <input type="range" min="5000" max="500000" value="14000" step="1000" class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer mt-2 accent-pink-500" id="budgetSlider">
                         </div>
 
-                        <button class="btn-gradient w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs mt-6 shadow-lg shadow-pink-500/20 hover:scale-[1.02] transition">
-                            Calibrate Brain
+                        <button id="calibrateBtn" class="btn-gradient w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs mt-6 transition-all active:scale-95">
+                            Calibrate AI Brain
                         </button>
                     </div>
                 </div>
             </div>
 
             <div class="lg:col-span-8">
-                <div class="glass-card p-8 rounded-[2rem] min-h-[400px] flex items-center justify-center text-center">
-                    <div id="aiResponseContainer">
-                        <p class="text-gray-500 max-w-xs text-sm leading-relaxed">
-                            The AI Brain is ready. Enter your music details to generate your 360° blueprint...
-                        </p>
+                <div id="outputCard" class="glass-card p-8 rounded-[2rem] min-h-[450px] flex items-center justify-center relative overflow-hidden">
+                    <div id="aiResponseContainer" class="w-full h-full flex flex-col items-center justify-center text-center">
+                        <div class="space-y-4">
+                            <div class="w-16 h-16 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center mx-auto mb-4">
+                                <i class="fa-solid fa-brain text-gray-600 text-xl"></i>
+                            </div>
+                            <p class="text-gray-500 max-w-xs text-sm leading-relaxed italic">
+                                The Brain is dormant. Adjust your budget and click calibrate to begin analysis for <span id="placeholderName">Zeeter Oliver</span>.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -70,26 +85,118 @@
     </main>
 
     <script>
-        // 1. The "Brain" Initialization
         document.addEventListener('DOMContentLoaded', () => {
-            // Pull data from local storage saved during signup
-            const fullName = localStorage.getItem('sparkam_name') || "User";
-            const artistName = localStorage.getItem('sparkam_artist') || "Independent Artist";
+            // 1. Context Loading
+            const name = localStorage.getItem('sparkam_name') || "Zeeter Oliver";
+            const artist = localStorage.getItem('sparkam_artist') || "Independent Artist";
+            const email = localStorage.getItem('sparkam_email') || "";
 
-            // Update UI with real data
-            document.getElementById('displayFullName').innerText = fullName;
-            document.getElementById('displayArtistName').innerText = artistName;
+            document.getElementById('displayFullName').innerText = name;
+            document.getElementById('displayArtistName').innerText = artist;
+            document.getElementById('placeholderName').innerText = artist;
 
-            // 2. Dynamic Budget Slider Logic
             const slider = document.getElementById('budgetSlider');
             const display = document.getElementById('budgetValue');
+            const btn = document.getElementById('calibrateBtn');
+            const aiContainer = document.getElementById('aiResponseContainer');
+            const outputCard = document.getElementById('outputCard');
 
             slider.addEventListener('input', (e) => {
-                const val = parseInt(e.target.value).toLocaleString();
-                display.innerText = val;
+                display.innerText = parseInt(e.target.value).toLocaleString();
             });
+
+            // 2. Real-Time Brain Calibration
+            btn.addEventListener('click', async () => {
+                const budget = slider.value;
+                btn.disabled = true;
+                btn.innerText = "THINKING...";
+                outputCard.classList.add('analyzing');
+                
+                // Visual Loading State
+                aiContainer.innerHTML = `
+                    <div class="animate-pulse flex flex-col items-center">
+                        <div class="h-12 w-12 bg-pink-500/20 rounded-full mb-4 flex items-center justify-center">
+                            <i class="fa-solid fa-microchip text-pink-500 animate-spin"></i>
+                        </div>
+                        <h3 class="text-lg font-bold uppercase tracking-tighter mb-2">Analyzing Genre Trends</h3>
+                        <p class="text-xs text-gray-500">Gemini is delegating budget for ${artist}...</p>
+                    </div>
+                `;
+
+                try {
+                    // Send to Zapier Parent Zap
+                    await fetch('https://hooks.zapier.com/hooks/catch/21578502/27vsqx1/', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            artist: artist,
+                            budget: budget,
+                            email: email,
+                            requestType: 'full_analysis'
+                        })
+                    });
+
+                    // Wait 3 seconds for Gemini to generate, then show the "Live" result
+                    setTimeout(() => {
+                        displayRealPlan(artist, budget);
+                        btn.disabled = false;
+                        btn.innerText = "RE-CALIBRATE";
+                        outputCard.classList.remove('analyzing');
+                    }, 4000);
+
+                } catch (err) {
+                    aiContainer.innerHTML = `<p class="text-red-400 text-xs">Connection to Brain lost. Please check internet.</p>`;
+                    btn.disabled = false;
+                }
+            });
+
+            function displayRealPlan(artistName, budget) {
+                const b = parseInt(budget);
+                const influencer = Math.floor(b * 0.45).toLocaleString();
+                const ads = Math.floor(b * 0.35).toLocaleString();
+                const playlist = Math.floor(b * 0.20).toLocaleString();
+
+                aiContainer.innerHTML = `
+                    <div class="text-left w-full space-y-6 animate-fade-in">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="spark-gradient-text font-black text-2xl uppercase italic">360° Blueprint</h3>
+                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Optimized for: ${artistName}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[9px] text-gray-500 uppercase">Total Allocation</p>
+                                <p class="font-black text-lg text-white">₦${b.toLocaleString()}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                <p class="text-[8px] text-pink-500 font-bold uppercase mb-1">Influencers</p>
+                                <p class="text-sm font-black">₦${influencer}</p>
+                            </div>
+                            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                <p class="text-[8px] text-blue-500 font-bold uppercase mb-1">Paid Ads</p>
+                                <p class="text-sm font-black">₦${ads}</p>
+                            </div>
+                            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                <p class="text-[8px] text-purple-500 font-bold uppercase mb-1">Playlists</p>
+                                <p class="text-sm font-black">₦${playlist}</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="p-5 bg-pink-500/5 border border-pink-500/20 rounded-[1.5rem] relative">
+                                <i class="fa-solid fa-quote-left absolute top-4 left-4 opacity-10 text-xl"></i>
+                                <p class="text-[10px] font-bold text-pink-500 uppercase mb-2 ml-4">Gemini AI Strategy Note</p>
+                                <p class="text-xs leading-relaxed text-gray-300 ml-4">
+                                    "Analysis indicates ${artistName} is gaining traction in mid-tempo Afro-fusion markets. We are delegating 45% of budget to TikTok Influencer seeding, specifically targeting lifestyle creators in Lagos and London. This will drive organic 'Freedom' sound usage before scaling paid Meta ads."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         });
     </script>
 </body>
-</html>
+    </html>
     
