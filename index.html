@@ -7,106 +7,93 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; }
         .spark-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
         .glass { 
             background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(15px); 
-            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1); 
         }
         input[type=range] { -webkit-appearance: none; background: rgba(255,255,255,0.1); border-radius: 10px; height: 8px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #ff00cc; cursor: pointer; box-shadow: 0 0 10px #ff00cc; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #ff00cc; cursor: pointer; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <nav class="flex justify-between items-center p-6 max-w-7xl mx-auto">
         <div class="text-2xl font-bold tracking-tighter">SPARKAM<span class="text-pink-500">.</span></div>
-        <button class="spark-gradient px-6 py-2 rounded-full font-bold text-sm">Launch Brain —></button>
     </nav>
 
-    <main class="max-w-5xl mx-auto text-center mt-12 px-6">
-        <div class="inline-block glass px-4 py-1 rounded-full text-[10px] mb-6 tracking-[0.2em] uppercase font-bold text-pink-500">
-            <i class="fa-solid fa-brain mr-2"></i> Autonomous Record Label
-        </div>
-        <h1 class="text-5xl md:text-7xl font-black leading-tight mb-6">Your AI Manager & <span class="text-transparent bg-clip-text spark-gradient">Mini Record Label</span></h1>
-        <p class="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">Analyze your DSP release, find your true audience, and launch a 360° campaign autonomously. From content rollout to global distribution.</p>
-
-        <div class="glass p-10 rounded-[2.5rem] max-w-2xl mx-auto mb-24 relative overflow-hidden">
-            <div class="absolute -top-10 -left-10 w-32 h-32 bg-pink-500/10 blur-3xl"></div>
-            <h3 class="text-xl font-bold mb-8">Set Your Promotion Budget</h3>
+    <main id="main-view" class="max-w-5xl mx-auto text-center mt-12 px-6">
+        <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tight">Your AI <span class="text-transparent bg-clip-text spark-gradient">Mini Record Label</span></h1>
+        
+        <div class="glass p-10 rounded-[2.5rem] max-w-2xl mx-auto mb-12">
+            <h3 class="text-xl font-bold mb-6">Set Your Promo Budget</h3>
             <div class="text-5xl font-black mb-6"><span class="currency-symbol">$</span><span id="budgetValue">9</span></div>
-            <input type="range" min="9" max="10000" value="9" class="w-full mb-6" id="budgetSlider">
-            <p class="text-sm text-gray-500">The AI Brain optimizes your <span class="currency-symbol">$</span><span id="sliderDisplay">9</span> budget for maximum reach across Socials & DSPs.</p>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-8 mb-32">
-            <div class="glass p-8 rounded-3xl text-left">
-                <h4 class="text-lg font-bold text-gray-400">Free</h4>
-                <div class="text-3xl font-black my-4"><span class="currency-symbol">$</span>0</div>
-                <ul class="space-y-3 text-xs text-gray-400">
-                    <li><i class="fa-solid fa-check text-pink-500 mr-2"></i> Content Creation Tools</li>
-                    <li><i class="fa-solid fa-check text-pink-500 mr-2"></i> Artist Page Setup</li>
-                    <li><i class="fa-solid fa-check text-pink-500 mr-2"></i> Basic Campaign Planning</li>
-                </ul>
-            </div>
-            <div class="glass p-8 rounded-3xl text-left border-pink-500/50">
-                <h4 class="text-lg font-bold text-pink-500">Regular</h4>
-                <div class="text-3xl font-black my-4"><span class="currency-symbol">$</span><span class="price-reg">9</span></div>
-                <ul class="space-y-3 text-xs text-gray-400">
-                    <li><i class="fa-solid fa-bolt text-pink-500 mr-2"></i> 1 Song Campaign Rollout</li>
-                    <li><i class="fa-solid fa-bolt text-pink-500 mr-2"></i> AI Audience Analysis</li>
-                    <li><i class="fa-solid fa-bolt text-pink-500 mr-2"></i> Autonomous Social Media</li>
-                </ul>
-            </div>
-            <div class="glass p-8 rounded-3xl text-left">
-                <h4 class="text-lg font-bold text-blue-500">Pro</h4>
-                <div class="text-3xl font-black my-4"><span class="currency-symbol">$</span><span class="price-pro">39</span></div>
-                <ul class="space-y-3 text-xs text-gray-400">
-                    <li><i class="fa-solid fa-star text-blue-500 mr-2"></i> Multiple Artist Profiles</li>
-                    <li><i class="fa-solid fa-star text-blue-500 mr-2"></i> Unlimited Song Promos</li>
-                    <li><i class="fa-solid fa-star text-blue-500 mr-2"></i> Advanced 360° Analytics</li>
-                </ul>
-            </div>
+            <input type="range" min="9" max="10000" value="9" class="w-full mb-8" id="budgetSlider">
+            
+            <input type="text" id="musicLink" placeholder="Paste Spotify or Apple Music Link..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-center outline-none focus:border-pink-500">
+            <button onclick="launchAI()" id="launch-btn" class="spark-gradient w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-lg shadow-pink-500/20">Analyze & Launch Campaign</button>
         </div>
     </main>
 
-    <footer class="text-center p-12 border-t border-white/5 glass">
-        <div class="flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest font-bold opacity-60">
-            <span>Made in Nigeria</span> <span class="text-sm">🇳🇬</span> <span>Powered by AI Brain</span>
+    <section id="results-view" class="max-w-4xl mx-auto mt-12 px-6 hidden">
+        <div class="glass p-8 rounded-[2.5rem]">
+            <h2 class="text-2xl font-black mb-6">AI STRATEGY GENERATED</h2>
+            <div id="ai-response-text" class="text-gray-300 whitespace-pre-wrap leading-relaxed text-sm bg-black/20 p-6 rounded-2xl">
+                Analyzing your sound...
+            </div>
+            <button onclick="location.reload()" class="mt-8 text-xs font-bold uppercase tracking-widest opacity-50 hover:opacity-100">← Back to Budget</button>
         </div>
-    </footer>
+    </section>
 
     <script>
         const slider = document.getElementById('budgetSlider');
         const budgetVal = document.getElementById('budgetValue');
-        const sliderDisp = document.getElementById('sliderDisplay');
-        let isNGN = false;
+        let currentCurrency = "$";
 
         async function init() {
             try {
                 const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
                 if (data.country_code === 'NG') {
-                    isNGN = true;
+                    currentCurrency = "₦";
                     document.querySelectorAll('.currency-symbol').forEach(el => el.innerText = '₦');
-                    document.querySelector('.price-reg').innerText = '14,000';
-                    document.querySelector('.price-pro').innerText = '60,000';
                     slider.min = 14000; slider.max = 15000000; slider.value = 14000;
-                    updateDisplay(14000);
+                    budgetVal.innerText = "14,000";
                 }
             } catch (e) { console.log("Defaulting to USD"); }
         }
 
-        function updateDisplay(val) {
-            const formatted = new Intl.NumberFormat().format(val);
-            budgetVal.innerText = formatted;
-            sliderDisp.innerText = formatted;
-        }
+        slider.oninput = function() { budgetVal.innerText = new Intl.NumberFormat().format(this.value); }
 
-        slider.oninput = function() { updateDisplay(this.value); }
+        async function launchAI() {
+            const link = document.getElementById('musicLink').value;
+            const btn = document.getElementById('launch-btn');
+            if (!link) return alert("Please paste your link!");
+
+            btn.innerText = "AI BRAIN ANALYZING...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ musicLink: link, budget: budgetVal.innerText, currency: currentCurrency })
+                });
+
+                const data = await response.json();
+                document.getElementById('main-view').classList.add('hidden');
+                document.getElementById('results-view').classList.remove('hidden');
+                document.getElementById('ai-response-text').innerText = data.strategy || data.error;
+            } catch (error) {
+                alert("AI Brain is offline.");
+            } finally {
+                btn.innerText = "Analyze & Launch Campaign";
+                btn.disabled = false;
+            }
+        }
         init();
     </script>
 </body>
-    </html>
-            
+</html>
