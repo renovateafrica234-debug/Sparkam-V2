@@ -1,17 +1,11 @@
 {
   "name": "sparkam-v2",
   "version": "1.0.0",
-  "description": "Sparkam AI - Music Promotion Platform",
-  "main": "index.html",
   "type": "module",
-  "scripts": {
-    "start": "vercel dev",
-    "build": "vercel build",
-    "deploy": "vercel --prod"
-  },
   "dependencies": {
     "@google/generative-ai": "^0.21.0"
   },
-  "author": "Sparkam AI",
-  "license": "MIT"
+  "scripts": {
+    "build": "vercel build"
+  }
 }
