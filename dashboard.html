@@ -2,64 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sparkam AI - Dashboard</title>
     <style>
-        body { background-color: #0a0a0c; color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; min-height: 100vh; }
-        .sidebar { width: 250px; border-right: 1px solid #1a1a1c; padding: 30px; }
-        .main-content { flex: 1; padding: 50px; }
-        .card { background-color: #161618; padding: 30px; borderRadius: 20px; border: 1px solid #222; display: flex; flexDirection: column; gap: 20px; max-width: 400px; }
-        .input-box { background: #222; border: 1px solid #333; padding: 15px; border-radius: 10px; color: #fff; margin-bottom: 15px; width: 100%; }
-        .spark-button { background: linear-gradient(90deg, #ff00ff, #007bff); color: white; border: none; padding: 18px; border-radius: 15px; font-weight: 900; cursor: pointer; width: 100%; }
-        .strategy-display { background: #161618; padding: 30px; border-radius: 20px; margin-top: 20px; min-height: 200px; border: 1px solid #1a1a1c; }
+        body { background-color: #0a0a0c; color: #fff; font-family: sans-serif; margin: 0; display: flex; }
+        .sidebar { width: 250px; border-right: 1px solid #1a1a1c; padding: 30px; height: 100vh; }
+        .main { flex: 1; padding: 50px; }
+        .card { background: #161618; padding: 30px; border-radius: 20px; border: 1px solid #222; max-width: 400px; }
+        .input { background: #222; border: 1px solid #333; padding: 15px; border-radius: 10px; color: #fff; margin-bottom: 15px; width: 100%; }
+        .spark-button { background: linear-gradient(90deg, #ff00ff, #007bff); color: white; border: none; padding: 18px; border-radius: 15px; font-weight: 900; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(255, 0, 255, 0.3); }
+        #strategyOutput { background: #161618; padding: 30px; border-radius: 20px; margin-top: 20px; border: 1px solid #1a1a1c; line-height: 1.6; }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <h2 style="color: #ff00ff;">SPARKAM.</h2>
-        <p style="color: #666; font-size: 14px;">AI ANALYSIS</p>
+        <p style="color: #666;">AI ANALYSIS</p>
     </div>
-    <div class="main-content">
+    <div class="main">
         <h1>AI STRATEGY ANALYSIS</h1>
         <div class="card">
-            <input type="text" id="artistName" class="input-box" placeholder="Artist Name">
-            <input type="text" id="trackTitle" class="input-box" placeholder="Track Title">
-            <button id="sparkButton" class="spark-button">SPARK IT</button>
+            <input type="text" id="artistName" class="input" placeholder="Artist Name (e.g. Zeeter Oliver)">
+            <input type="text" id="trackTitle" class="input" placeholder="Track Title (e.g. Freedom)">
+            <button id="sparkBtn" class="spark-button">SPARK IT</button>
         </div>
-        <div id="result" class="strategy-display">
-            <p style="color: #444;">The AI Brain is ready. Enter details and click SPARK IT...</p>
-        </div>
+        <div id="strategyOutput">The AI Brain is ready. Enter details and click SPARK IT...</div>
     </div>
 
     <script>
-        document.getElementById('sparkButton').addEventListener('click', async () => {
-            const btn = document.getElementById('sparkButton');
-            const resultDiv = document.getElementById('result');
+        document.getElementById('sparkBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('sparkBtn');
+            const output = document.getElementById('strategyOutput');
             const artist = document.getElementById('artistName').value;
-            
+            const track = document.getElementById('trackTitle').value;
+
             btn.innerText = "SPARKING...";
-            resultDiv.innerHTML = "Connecting to the AI Brain...";
+            output.innerHTML = "Consulting the AI Brain...";
 
             try {
-                // This calls your api/promote.js file
+                // This calls your updated api/promote.js file
                 const response = await fetch('/api/promote', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        artistName: artist,
-                        fullName: artist, // Using artist name for beta placeholder
-                        email: "beta-user@sparkam.com",
-                        timestamp: new Date().toISOString()
-                    }),
+                    body: JSON.stringify({ artistName: artist, trackTitle: track })
                 });
 
                 const data = await response.json();
                 if (data.success) {
-                    resultDiv.innerHTML = `<div style="line-height: 1.8;">${data.strategy}</div>`;
+                    output.innerHTML = data.strategy;
                     btn.innerText = "SPARK IT";
                 }
             } catch (err) {
-                resultDiv.innerHTML = "Brain connection failed. Check Vercel logs.";
+                output.innerHTML = "Connection failed. Ensure ZAPIER_WEBHOOK_URL is in Vercel.";
                 btn.innerText = "SPARK IT";
             }
         });
