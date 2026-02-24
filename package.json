@@ -6,6 +6,6 @@
     "@google/generative-ai": "^0.21.0"
   }
   "scripts": {
-    "build": "vercel build"
+    "build": "vercel build",
   }
 }
