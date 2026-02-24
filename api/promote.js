@@ -1,31 +1,53 @@
-import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// Sparkam AI Music Promo - Gemini AI Studio Integration
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { musicLink, struggle } = req.body;
+  const { musicLink, struggle, fullName, email, artistName } = req.body;
 
   try {
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: "You are the Sparkam AI Brain, a professional music promo manager. Analyze the user's struggle and music link to provide a 3-step growth strategy."
-        },
-        {
-          role: "user",
-          content: `Music Link: ${musicLink}. Main Struggle: ${struggle}`
-        }
-      ],
-      model: "mixtral-8x7b-32768",
+    // 1. Initialize Gemini AI Model
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `You are the Sparkam AI Brain, a professional music promo manager. 
+    Analyze this request and provide a growth strategy:
+    Artist Name: ${artistName}
+    Music Link: ${musicLink}
+    Current Challenge: ${struggle}`;
+
+    // 2. Generate the Strategy
+    const result = await model.generateContent(prompt);
+    const aiStrategy = result.response.text();
+
+    // 3. THE HANDSHAKE: Send results to Zapier Parent Zap
+    if (process.env.ZAPIER_WEBHOOK_URL) {
+      await fetch(process.env.ZAPIER_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: fullName,
+          email: email,
+          artistName: artistName,
+          strategy: aiStrategy,
+          link: musicLink,
+          timestamp: new Date().toISOString()
+        }),
+      });
+    }
+
+    // 4. Return to your Sparkam Social Media UI
+    res.status(200).json({ 
+      success: true, 
+      strategy: aiStrategy 
     });
 
-    res.status(200).json({ strategy: chatCompletion.choices[0].message.content });
   } catch (error) {
-    res.status(500).json({ error: "AI Brain is offline. Try again later." });
+    console.error('Gemini Brain Error:', error);
+    res.status(500).json({ error: "AI Brain failed to process music promo" });
   }
 }
