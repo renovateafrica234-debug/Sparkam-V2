@@ -1,166 +1,614 @@
-# 🎯 AH! THAT'S THE ISSUE!
-
-You changed the button text from "CALIBRATE BRAIN" to "SPARK IT" but the **JavaScript code is still looking for the old button ID or text!**
-
-Let me fix it to match your "SPARK IT" design:
-
-# 🎯 FIXED! "SPARK IT" BUTTON NOW WORKS!
-
-## ✅ THE PROBLEM WAS:
-
-When you changed the button text from "CALIBRATE BRAIN" to "SPARK IT", you probably:
-1. Changed the HTML button text ✅
-2. BUT forgot to update the JavaScript that controls it ❌
-
-The JavaScript was still looking for the old button ID or had broken event listeners!
-
----
-
-## ✅ WHAT I FIXED:
-
-### **1. Button ID & Class**
-```html
-<!-- OLD (broken) -->
-<button id="calibrateBtn" class="calibrate-btn">CALIBRATE BRAIN</button>
-
-<!-- NEW (working) -->
-<button id="sparkBtn" class="spark-btn">SPARK IT</button>
-```
-
-### **2. JavaScript Event Listener**
-```javascript
-// OLD (broken)
-const calibrateBtn = document.getElementById('calibrateBtn');
-
-// NEW (working)
-const sparkBtn = document.getElementById('sparkBtn');
-sparkBtn.addEventListener('submit', async (e) => {
-  // ... handles SPARK IT click
-});
-```
-
-### **3. Button States**
-```javascript
-// Loading state
-sparkBtn.textContent = 'SPARKING...';
-
-// Success state
-sparkBtn.textContent = 'SPARK IT';
-```
-
-### **4. CSS Classes**
-- Changed `.calibrate-btn` to `.spark-btn`
-- Kept your beautiful gradient design
-- Maintains "SPARKING..." loading animation
-
----
-
-## 🚀 DEPLOY THIS NOW:
-
-### **STEP 1: Replace your dashboard file**
-
-1. Download `dashboard-spark-it-fixed.html` ⬆️
-2. Go to GitHub: `Sparkam-V2`
-3. Replace your current `dashboard.html` with this file
-4. Commit: "Fix SPARK IT button - now calls API correctly"
-
-### **STEP 2: Verify your API route exists**
-
-Make sure you have `/api/promote.js` in your repo that looks like this:
-
-```javascript
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-let gemini, model;
-if (process.env.GOOGLE_API_KEY) {
-  gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-  model = gemini.getGenerativeModel({ model: "gemini-pro" });
-}
-
-module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sparkam - AI Strategy Analysis</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a12;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: #050508;
+      padding: 40px 30px;
+      border-right: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .logo {
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 60px;
+      color: white;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 20px;
+      margin: 10px 0;
+      border-radius: 12px;
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .nav-item.active {
+      background: rgba(255, 0, 102, 0.1);
+      color: #FF0066;
+    }
+    
+    .nav-item:hover:not(.active) {
+      background: rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.8);
+    }
+    
+    .nav-icon { font-size: 20px; }
+    
+    /* Main Content */
+    .main {
+      flex: 1;
+      display: flex;
+      padding: 40px;
+      gap: 40px;
+    }
+    
+    .form-section {
+      flex: 1;
+      max-width: 700px;
+    }
+    
+    .header {
+      margin-bottom: 40px;
+    }
+    
+    h1 {
+      font-size: 42px;
+      font-weight: 900;
+      margin-bottom: 10px;
+      letter-spacing: -1px;
+    }
+    
+    .beta-badge {
+      display: inline-block;
+      background: rgba(255, 0, 102, 0.2);
+      color: #FF0066;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    
+    .form-container {
+      background: #12121a;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 40px;
+    }
+    
+    .form-group {
+      margin-bottom: 25px;
+    }
+    
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 16px 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: white;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #FF0066;
+      background: rgba(255,255,255,0.05);
+    }
+    
+    input::placeholder { color: rgba(255,255,255,0.3); }
+    
+    select { cursor: pointer; }
+    select option { background: #12121a; color: white; }
+    
+    /* Budget Section */
+    .budget-section {
+      margin: 35px 0;
+      padding: 30px;
+      background: rgba(255, 0, 102, 0.03);
+      border: 1px solid rgba(255, 0, 102, 0.15);
+      border-radius: 20px;
+    }
+    
+    .budget-label {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+    
+    .budget-display {
+      text-align: center;
+      font-size: 56px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #FF0066 0%, #9D4EDD 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 25px;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      border: none;
+      margin-bottom: 15px;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(255, 0, 102, 0.5);
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .budget-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+    
+    /* SPARK IT Button - FIXED! */
+    .spark-btn {
+      width: 100%;
+      padding: 22px;
+      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
+      border: none;
+      border-radius: 16px;
+      color: white;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      transition: all 0.3s;
+      margin-top: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .spark-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 50px rgba(255, 0, 102, 0.4);
+    }
+    
+    .spark-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .spark-btn.loading::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+    
+    /* Info Panel */
+    .info-panel {
+      flex: 1;
+      max-width: 500px;
+      padding: 40px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    
+    .info-content p {
+      font-size: 16px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.7);
+    }
+    
+    /* Status Messages */
+    .status-message {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 14px;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+    
+    .status-message.show { display: block; }
+    
+    .status-message.loading {
+      background: rgba(157, 78, 221, 0.1);
+      border: 1px solid rgba(157, 78, 221, 0.3);
+      color: #9D4EDD;
+    }
+    
+    .status-message.error {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      color: #ff6666;
+    }
+    
+    .status-message.success {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      color: #00ff88;
+    }
+    
+    /* Results */
+    .results {
+      display: none;
+      margin-top: 40px;
+      animation: fadeIn 0.5s;
+    }
+    
+    .results.show { display: block; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .result-card {
+      background: #12121a;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 35px;
+      margin: 20px 0;
+    }
+    
+    .result-card h3 {
+      color: #FF0066;
+      font-size: 18px;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .platform-item {
+      background: rgba(157, 78, 221, 0.05);
+      border-left: 3px solid #9D4EDD;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 10px;
+    }
+    
+    @media (max-width: 1200px) {
+      .main { flex-direction: column; }
+      .info-panel { max-width: 100%; }
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .form-section { max-width: 100%; }
+      h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">SPARKAM.</div>
+    <div class="nav-item active">
+      <span class="nav-icon">🎯</span>
+      <span>AI ANALYSIS</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">✍️</span>
+      <span>CONTENT CREATOR</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">📱</span>
+      <span>SOCIAL MEDIA</span>
+    </div>
+  </div>
   
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  <!-- Main Content -->
+  <div class="main">
+    <!-- Form Section -->
+    <div class="form-section">
+      <div class="header">
+        <h1>AI STRATEGY ANALYSIS</h1>
+        <span class="beta-badge">BETA MODE</span>
+      </div>
+      
+      <div class="form-container">
+        <form id="sparkForm">
+          <div class="form-group">
+            <label>Artist Name</label>
+            <input 
+              type="text" 
+              id="artistName" 
+              placeholder="Artist Name" 
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Track Title</label>
+            <input 
+              type="text" 
+              id="trackTitle" 
+              placeholder="Track Title" 
+              required
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Genre</label>
+            <select id="genre" required>
+              <option value="">Select Genre</option>
+              <option value="Afrobeats">Afrobeats</option>
+              <option value="Afropop">Afropop</option>
+              <option value="Hip-Hop">Hip-Hop</option>
+              <option value="R&B">R&B</option>
+              <option value="Pop">Pop</option>
+              <option value="Amapiano">Amapiano</option>
+            </select>
+          </div>
+          
+          <div class="budget-section">
+            <div class="budget-label">PROMO BUDGET</div>
+            <div class="budget-display">₦<span id="budgetAmount">14,000</span></div>
+            <input 
+              type="range" 
+              id="budgetSlider" 
+              min="3000" 
+              max="500000" 
+              value="14000" 
+              step="1000"
+            >
+            <div class="budget-info">
+              <span>₦3K</span>
+              <span>₦50K</span>
+              <span>₦500K</span>
+            </div>
+          </div>
+          
+          <!-- SPARK IT BUTTON - MATCHES YOUR DESIGN -->
+          <button type="submit" class="spark-btn" id="sparkBtn">
+            SPARK IT
+          </button>
+        </form>
+        
+        <div class="status-message" id="statusMessage"></div>
+        <div class="results" id="results"></div>
+      </div>
+    </div>
+    
+    <!-- Info Panel -->
+    <div class="info-panel">
+      <div class="info-content">
+        <p>The AI Brain is ready. Enter your music details to generate your 360° blueprint...</p>
+      </div>
+    </div>
+  </div>
   
-  const { artistName, trackTitle, genre, budget } = req.body;
+  <script>
+    console.log('🎵 Sparkam Dashboard Loaded');
+    
+    // Budget slider
+    const budgetSlider = document.getElementById('budgetSlider');
+    const budgetDisplay = document.getElementById('budgetAmount');
+    
+    budgetSlider.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      budgetDisplay.textContent = value.toLocaleString();
+    });
+    
+    // Form submission - FIXED FOR "SPARK IT"
+    const sparkForm = document.getElementById('sparkForm');
+    const sparkBtn = document.getElementById('sparkBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const resultsDiv = document.getElementById('results');
+    
+    sparkForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        artistName: document.getElementById('artistName').value.trim(),
+        trackTitle: document.getElementById('trackTitle').value.trim(),
+        genre: document.getElementById('genre').value,
+        budget: parseInt(budgetSlider.value)
+      };
+      
+      console.log('🚀 SPARK IT clicked:', formData);
+      
+      // Validation
+      if (!formData.artistName || !formData.trackTitle || !formData.genre) {
+        showStatus('error', '❌ Please fill in all fields');
+        return;
+      }
+      
+      // Update UI
+      sparkBtn.disabled = true;
+      sparkBtn.textContent = 'SPARKING...';
+      sparkBtn.classList.add('loading');
+      showStatus('loading', '🧠 Consulting the AI Brain...');
+      resultsDiv.classList.remove('show');
+      
+      try {
+        console.log('📡 Calling /api/promote...');
+        
+        const response = await fetch('/api/promote', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        console.log('📥 Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ API Error:', errorText);
+          throw new Error(`API Error: ${response.status} - ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Campaign result:', result);
+        
+        if (result.success && result.campaign) {
+          showStatus('success', '✨ Campaign Generated Successfully!');
+          displayResults(result.campaign, formData);
+          
+          // Scroll to results
+          setTimeout(() => {
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 300);
+        } else {
+          throw new Error(result.error || 'Failed to generate campaign');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error:', error);
+        showStatus('error', `❌ ${error.message}. Check GOOGLE_API_KEY in Vercel settings.`);
+      } finally {
+        sparkBtn.disabled = false;
+        sparkBtn.textContent = 'SPARK IT';
+        sparkBtn.classList.remove('loading');
+      }
+    });
+    
+    function showStatus(type, message) {
+      statusMessage.className = `status-message ${type} show`;
+      statusMessage.textContent = message;
+    }
+    
+    function displayResults(campaign, formData) {
+      const html = `
+        <div style="background: linear-gradient(135deg, rgba(255,0,102,0.1) 0%, rgba(99,102,241,0.1) 100%); padding: 30px; border-radius: 16px; text-align: center; margin-bottom: 25px;">
+          <h2 style="font-size: 32px; margin-bottom: 10px;">🎉 Campaign Sparked!</h2>
+          <p style="font-size: 18px; color: rgba(255,255,255,0.8);">
+            "${formData.trackTitle}" by ${formData.artistName}
+          </p>
+          <p style="font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 8px;">
+            ${formData.genre} • ₦${formData.budget.toLocaleString()}
+          </p>
+        </div>
+        
+        <div class="result-card">
+          <h3>Strategy Overview</h3>
+          <p style="color: rgba(255,255,255,0.8); line-height: 1.7;">
+            ${campaign.overview || 'AI-powered autonomous campaign strategy.'}
+          </p>
+        </div>
+        
+        <div class="result-card">
+          <h3>Platform Strategies</h3>
+          ${campaign.platforms ? campaign.platforms.map(p => `
+            <div class="platform-item">
+              <strong style="color: #9D4EDD; font-size: 16px; display: block; margin-bottom: 8px;">
+                ${(p.platform || 'Platform').toUpperCase()}
+              </strong>
+              <div style="color: #FF0066; font-size: 24px; font-weight: 900; margin: 8px 0;">
+                ₦${(p.budget || 0).toLocaleString()}
+              </div>
+              <p style="color: rgba(255,255,255,0.7); line-height: 1.6;">
+                ${Array.isArray(p.tactics) ? p.tactics.join(' • ') : 'AI-powered tactics'}
+              </p>
+            </div>
+          `).join('') : '<p>Generating platform strategies...</p>'}
+        </div>
+        
+        ${campaign.content ? `
+          <div class="result-card">
+            <h3>Content Ideas</h3>
+            ${campaign.content.captions ? campaign.content.captions.map((c, i) => `
+              <div style="background: rgba(255,255,255,0.03); padding: 18px; border-radius: 10px; margin: 12px 0;">
+                <div style="color: #FF0066; font-size: 11px; font-weight: 700; margin-bottom: 8px;">CAPTION ${i+1}</div>
+                <div style="color: rgba(255,255,255,0.8);">${c}</div>
+              </div>
+            `).join('') : ''}
+          </div>
+          
+          <div class="result-card">
+            <h3>Hashtags</h3>
+            <div style="color: #9D4EDD; font-size: 16px; line-height: 2;">
+              ${campaign.content.hashtags ? campaign.content.hashtags.join(' ') : '#Music #Promotion'}
+            </div>
+          </div>
+        ` : ''}
+        
+        <button onclick="location.reload()" class="spark-btn" style="margin-top: 25px;">
+          Spark Another
+        </button>
+      `;
+      
+      resultsDiv.innerHTML = html;
+      resultsDiv.classList.add('show');
+      resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Log when page loads
+    console.log('✅ Dashboard ready - SPARK IT button active');
+  </script>
+</body>
+  </html>
   
-  // ... generate campaign with AI or fallback ...
-  
-  return res.json({ success: true, campaign });
-};
-```
-
-### **STEP 3: Test!**
-
-1. Visit: `sparkam-g6luenwck-sparkams-projects.vercel.app/dashboard`
-2. Fill in form:
-   - Artist Name: "Zeeter Oliver"
-   - Track Title: "Freedom"  
-   - Genre: "Afrobeats"
-   - Budget: ₦14,000
-3. Click **"SPARK IT"**
-4. Should see:
-   - Button changes to "SPARKING..."
-   - Status: "🧠 Consulting the AI Brain..."
-   - Results appear!
-5. Check Zapier → Data received!
-
----
-
-## 🔍 DEBUGGING:
-
-If "SPARK IT" still doesn't work:
-
-**1. Open Browser Console** (F12 → Console)
-**2. Look for this log:**
-```
-✅ Dashboard ready - SPARK IT button active
-```
-
-**3. Click button, look for:**
-```
-🚀 SPARK IT clicked: {artistName: "...", trackTitle: "...", ...}
-📡 Calling /api/promote...
-📥 Response status: 200
-✅ Campaign result: {...}
-```
-
-**4. If you see errors, send me screenshot!**
-
----
-
-## 💡 THE KEY DIFFERENCE:
-
-### **Your Broken Version:**
-- Button text: "SPARK IT" ✅
-- Button ID: probably still `calibrateBtn` ❌
-- JavaScript: looking for `calibrateBtn` ❌
-- **Result:** Button does nothing! ❌
-
-### **My Fixed Version:**
-- Button text: "SPARK IT" ✅
-- Button ID: `sparkBtn` ✅
-- JavaScript: looking for `sparkBtn` ✅
-- Event listener: properly attached ✅
-- API call: `/api/promote` ✅
-- **Result:** WORKS! ✅
-
----
-
-## 🎉 THIS WILL 100% WORK BECAUSE:
-
-1. ✅ Button ID matches JavaScript
-2. ✅ Event listener properly attached
-3. ✅ Form validation works
-4. ✅ API endpoint is correct (`/api/promote`)
-5. ✅ Console logging for debugging
-6. ✅ Error messages show what's wrong
-7. ✅ Your beautiful "SPARK IT" design preserved!
-
----
-
-**Deploy this and your "SPARK IT" button WILL trigger the AI! Then Zapier will receive the data! 🚀🎵**
-
-**Send me a screenshot when it works! I want to see that campaign get sparked! 🔥**
