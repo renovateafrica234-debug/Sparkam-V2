@@ -1,31 +1,53 @@
-import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// Sparkam AI Brain - Gemini AI Studio Integration
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { musicLink, struggle } = req.body;
+  const { artistName, trackTitle, fullName, email } = req.body;
 
   try {
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: "You are the Sparkam AI Brain, a professional music promo manager. Analyze the user's struggle and music link to provide a 3-step growth strategy."
-        },
-        {
-          role: "user",
-          content: `Music Link: ${musicLink}. Main Struggle: ${struggle}`
-        }
-      ],
-      model: "mixtral-8x7b-32768",
+    // 1. Initialize Gemini Model
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `You are the Sparkam AI Brain. 
+    Create a global 360° marketing rollout plan for:
+    Artist: ${artistName}
+    Track: ${trackTitle}
+    Focus on social media growth and viral potential.`;
+
+    // 2. Generate the Strategy
+    const result = await model.generateContent(prompt);
+    const aiStrategy = result.response.text();
+
+    // 3. THE HANDSHAKE: Send to Zapier Parent Zap
+    if (process.env.ZAPIER_WEBHOOK_URL) {
+      await fetch(process.env.ZAPIER_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: fullName || artistName,
+          email: email || "beta-user@sparkam.com",
+          artistName: artistName,
+          trackTitle: trackTitle,
+          strategy: aiStrategy,
+          timestamp: new Date().toISOString()
+        }),
+      });
+    }
+
+    // 4. Return results to the Dashboard
+    res.status(200).json({ 
+      success: true, 
+      strategy: aiStrategy 
     });
 
-    res.status(200).json({ strategy: chatCompletion.choices[0].message.content });
   } catch (error) {
-    res.status(500).json({ error: "AI Brain is offline. Try again later." });
+    console.error('Gemini Brain Error:', error);
+    res.status(500).json({ error: "The AI Brain is over-capacity. Please try again." });
   }
 }
