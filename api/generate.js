@@ -1,19 +1,34 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// FACT: The environment variable in Vercel must be GOOGLE_API_KEY
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+/**
+ * Sparkam AI Music Promo - AI Brain
+ * Updated: Feb 24, 2026
+ * Migration: Gemini 3 Flash (Replaces retired 1.5)
+ */
 
 export default async function handler(req, res) {
+  // 1. Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // 2. Validate API Key
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'AI Brain Configuration Missing: GOOGLE_API_KEY' });
   }
 
   try {
     const { prompt } = req.body;
+    
+    if (!prompt) {
+      return res.status(400).json({ error: 'Prompt is required' });
+    }
 
-    // MANDATORY FEB 2026 UPDATE:
-    // 1. Use 'gemini-3-flash' (1.5 is retired).
-    // 2. Use 'v1' apiVersion for production stability.
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    // FACT: gemini-1.5 was retired Feb 17, 2026.
+    // Use 'gemini-3-flash' on the 'v1' stable endpoint.
     const model = genAI.getGenerativeModel({ 
       model: "gemini-3-flash" 
     }, { apiVersion: 'v1' });
@@ -34,11 +49,11 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error("Sparkam AI Brain Failure:", error.message);
     
-    // Diagnostic for the 404/Invalid Key loop
+    // Catch 404s from retired models
     if (error.message.includes("404") || error.message.includes("not found")) {
-      return res.status(410).json({ error: "API Update Required: Model 1.5 is offline. Using Gemini 3." });
+      return res.status(410).json({ error: "System Update: Transitioning to Gemini 3. Please refresh." });
     }
     
-    return res.status(500).json({ error: "AI Brain connection failed." });
+    return res.status(500).json({ error: "AI Brain failed to respond. Check Vercel logs." });
   }
 }
