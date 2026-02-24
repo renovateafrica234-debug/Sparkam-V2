@@ -1,38 +1,24 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Initialize Gemini
+// Initialize the SDK with the key from your Vercel Environment Variables
+// Ensure the name here matches exactly what you typed in Vercel (GOOGLE_API_KEY)
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-export default async function handler(req, res) {
-  // CORS Headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  
-  const { artistName, trackTitle, genre, budget } = req.body;
-  
+export async function generatePromoContent(prompt) {
   try {
-    // Generate campaign with AI
-    const prompt = `Create a viral music promo plan for ${artistName} - ${trackTitle} (${genre}) with a budget of ${budget}.`;
-    const result = await model.generateContent(prompt);
-    const campaign = result.response.text();
+    // 2026 Update: gemini-3.1-flash is the current stable workhorse
+    // We explicitly use the 'v1' API version for production stability
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-3.1-flash" 
+    }, { apiVersion: 'v1' });
 
-    // The Zapier Handshake (The Brain connects here)
-    if (process.env.ZAPIER_WEBHOOK_URL) {
-      await fetch(process.env.ZAPIER_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ artistName, trackTitle, genre, budget, campaign })
-      });
-    }
-  
-    return res.status(200).json({ success: true, campaign });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+    
   } catch (error) {
-    console.error("AI Brain Error:", error);
-    return res.status(500).json({ success: false, error: error.message });
+    console.error("Sparkam AI Brain Error:", error);
+    // This will help you see if it's still an Auth error or a Model error
+    throw new Error(`AI Brain connection failed: ${error.message}`);
   }
 }
