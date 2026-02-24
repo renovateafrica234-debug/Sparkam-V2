@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-// Sparkam AI - Beta Dashboard with "SPARK IT" Trigger
 const Dashboard = ({ user }) => {
   const [promoBudget, setPromoBudget] = useState(112000);
   const [status, setStatus] = useState('idle');
@@ -8,9 +7,7 @@ const Dashboard = ({ user }) => {
 
   const sparkTheBrain = async () => {
     setStatus('loading');
-    
     try {
-      // THE HANDSHAKE: Sends to api/promote.js which calls Gemini & Zapier
       const response = await fetch('/api/promote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -22,9 +19,7 @@ const Dashboard = ({ user }) => {
           timestamp: new Date().toISOString()
         }),
       });
-
       const data = await response.json();
-      
       if (data.success) {
         setStrategy(data.strategy);
         setStatus('success');
@@ -47,43 +42,24 @@ const Dashboard = ({ user }) => {
           <div style={styles.navItem}>SOCIAL MEDIA</div>
         </nav>
       </aside>
-
       <main style={styles.mainContent}>
-        <header>
-          <h1 style={styles.title}>AI STRATEGY ANALYSIS</h1>
-        </header>
-
+        <header><h1 style={styles.title}>AI STRATEGY ANALYSIS</h1></header>
         <section style={styles.grid}>
           <div style={styles.card}>
             <div style={styles.inputPreview}>{user?.fullName || "Zeeter Oliver"}</div>
             <div style={styles.inputPreview}>{user?.artistName || "Freedom"}</div>
-            
             <label style={styles.label}>PROMO BUDGET</label>
             <div style={styles.budgetValue}>₦{promoBudget.toLocaleString()}</div>
-            <input 
-              type="range" 
-              min="10000" 
-              max="1000000" 
-              step="5000"
-              value={promoBudget}
-              onChange={(e) => setPromoBudget(Number(e.target.value))}
-              style={styles.slider}
-            />
-
-            <button 
-              onClick={sparkTheBrain} 
-              style={styles.sparkButton}
-              disabled={status === 'loading'}
-            >
+            <input type="range" min="10000" max="1000000" step="5000" value={promoBudget} onChange={(e) => setPromoBudget(Number(e.target.value))} style={styles.slider} />
+            <button onClick={sparkTheBrain} style={styles.sparkButton} disabled={status === 'loading'}>
               {status === 'loading' ? 'SPARKING...' : 'SPARK IT'}
             </button>
           </div>
-
           <div style={styles.analysisDisplay}>
             {status === 'idle' && <p style={styles.placeholder}>Ready to go global? Click SPARK IT to generate your strategy.</p>}
-            {status === 'loading' && <div className="loading-state">The AI Brain is analyzing your sound...</div>}
+            {status === 'loading' && <div>The AI Brain is analyzing your sound...</div>}
             {status === 'success' && <div style={styles.strategyText}>{strategy}</div>}
-            {status === 'error' && <p style={styles.error}>The AI Brain is over-capacity. Please refresh and try again.</p>}
+            {status === 'error' && <p style={styles.error}>Brain connection failed. Check Vercel logs.</p>}
           </div>
         </section>
       </main>
@@ -92,25 +68,26 @@ const Dashboard = ({ user }) => {
 };
 
 const styles = {
-  dashboardContainer: { display: 'flex', backgroundColor: '#0a0a0c', color: '#fff', minHeight: '100vh', fontFamily: 'Inter, sans-serif' },
+  dashboardContainer: { display: 'flex', backgroundColor: '#0a0a0c', color: '#fff', minHeight: '100vh', fontFamily: 'sans-serif' },
   sidebar: { width: '250px', borderRight: '1px solid #1a1a1c', padding: '30px' },
-  logo: { fontSize: '20px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '50px' },
+  logo: { fontSize: '20px', fontWeight: 'bold', marginBottom: '50px' },
   nav: { display: 'flex', flexDirection: 'column', gap: '20px' },
   navItem: { color: '#666', cursor: 'pointer', fontSize: '14px' },
-  navItemActive: { color: '#fff', fontWeight: 'bold', fontSize: '14px' },
+  navItemActive: { color: '#fff', fontWeight: 'bold' },
   mainContent: { flex: 1, padding: '50px' },
   title: { fontSize: '24px', marginBottom: '40px' },
   grid: { display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '30px' },
   card: { backgroundColor: '#161618', padding: '30px', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '20px', border: '1px solid #222' },
-  inputPreview: { backgroundColor: '#222', padding: '15px', borderRadius: '10px', color: '#888', border: '1px solid #333' },
-  label: { fontSize: '12px', color: '#666', marginTop: '10px' },
+  inputPreview: { backgroundColor: '#222', padding: '15px', borderRadius: '10px', color: '#888' },
+  label: { fontSize: '12px', color: '#666' },
   budgetValue: { fontSize: '32px', fontWeight: 'bold' },
   slider: { width: '100%', accentColor: '#ff00ff' },
-  sparkButton: { background: 'linear-gradient(90deg, #ff00ff, #007bff)', color: '#fff', border: 'none', padding: '18px', borderRadius: '15px', fontWeight: '900', fontSize: '16px', cursor: 'pointer', marginTop: '10px', boxShadow: '0 4px 15px rgba(255, 0, 255, 0.3)' },
-  analysisDisplay: { backgroundColor: '#161618', padding: '40px', borderRadius: '20px', border: '1px solid #1a1a1c' },
+  sparkButton: { background: 'linear-gradient(90deg, #ff00ff, #007bff)', color: '#fff', border: 'none', padding: '18px', borderRadius: '15px', fontWeight: '900', cursor: 'pointer' },
+  analysisDisplay: { backgroundColor: '#161618', padding: '40px', borderRadius: '20px' },
   strategyText: { lineHeight: '1.8', color: '#eee', whiteSpace: 'pre-wrap' },
   placeholder: { color: '#444', textAlign: 'center', marginTop: '100px' },
   error: { color: '#ff4444' }
 };
 
 export default Dashboard;
+  
