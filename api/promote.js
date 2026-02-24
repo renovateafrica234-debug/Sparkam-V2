@@ -1,12 +1,9 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-module.exports = async function (req, res) {
-  // Only allow POST requests from your dashboard
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: "Method not allowed" });
 
   const { artistName, trackTitle } = req.body;
 
@@ -15,9 +12,9 @@ module.exports = async function (req, res) {
     const prompt = `Create a viral 360 music promo plan for ${artistName} - ${trackTitle}. Keep it punchy.`;
     
     const result = await model.generateContent(prompt);
-    const strategy = result.response.text();
+    const aiStrategy = result.response.text();
 
-    // The Handshake: Send to Zapier
+    // The Zapier Handshake
     if (process.env.ZAPIER_WEBHOOK_URL) {
       await fetch(process.env.ZAPIER_WEBHOOK_URL, {
         method: 'POST',
@@ -25,15 +22,15 @@ module.exports = async function (req, res) {
         body: JSON.stringify({ 
           artistName, 
           trackTitle, 
-          strategy, 
-          email: "beta@sparkam.com" 
+          strategy: aiStrategy,
+          timestamp: new Date().toISOString()
         })
       });
     }
 
-    res.status(200).json({ success: true, strategy });
+    res.status(200).json({ success: true, strategy: aiStrategy });
   } catch (error) {
-    console.error("Brain Error:", error);
-    res.status(500).json({ success: false, error: "AI Brain is over-capacity." });
+    console.error("AI Brain Error:", error);
+    res.status(500).json({ success: false, error: "The AI Brain is over-capacity." });
   }
-};
+      }
