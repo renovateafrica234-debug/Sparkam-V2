@@ -3,18 +3,17 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { artistName, trackTitle } = req.body;
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const prompt = `Create a viral music promo plan for ${artistName} - ${trackTitle}.`;
+    const prompt = `Create a viral 360 music promo plan for ${artistName} - ${trackTitle}.`;
     
     const result = await model.generateContent(prompt);
     const aiStrategy = result.response.text();
 
-    // The Zapier Handshake
     if (process.env.ZAPIER_WEBHOOK_URL) {
       await fetch(process.env.ZAPIER_WEBHOOK_URL, {
         method: 'POST',
