@@ -2,6 +2,7 @@
   "name": "sparkam-v2",
   "version": "1.0.0",
   "type": "module",
+  "main": "api/promote.js",
   "dependencies": {
     "@google/generative-ai": "^0.21.0"
   },
