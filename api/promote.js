@@ -1,9 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// Initialize the Brain with your Vercel Environment Variable
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export default async function handler(req, res) {
-  // 1. Safety Check
+  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -11,14 +12,14 @@ export default async function handler(req, res) {
   const { artistName, trackTitle } = req.body;
 
   try {
-    // 2. Wake up the Gemini Brain
+    // 1. Generate Strategy with Gemini 1.5 Flash
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const prompt = `Create a viral 360 music promo plan for ${artistName} - ${trackTitle}.`;
+    const prompt = `You are the Sparkam AI Brain. Create a viral 360 music promo plan for the artist "${artistName}" and their track "${trackTitle}". Focus on social media growth.`;
     
     const result = await model.generateContent(prompt);
-    const strategy = result.response.text();
+    const aiStrategy = result.response.text();
 
-    // 3. The Handshake: Send to Zapier
+    // 2. THE HANDSHAKE: Send the data to your Zapier Webhook
     if (process.env.ZAPIER_WEBHOOK_URL) {
       await fetch(process.env.ZAPIER_WEBHOOK_URL, {
         method: 'POST',
@@ -26,17 +27,18 @@ export default async function handler(req, res) {
         body: JSON.stringify({ 
           artistName, 
           trackTitle, 
-          strategy,
-          status: "Sparked from Dashboard" 
+          strategy: aiStrategy,
+          timestamp: new Date().toISOString(),
+          status: "Sparked"
         }),
       });
     }
 
-    // 4. Send back to the Sparkam Dashboard
-    res.status(200).json({ success: true, strategy });
+    // 3. Send the strategy back to your Dashboard
+    res.status(200).json({ success: true, strategy: aiStrategy });
 
   } catch (error) {
-    console.error("Brain Failure:", error);
-    res.status(500).json({ success: false, error: error.message });
+    console.error("AI Brain Error:", error);
+    res.status(500).json({ success: false, error: "Brain connection timed out. Try again." });
   }
 }
