@@ -1,12 +1,11 @@
 {
   "name": "sparkam-v2",
   "version": "1.0.0",
-  "type": "module",
-  "main": "api/promote.js",
+  "description": "Autonomous AI Music Promotion Platform",
   "dependencies": {
     "@google/generative-ai": "^0.21.0"
   },
-  "scripts": {
-    "build": "vercel build"
+  "engines": {
+    "node": "20.x"
   }
 }
