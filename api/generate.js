@@ -1,32 +1,44 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY);
+// FACT: The environment variable in Vercel must be GOOGLE_API_KEY
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ message: 'Method Not Allowed' });
-
-  const { artist, track, budget } = req.body;
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
-    const prompt = `You are the Sparkam AI Brain. Analyze track "${track}" by "${artist}".
-    Budget: ₦${budget}.
-    Provide a comprehensive 360° blueprint:
-    1. CURRENT STATS: Estimate current Spotify/Apple Music reach.
-    2. TARGETING: Define the exact audience demographics for this sound.
-    3. REACH PROJECTION: How many people will see this with ₦${budget}?
-    4. CONTENT CREATOR: Provide 3 unique TikTok/Reel concepts with captions.
-    5. SOCIAL PLAN: A 7-day posting schedule.
-    Format with professional headings and bullet points.`;
+    const { prompt } = req.body;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    // MANDATORY FEB 2026 UPDATE:
+    // 1. Use 'gemini-3-flash' (1.5 is retired).
+    // 2. Use 'v1' apiVersion for production stability.
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-3-flash" 
+    }, { apiVersion: 'v1' });
 
-    // SUCCESS: Return the 'strategy' key that the frontend is looking for
-    return res.status(200).json({ strategy: text });
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1000,
+      }
+    });
+
+    const response = await result.response;
+    const text = response.text();
+
+    return res.status(200).json({ text });
+
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ strategy: "The AI Brain is over-capacity. Please refresh and try again." });
+    console.error("Sparkam AI Brain Failure:", error.message);
+    
+    // Diagnostic for the 404/Invalid Key loop
+    if (error.message.includes("404") || error.message.includes("not found")) {
+      return res.status(410).json({ error: "API Update Required: Model 1.5 is offline. Using Gemini 3." });
+    }
+    
+    return res.status(500).json({ error: "AI Brain connection failed." });
   }
 }
