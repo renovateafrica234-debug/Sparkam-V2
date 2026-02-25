@@ -1,128 +1,217 @@
-import React, { useState } from 'react';
-import Head from 'next/head';
-import { Sparkles, Music, Rocket, Share2, BarChart3 } from 'lucide-react';
+// api/promote.js - Bulletproof Sparkam Campaign Generator
+// This file handles campaign generation with Google AI + fallback
 
-export default function Promote() {
-  const [prompt, setPrompt] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-  const handleSpark = async (e) => {
-    e.preventDefault();
-    if (!prompt) return;
-
-    setLoading(true);
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setResult(data.text);
-      } else {
-        alert(data.error || 'Something went wrong');
-      }
-    } catch (error) {
-      console.error('Error sparking promo:', error);
-      alert('Failed to connect to AI Brain.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-black text-white font-sans">
-      <Head>
-        <title>Promote | Sparkam AI</title>
-      </Head>
-
-      <main className="max-w-4xl mx-auto px-6 py-12">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-extrabold mb-4 bg-gradient-to-r from-pink-500 to-cyan-400 bg-clip-text text-transparent">
-            Spark Your Movement
-          </h1>
-          <p className="text-gray-400 text-lg">
-            Feed the AI Brain your track details and let us generate your viral lore.
-          </p>
-        </div>
-
-        {/* Input Section */}
-        <div className="bg-[#111] border border-gray-800 rounded-2xl p-8 mb-8">
-          <form onSubmit={handleSpark}>
-            <label className="block text-sm font-medium text-gray-400 mb-2 uppercase tracking-widest">
-              Audio DNA & Vibe
-            </label>
-            <textarea
-              className="w-full bg-black border border-gray-700 rounded-xl p-4 text-white focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all resize-none h-32"
-              placeholder="e.g. An Afrobeat track about late nights in Lagos, high energy, neon visuals, target audience: Gen Z club-goers..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-            />
-            
-            <button
-              type="submit"
-              disabled={loading}
-              className={`mt-6 w-full flex items-center justify-center gap-2 py-4 rounded-full font-bold text-lg transition-all ${
-                loading 
-                ? 'bg-gray-700 cursor-not-allowed' 
-                : 'bg-gradient-to-r from-pink-600 to-purple-600 hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(219,39,119,0.4)]'
-              }`}
-            >
-              {loading ? (
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-              ) : (
-                <>
-                  <Sparkles size={20} />
-                  Spark It
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* Results Section */}
-        {result && (
-          <div className="bg-[#111] border border-pink-900/30 rounded-2xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex items-center gap-2 mb-4 text-cyan-400">
-              <Rocket size={20} />
-              <h2 className="font-bold uppercase tracking-widest">Your AI Lore is Ready</h2>
-            </div>
-            <div className="prose prose-invert max-w-none text-gray-300 whitespace-pre-wrap">
-              {result}
-            </div>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <button className="flex items-center gap-2 bg-white text-black px-6 py-2 rounded-full font-semibold hover:bg-gray-200">
-                <Share2 size={18} /> Copy Promo
-              </button>
-              <button className="flex items-center gap-2 border border-gray-700 px-6 py-2 rounded-full font-semibold hover:bg-gray-900">
-                <BarChart3 size={18} /> View Data Flow
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Footer Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <FeatureCard icon={<Music className="text-pink-500" />} title="Audio DNA" desc="Deep analysis of your sound." />
-          <FeatureCard icon={<Sparkles className="text-cyan-400" />} title="AI Visuals" desc="Cinematic lore in seconds." />
-          <FeatureCard icon={<BarChart3 className="text-purple-500" />} title="Live Data" desc="Track your spark in real-time." />
-        </div>
-      </main>
-    </div>
-  );
+// Initialize Google AI (only if key exists)
+let gemini, model;
+try {
+  if (process.env.GOOGLE_API_KEY) {
+    gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+    model = gemini.getGenerativeModel({ model: "gemini-pro" });
+    console.log('✅ Google AI initialized');
+  } else {
+    console.warn('⚠️  GOOGLE_API_KEY not set - will use fallback');
+  }
+} catch (initError) {
+  console.error('❌ Google AI init failed:', initError.message);
 }
 
-function FeatureCard({ icon, title, desc }) {
-  return (
-    <div className="bg-[#0A0A0A] border border-gray-900 p-6 rounded-xl">
-      <div className="mb-3">{icon}</div>
-      <h3 className="font-bold text-white mb-1">{title}</h3>
-      <p className="text-gray-500 text-sm">{desc}</p>
-    </div>
-  );
+module.exports = async (req, res) => {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  // Only allow POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ 
+      success: false,
+      error: 'Method not allowed. Use POST.' 
+    });
+  }
+  
+  try {
+    console.log('📥 Campaign request received');
+    
+    // Extract data
+    const { artistName, trackTitle, genre, budget } = req.body;
+    
+    console.log('Request data:', { artistName, trackTitle, genre, budget });
+    
+    // Validation
+    if (!artistName || !trackTitle || !genre) {
+      console.log('❌ Validation failed - missing fields');
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: artistName, trackTitle, genre'
+      });
     }
     
+    const budgetNum = parseInt(budget) || 14000;
+    console.log('✅ Validation passed');
+    
+    // Build prompt
+    const prompt = `Create a music promotion campaign for "${trackTitle}" by ${artistName}.
+Genre: ${genre}
+Budget: ₦${budgetNum}
+
+Return ONLY valid JSON (no markdown, no backticks):
+{
+  "overview": "Brief 2-sentence campaign strategy for ${genre} music",
+  "platforms": [
+    {"platform": "tiktok", "budget": ${Math.floor(budgetNum * 0.4)}, "tactics": ["tactic 1", "tactic 2", "tactic 3"]},
+    {"platform": "instagram", "budget": ${Math.floor(budgetNum * 0.35)}, "tactics": ["tactic 1", "tactic 2", "tactic 3"]},
+    {"platform": "spotify", "budget": ${Math.floor(budgetNum * 0.25)}, "tactics": ["tactic 1", "tactic 2", "tactic 3"]}
+  ],
+  "content": {
+    "captions": ["engaging caption 1", "engaging caption 2", "engaging caption 3"],
+    "hashtags": ["#${genre}", "#tag2", "#tag3", "#tag4", "#tag5"]
+  }
+}`;
+
+    let campaign = null;
+    
+    // Try Google AI (with timeout)
+    if (model && process.env.GOOGLE_API_KEY) {
+      try {
+        console.log('🤖 Calling Google AI...');
+        
+        const result = await Promise.race([
+          model.generateContent(prompt),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('AI timeout after 8 seconds')), 8000)
+          )
+        ]);
+        
+        const response = await result.response;
+        const text = response.text();
+        
+        console.log('📝 AI response received, length:', text.length);
+        
+        // Clean and parse
+        const cleanText = text.replace(/```json|```/g, '').trim();
+        campaign = JSON.parse(cleanText);
+        
+        console.log('✅ AI campaign generated successfully');
+        
+      } catch (aiError) {
+        console.warn('⚠️  AI generation failed:', aiError.message);
+        console.warn('Will use fallback campaign');
+        campaign = null;
+      }
+    } else {
+      console.log('⚠️  No GOOGLE_API_KEY, using fallback immediately');
+    }
+    
+    // Fallback campaign (always works)
+    if (!campaign) {
+      console.log('📦 Generating fallback campaign');
+      
+      campaign = {
+        overview: `Comprehensive ${genre} promotion campaign for "${trackTitle}" by ${artistName}. AI-powered autonomous execution across TikTok, Instagram, and Spotify targeting engaged music fans with ₦${budgetNum.toLocaleString()} budget allocation.`,
+        platforms: [
+          {
+            platform: "tiktok",
+            budget: Math.floor(budgetNum * 0.4),
+            tactics: [
+              "Viral short-form video creation using track audio and trending challenges",
+              "Micro-influencer outreach targeting ${genre} content creators (10K-100K followers)",
+              "Real-time trend integration with branded sound usage and hashtag campaigns"
+            ]
+          },
+          {
+            platform: "instagram",
+            budget: Math.floor(budgetNum * 0.35),
+            tactics: [
+              "Automated Reels schedule (3x/week) optimized for peak engagement times",
+              "Story takeovers with ${genre} fan pages and collaborative posts",
+              "AI-generated carousel posts highlighting lyrics and artist journey"
+            ]
+          },
+          {
+            platform: "spotify",
+            budget: Math.floor(budgetNum * 0.25),
+            tactics: [
+              "Playlist pitching to 50+ curators in ${genre} and related genres",
+              "Canvas video auto-creation and upload for enhanced visual experience",
+              "Pre-save campaign automation with email retargeting sequences"
+            ]
+          }
+        ],
+        content: {
+          captions: [
+            `🔥 New ${genre} alert! "${trackTitle}" by ${artistName} is taking over the airwaves. This is the vibe we've been waiting for! Stream now on all platforms 🎵`,
+            `When ${artistName} drops, you know it's about to be legendary. "${trackTitle}" hits different and I can't stop playing it on repeat! 🚀💯`,
+            `This is the soundtrack of the season! ${artistName}'s "${trackTitle}" is pure ${genre} excellence. Add it to your playlist right now! ✨🎶`
+          ],
+          hashtags: [`#${genre}`, "#NewMusic", `#${artistName.replace(/\s+/g,'')}`, "#MusicPromotion", "#NowPlaying", "#AfricanMusic"]
+        },
+        source: 'fallback'
+      };
+      
+      console.log('✅ Fallback campaign generated');
+    }
+    
+    // Add metadata
+    campaign.id = `camp_${Date.now()}`;
+    campaign.created = new Date().toISOString();
+    campaign.track = { artistName, trackTitle, genre };
+    campaign.budget = budgetNum;
+    
+    // Send to Zapier webhook (if configured)
+    if (process.env.ZAPIER_WEBHOOK_URL) {
+      try {
+        console.log('📤 Sending to Zapier webhook...');
+        
+        await fetch(process.env.ZAPIER_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            artistName,
+            trackTitle,
+            genre,
+            budget: budgetNum,
+            campaign,
+            timestamp: new Date().toISOString(),
+            source: 'sparkam-dashboard'
+          })
+        });
+        
+        console.log('✅ Zapier webhook sent');
+      } catch (zapierError) {
+        console.warn('⚠️  Zapier webhook failed:', zapierError.message);
+        // Don't fail the request if Zapier is down
+      }
+    }
+    
+    console.log('✅ Returning campaign to client');
+    
+    // Return success
+    return res.status(200).json({
+      success: true,
+      campaign: campaign,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ CRITICAL ERROR:', error);
+    console.error('Error stack:', error.stack);
+    
+    // Return detailed error
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: '500',
+        message: error.message || 'Internal server error',
+        details: 'Check Vercel function logs for more information'
+      }
+    });
+  }
+};
