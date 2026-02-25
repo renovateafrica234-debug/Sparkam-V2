@@ -1,26 +1,26 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  // Ensure GOOGLE_API_KEY is set in Vercel Environment Variables
+  // Uses the key you saved in Vercel Settings
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
   try {
     const { prompt } = req.body;
 
-    // FEB 2026 FIX: Use gemini-3-flash (1.5 is retired)
+    // FEB 2026: Using the live Gemini 3 Flash model
     const model = genAI.getGenerativeModel({ model: "gemini-3-flash" });
 
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(prompt || "Generate music promo");
     const response = await result.response;
     const text = response.text();
 
     return res.status(200).json({ text });
   } catch (error) {
-    console.error("Sparkam Brain Error:", error);
-    return res.status(500).json({ error: "AI Brain failed to ignite. Check Vercel logs." });
+    console.error("Brain Error:", error);
+    return res.status(500).json({ error: "AI Brain failed to ignite." });
   }
-}
+};
