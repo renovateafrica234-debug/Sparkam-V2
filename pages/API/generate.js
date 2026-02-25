@@ -5,12 +5,11 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  // Uses the key you saved in Vercel Settings
-  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+  const apiKey = process.env.GOOGLE_API_KEY;
+  const genAI = new GoogleGenerativeAI(apiKey);
 
   try {
     const { prompt } = req.body;
-
     // FEB 2026: Using the live Gemini 3 Flash model
     const model = genAI.getGenerativeModel({ model: "gemini-3-flash" });
 
