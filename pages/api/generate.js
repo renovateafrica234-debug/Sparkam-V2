@@ -1,7 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+  if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
   try {
@@ -10,6 +10,6 @@ module.exports = async function handler(req, res) {
     const response = await result.response;
     return res.status(200).json({ text: response.text() });
   } catch (error) {
-    return res.status(500).json({ error: "Brain Offline" });
+    return res.status(500).json({ error: "Brain Error" });
   }
 };
