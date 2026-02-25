@@ -1,26 +1,26 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 module.exports = async function handler(req, res) {
+  // 1. Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.GOOGLE_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: "Missing API Key in Vercel" });
-  }
+  // 2. Initialize the AI Brain with your Vercel Key
+  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    // Using Gemini 3 Flash for 2026
+    // 3. Use Gemini 3 Flash (Active Feb 2026)
     const model = genAI.getGenerativeModel({ model: "gemini-3-flash" });
 
-    const result = await model.generateContent(req.body.prompt || "Generate music promo");
-    const response = await result.response;
-    
-    return res.status(200).json({ text: response.text() });
+    const { prompt } = req.body;
+    const result = await model.generateContent(prompt || "Music promo idea");
+    const text = result.response.text();
+
+    // 4. Send the result back to the Dashboard
+    return res.status(200).json({ text });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "The AI Brain is offline." });
+    console.error("Build Error:", error.message);
+    return res.status(500).json({ error: "AI Brain failed to ignite." });
   }
 };
