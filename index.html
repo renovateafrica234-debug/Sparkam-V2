@@ -1,110 +1,574 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sparkam - Autonomous AI Music Label</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .spark-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
-        .glass { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-        }
-        .hero-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(255, 0, 204, 0.15) 0%, rgba(51, 51, 255, 0) 70%); z-index: -1; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sparkam - Your mini record label powered by AI. Autonomous music promotion in 30 seconds.">
+  <title>Sparkam - AI-Powered Music Promotion</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #0a0118 0%, #1a0533 50%, #2d0a4e 100%);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Navigation */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 60px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .logo {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+    }
+    
+    .nav-links a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+    
+    .nav-links a:hover {
+      color: white;
+    }
+    
+    .launch-btn {
+      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
+      padding: 12px 28px;
+      border-radius: 30px;
+      color: white !important;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(255, 0, 102, 0.3);
+    }
+    
+    .launch-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(255, 0, 102, 0.5);
+    }
+    
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 100px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: clamp(48px, 8vw, 90px);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 30px;
+      letter-spacing: -2px;
+    }
+    
+    h1 .gradient-text {
+      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .hero-subtitle {
+      font-size: clamp(18px, 3vw, 22px);
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.8);
+      max-width: 800px;
+      margin: 0 auto 50px;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 80px;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+      padding: 20px 45px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 10px 40px rgba(255, 0, 102, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 60px rgba(255, 0, 102, 0.6);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn-secondary:hover {
+      border-color: #FF0066;
+      background: rgba(255, 0, 102, 0.1);
+    }
+    
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 40px;
+      max-width: 1000px;
+      margin: 80px auto;
+      padding: 60px 40px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 56px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+      margin-bottom: 15px;
+    }
+    
+    .stat-label {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+    }
+    
+    /* Features Section */
+    .section {
+      padding: 100px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .section-title {
+      text-align: center;
+      font-size: clamp(36px, 6vw, 52px);
+      font-weight: 900;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, white 0%, #FF0066 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .section-subtitle {
+      text-align: center;
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 80px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 40px;
+    }
+    
+    .feature {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px;
+      transition: all 0.3s;
+    }
+    
+    .feature:hover {
+      transform: translateY(-10px);
+      border-color: #FF0066;
+      box-shadow: 0 20px 60px rgba(255, 0, 102, 0.3);
+    }
+    
+    .feature-icon {
+      font-size: 48px;
+      margin-bottom: 25px;
+      display: block;
+    }
+    
+    .feature h3 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: #FF0066;
+    }
+    
+    .feature p {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.7;
+    }
+    
+    /* Pricing */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 40px;
+      max-width: 1100px;
+      margin: 80px auto;
+    }
+    
+    .pricing-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 50px 40px;
+      position: relative;
+      transition: all 0.3s;
+    }
+    
+    .pricing-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255, 0, 102, 0.5);
+    }
+    
+    .pricing-card.featured {
+      border-color: #FF0066;
+      box-shadow: 0 20px 80px rgba(255, 0, 102, 0.3);
+    }
+    
+    .pricing-card.featured::before {
+      content: 'BETA SPECIAL';
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
+      padding: 8px 24px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+    
+    .tier-name {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 15px;
+      color: #FF0066;
+    }
+    
+    .tier-price {
+      font-size: 64px;
+      font-weight: 900;
+      color: white;
+      margin: 25px 0;
+      line-height: 1;
+    }
+    
+    .tier-price small {
+      font-size: 24px;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 600;
+    }
+    
+    .tier-description {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 35px;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    
+    .tier-features {
+      list-style: none;
+      margin-bottom: 40px;
+    }
+    
+    .tier-features li {
+      padding: 15px 0;
+      color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 15px;
+    }
+    
+    .tier-features li:last-child {
+      border-bottom: none;
+    }
+    
+    .tier-features li::before {
+      content: '✓';
+      color: #FF0066;
+      font-weight: 900;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    
+    .tier-btn {
+      width: 100%;
+      padding: 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .tier-btn-primary {
+      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
+      color: white;
+    }
+    
+    .tier-btn-secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .tier-btn:hover {
+      transform: translateY(-3px);
+    }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 60px 20px;
+      color: rgba(255, 255, 255, 0.5);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 100px;
+    }
+    
+    footer p {
+      margin: 8px 0;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav {
+        padding: 20px 30px;
+      }
+      
+      .nav-links {
+        gap: 20px;
+      }
+      
+      .hero {
+        padding: 60px 20px;
+      }
+      
+      .stats {
+        grid-template-columns: 1fr;
+        padding: 40px 20px;
+      }
+      
+      .features-grid,
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .pricing-card.featured {
+        transform: scale(1);
+      }
+      
+      .section {
+        padding: 60px 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="hero-glow"></div>
-
-    <nav class="flex justify-between items-center p-6 max-w-7xl mx-auto sticky top-0 z-50 glass rounded-full mt-4">
-        <div class="text-2xl font-bold tracking-tighter">SPARKAM<span class="text-pink-500">.</span></div>
-        <div class="hidden md:flex gap-8 text-xs font-bold uppercase tracking-widest opacity-70">
-            <a href="#how-it-works" class="hover:text-pink-500 transition">How it Works</a>
-            <a href="#pricing" class="hover:text-pink-500 transition">Pricing</a>
-        </div>
-        <a href="/signup.html" class="spark-gradient px-6 py-2 rounded-full font-bold text-xs uppercase">Launch Brain —></a>
-    </nav>
-
-    <header class="max-w-5xl mx-auto text-center mt-24 px-6 pb-32">
-        <div class="inline-block glass px-4 py-1 rounded-full text-[10px] mb-6 tracking-[0.2em] uppercase font-bold text-pink-500">
-            <i class="fa-solid fa-brain mr-2"></i> Autonomous AI Promotion
-        </div>
-        <h1 class="text-5xl md:text-8xl font-black leading-tight mb-6 tracking-tight">Your Mini Record Label, <span class="text-transparent bg-clip-text spark-gradient">Powered by AI</span></h1>
-        <p class="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">Paste your music link. Our AI Brain analyzes your sound, finds your audience, and autonomously handles your entire 360° promotion campaign [cite: 2026-02-06].</p>
-        <div class="flex flex-col md:flex-row justify-center gap-4">
-            <a href="/signup.html" class="spark-gradient px-12 py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-lg shadow-pink-500/20">Start Free Campaign</a>
-            <a href="#how-it-works" class="glass px-12 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-white/5 transition">See How It Works</a>
-        </div>
-    </header>
-
-    <section id="how-it-works" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="glass p-10 rounded-[2.5rem] hover:border-pink-500/50 transition">
-                <i class="fa-solid fa-magnifying-glass-chart text-3xl text-pink-500 mb-6"></i>
-                <h3 class="text-xl font-bold mb-4">Smart Analysis</h3>
-                <p class="text-gray-400 text-sm">AI Brain identifies your genre and target audience instantly [cite: 2026-02-06].</p>
-            </div>
-            <div class="glass p-10 rounded-[2.5rem] hover:border-pink-500/50 transition">
-                <i class="fa-solid fa-bullseye text-3xl text-pink-500 mb-6"></i>
-                <h3 class="text-xl font-bold mb-4">Auto-Targeting</h3>
-                <p class="text-gray-400 text-sm">Reach the fans most likely to save your tracks and follow.</p>
-            </div>
-            <div class="glass p-10 rounded-[2.5rem] hover:border-pink-500/50 transition">
-                <i class="fa-solid fa-chart-line text-3xl text-pink-500 mb-6"></i>
-                <h3 class="text-xl font-bold mb-4">Real-time Growth</h3>
-                <p class="text-gray-400 text-sm">Watch your streams grow with data-driven label insights.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="pricing" class="max-w-5xl mx-auto px-6 py-24">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl font-black mb-4">Simple, Transparent Pricing</h2>
-            <p class="text-gray-400">Choose the plan that fits your career stage.</p>
-        </div>
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="glass p-8 rounded-3xl text-left">
-                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Free</h4>
-                <div class="text-4xl font-black my-4">₦0</div>
-                <ul class="space-y-4 text-xs text-gray-400">
-                    <li><i class="fa-solid fa-check text-pink-500 mr-2"></i> Content creation tools</li>
-                    <li><i class="fa-solid fa-check text-pink-500 mr-2"></i> Artist page setup</li>
-                    <li><i class="fa-solid fa-check text-pink-500 mr-2"></i> Campaign planning</li>
-                </ul>
-            </div>
-            <div class="glass p-8 rounded-3xl text-left border-pink-500 border-2 relative scale-105 bg-white/[0.05]">
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-pink-500 text-[10px] font-black px-4 py-1 rounded-full uppercase">Most Popular</div>
-                <h4 class="text-xs font-bold text-pink-500 uppercase tracking-widest">Regular</h4>
-                <div class="text-4xl font-black my-4">₦14,000<span class="text-xs font-normal text-gray-500">/campaign</span></div>
-                <ul class="space-y-4 text-xs text-gray-400">
-                    <li><i class="fa-solid fa-bolt text-pink-500 mr-2"></i> Full AI music analysis</li>
-                    <li><i class="fa-solid fa-bolt text-pink-500 mr-2"></i> 1 song campaign rollout</li>
-                    <li><i class="fa-solid fa-bolt text-pink-500 mr-2"></i> Autonomous social media</li>
-                </ul>
-            </div>
-            <div class="glass p-8 rounded-3xl text-left">
-                <h4 class="text-xs font-bold text-blue-400 uppercase tracking-widest">Pro</h4>
-                <div class="text-4xl font-black my-4">₦60,000<span class="text-xs font-normal text-gray-400">/month</span></div>
-                <ul class="space-y-4 text-xs text-gray-400">
-                    <li><i class="fa-solid fa-star text-blue-400 mr-2"></i> Unlimited song campaigns</li>
-                    <li><i class="fa-solid fa-star text-blue-400 mr-2"></i> Multiple artist profiles</li>
-                    <li><i class="fa-solid fa-star text-blue-400 mr-2"></i> Advanced analytics</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <footer class="text-center p-20 border-t border-white/5 glass mt-24">
-        <div class="mb-8 font-black text-2xl tracking-tighter">SPARKAM<span class="text-pink-500">.</span></div>
-        <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] mb-4">© 2026 Sparkam — Autonomous Music Promotion Platform</p>
-        <div class="flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest font-bold">
-            <span class="opacity-60">Made in Nigeria with AI</span> <span>🇳🇬</span> <span>⚡️</span>
-        </div>
-    </footer>
+  <!-- Navigation -->
+  <nav>
+    <div class="logo">SPARKAM.</div>
+    <div class="nav-links">
+      <a href="#how-it-works">HOW IT WORKS</a>
+      <a href="#pricing">PRICING</a>
+      <a href="/dashboard" class="launch-btn">LAUNCH BRAIN →</a>
+    </div>
+  </nav>
+  
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>
+      Your Mini Record Label, <span class="gradient-text">Powered by AI</span>
+    </h1>
+    
+    <p class="hero-subtitle">
+      Paste your music link. Our AI Brain analyzes your sound, finds your audience, and autonomously handles your entire 360° promotion campaign.
+    </p>
+    
+    <div class="cta-buttons">
+      <a href="/dashboard" class="btn-primary">START FREE CAMPAIGN</a>
+      <a href="#how-it-works" class="btn-secondary">SEE HOW IT WORKS</a>
+    </div>
+    
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-number">100%</span>
+        <span class="stat-label">Autonomous</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">360°</span>
+        <span class="stat-label">Full Campaign</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">24/7</span>
+        <span class="stat-label">AI Working</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">₦9</span>
+        <span class="stat-label">Starting Price</span>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Features Section -->
+  <section class="section" id="how-it-works">
+    <h2 class="section-title">What Sparkam Does For You</h2>
+    <p class="section-subtitle">Your autonomous record label handles everything while you create</p>
+    
+    <div class="features-grid">
+      <div class="feature">
+        <span class="feature-icon">🎵</span>
+        <h3>Analyze Your Music</h3>
+        <p>AI analyzes your track's genre, mood, tempo, and target audience from your DSP link in seconds.</p>
+      </div>
+      
+      <div class="feature">
+        <span class="feature-icon">🎯</span>
+        <h3>Find Your Audience</h3>
+        <p>Identifies where your listeners are, what they engage with, and the best platforms to reach them.</p>
+      </div>
+      
+      <div class="feature">
+        <span class="feature-icon">🚀</span>
+        <h3>Launch Campaigns</h3>
+        <p>Autonomously executes multi-platform promotion across TikTok, Instagram, Spotify, YouTube & more.</p>
+      </div>
+      
+      <div class="feature">
+        <span class="feature-icon">✍️</span>
+        <h3>Create Content</h3>
+        <p>AI generates and schedules social media posts, captions, hashtags, and content calendars.</p>
+      </div>
+      
+      <div class="feature">
+        <span class="feature-icon">📊</span>
+        <h3>Track Analytics</h3>
+        <p>Real-time dashboard showing streams, engagement, ROI, and campaign performance.</p>
+      </div>
+      
+      <div class="feature">
+        <span class="feature-icon">💰</span>
+        <h3>Budget Control</h3>
+        <p>Slider from ₦9-₦500K lets you choose your budget. AI optimizes spend for maximum impact.</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Pricing Section -->
+  <section class="section" id="pricing">
+    <h2 class="section-title">Simple, Transparent Pricing</h2>
+    <p class="section-subtitle">Choose the plan that fits your career stage</p>
+    
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="tier-name">Free</div>
+        <div class="tier-price">₦0<small></small></div>
+        <p class="tier-description">Perfect for trying out Sparkam</p>
+        <ul class="tier-features">
+          <li>Content creation tools</li>
+          <li>Artist page setup</li>
+          <li>Campaign planning</li>
+          <li>Analytics preview</li>
+          <li>1 campaign preview</li>
+        </ul>
+        <a href="/dashboard" class="tier-btn tier-btn-secondary">Start Free</a>
+      </div>
+      
+      <div class="pricing-card featured">
+        <div class="tier-name">Regular</div>
+        <div class="tier-price">₦9<small>/campaign</small></div>
+        <p class="tier-description">One song, professional promotion</p>
+        <ul class="tier-features">
+          <li>Full AI music analysis</li>
+          <li>1 song campaign rollout</li>
+          <li>Autonomous social media</li>
+          <li>Playlist pitching</li>
+          <li>Limited but quality reach</li>
+          <li>Campaign analytics</li>
+          <li>Budget slider (₦9-₦500K)</li>
+        </ul>
+        <a href="/dashboard" class="tier-btn tier-btn-primary">Launch Campaign</a>
+      </div>
+      
+      <div class="pricing-card">
+        <div class="tier-name">Pro</div>
+        <div class="tier-price">₦39<small>/month</small></div>
+        <p class="tier-description">For serious artists & labels</p>
+        <ul class="tier-features">
+          <li>Everything in Regular</li>
+          <li>Multiple artist profiles</li>
+          <li>Unlimited song campaigns</li>
+          <li>Advanced analytics</li>
+          <li>Priority support</li>
+          <li>Team collaboration</li>
+          <li>White-label option</li>
+        </ul>
+        <a href="/dashboard" class="tier-btn tier-btn-secondary">Coming Soon</a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer>
+    <p><strong>© 2026 Sparkam</strong> - Autonomous Music Promotion Platform</p>
+    <p>Built for independent artists who deserve a fighting chance.</p>
+    <p style="margin-top: 20px;">🇳🇬 Made in Nigeria with AI 🤖</p>
+  </footer>
 </body>
-                </html>
+    </html>
     
