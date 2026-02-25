@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sparkam - AI Strategy Analysis</title>
+  <title>Sparkam Dashboard - AI Campaign Generator</title>
+  
+  <!-- Add html2canvas for image export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Add jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -51,11 +57,6 @@
       color: #FF0066;
     }
     
-    .nav-item:hover:not(.active) {
-      background: rgba(255,255,255,0.03);
-      color: rgba(255,255,255,0.8);
-    }
-    
     .nav-icon { font-size: 20px; }
     
     /* Main Content */
@@ -69,10 +70,6 @@
     .form-section {
       flex: 1;
       max-width: 700px;
-    }
-    
-    .header {
-      margin-bottom: 40px;
     }
     
     h1 {
@@ -92,6 +89,7 @@
       font-weight: 700;
       letter-spacing: 2px;
       text-transform: uppercase;
+      margin-bottom: 40px;
     }
     
     .form-container {
@@ -101,9 +99,7 @@
       padding: 40px;
     }
     
-    .form-group {
-      margin-bottom: 25px;
-    }
+    .form-group { margin-bottom: 25px; }
     
     label {
       display: block;
@@ -133,7 +129,6 @@
     }
     
     input::placeholder { color: rgba(255,255,255,0.3); }
-    
     select { cursor: pointer; }
     select option { background: #12121a; color: white; }
     
@@ -204,7 +199,7 @@
       color: rgba(255,255,255,0.5);
     }
     
-    /* SPARK IT Button - FIXED! */
+    /* Spark Button */
     .spark-btn {
       width: 100%;
       padding: 22px;
@@ -228,10 +223,7 @@
       box-shadow: 0 15px 50px rgba(255, 0, 102, 0.4);
     }
     
-    .spark-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .spark-btn:disabled { opacity: 0.6; cursor: not-allowed; }
     
     .spark-btn.loading::after {
       content: '';
@@ -247,26 +239,6 @@
     @keyframes shimmer {
       0% { left: -100%; }
       100% { left: 100%; }
-    }
-    
-    /* Info Panel */
-    .info-panel {
-      flex: 1;
-      max-width: 500px;
-      padding: 40px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-    
-    .info-content p {
-      font-size: 16px;
-      line-height: 1.7;
-      color: rgba(255,255,255,0.7);
     }
     
     /* Status Messages */
@@ -337,15 +309,53 @@
       border-radius: 10px;
     }
     
-    @media (max-width: 1200px) {
-      .main { flex-direction: column; }
-      .info-panel { max-width: 100%; }
+    /* EXPORT BUTTONS - NEW! */
+    .export-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin: 30px 0;
+      padding: 30px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.05);
     }
     
+    .export-btn {
+      padding: 16px 24px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.03);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .export-btn:hover {
+      border-color: #FF0066;
+      background: rgba(255, 0, 102, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .export-btn:active {
+      transform: translateY(0);
+    }
+    
+    /* Responsive */
     @media (max-width: 768px) {
       .sidebar { display: none; }
+      .main { padding: 20px; flex-direction: column; }
       .form-section { max-width: 100%; }
       h1 { font-size: 32px; }
+      .export-actions { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -369,33 +379,20 @@
   
   <!-- Main Content -->
   <div class="main">
-    <!-- Form Section -->
     <div class="form-section">
-      <div class="header">
-        <h1>AI STRATEGY ANALYSIS</h1>
-        <span class="beta-badge">BETA MODE</span>
-      </div>
+      <h1>AI STRATEGY ANALYSIS</h1>
+      <span class="beta-badge">BETA - FREE</span>
       
       <div class="form-container">
         <form id="sparkForm">
           <div class="form-group">
             <label>Artist Name</label>
-            <input 
-              type="text" 
-              id="artistName" 
-              placeholder="Artist Name" 
-              required
-            >
+            <input type="text" id="artistName" placeholder="Artist Name" required>
           </div>
           
           <div class="form-group">
             <label>Track Title</label>
-            <input 
-              type="text" 
-              id="trackTitle" 
-              placeholder="Track Title" 
-              required
-            >
+            <input type="text" id="trackTitle" placeholder="Track Title" required>
           </div>
           
           <div class="form-group">
@@ -414,14 +411,7 @@
           <div class="budget-section">
             <div class="budget-label">PROMO BUDGET</div>
             <div class="budget-display">₦<span id="budgetAmount">14,000</span></div>
-            <input 
-              type="range" 
-              id="budgetSlider" 
-              min="3000" 
-              max="500000" 
-              value="14000" 
-              step="1000"
-            >
+            <input type="range" id="budgetSlider" min="3000" max="500000" value="14000" step="1000">
             <div class="budget-info">
               <span>₦3K</span>
               <span>₦50K</span>
@@ -429,27 +419,21 @@
             </div>
           </div>
           
-          <!-- SPARK IT BUTTON - MATCHES YOUR DESIGN -->
-          <button type="submit" class="spark-btn" id="sparkBtn">
-            SPARK IT
-          </button>
+          <button type="submit" class="spark-btn" id="sparkBtn">SPARK IT</button>
         </form>
         
         <div class="status-message" id="statusMessage"></div>
-        <div class="results" id="results"></div>
-      </div>
-    </div>
-    
-    <!-- Info Panel -->
-    <div class="info-panel">
-      <div class="info-content">
-        <p>The AI Brain is ready. Enter your music details to generate your 360° blueprint...</p>
+        
+        <!-- Results Section with Export Buttons -->
+        <div class="results" id="results">
+          <!-- Campaign results will be inserted here -->
+        </div>
       </div>
     </div>
   </div>
   
   <script>
-    console.log('🎵 Sparkam Dashboard Loaded');
+    console.log('🎵 Sparkam Dashboard with Export Features Loaded');
     
     // Budget slider
     const budgetSlider = document.getElementById('budgetSlider');
@@ -460,7 +444,7 @@
       budgetDisplay.textContent = value.toLocaleString();
     });
     
-    // Form submission - FIXED FOR "SPARK IT"
+    // Form submission
     const sparkForm = document.getElementById('sparkForm');
     const sparkBtn = document.getElementById('sparkBtn');
     const statusMessage = document.getElementById('statusMessage');
@@ -476,59 +460,41 @@
         budget: parseInt(budgetSlider.value)
       };
       
-      console.log('🚀 SPARK IT clicked:', formData);
-      
-      // Validation
-      if (!formData.artistName || !formData.trackTitle || !formData.genre) {
-        showStatus('error', '❌ Please fill in all fields');
-        return;
-      }
+      console.log('🚀 Sparking campaign:', formData);
       
       // Update UI
       sparkBtn.disabled = true;
       sparkBtn.textContent = 'SPARKING...';
       sparkBtn.classList.add('loading');
-      showStatus('loading', '🧠 Consulting the AI Brain...');
+      showStatus('loading', '🧠 AI Brain is analyzing...');
       resultsDiv.classList.remove('show');
       
       try {
-        console.log('📡 Calling /api/promote...');
-        
         const response = await fetch('/api/promote', {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
         
-        console.log('📥 Response status:', response.status);
+        console.log('Response:', response.status);
         
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('❌ API Error:', errorText);
-          throw new Error(`API Error: ${response.status} - ${errorText}`);
+          throw new Error(`API Error: ${response.status}`);
         }
         
         const result = await response.json();
-        console.log('✅ Campaign result:', result);
+        console.log('Result:', result);
         
         if (result.success && result.campaign) {
-          showStatus('success', '✨ Campaign Generated Successfully!');
+          showStatus('success', '✨ Campaign Generated!');
           displayResults(result.campaign, formData);
-          
-          // Scroll to results
-          setTimeout(() => {
-            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }, 300);
         } else {
-          throw new Error(result.error || 'Failed to generate campaign');
+          throw new Error(result.error || 'Generation failed');
         }
         
       } catch (error) {
-        console.error('❌ Error:', error);
-        showStatus('error', `❌ ${error.message}. Check GOOGLE_API_KEY in Vercel settings.`);
+        console.error('Error:', error);
+        showStatus('error', `❌ ${error.message}`);
       } finally {
         sparkBtn.disabled = false;
         sparkBtn.textContent = 'SPARK IT';
@@ -543,72 +509,187 @@
     
     function displayResults(campaign, formData) {
       const html = `
-        <div style="background: linear-gradient(135deg, rgba(255,0,102,0.1) 0%, rgba(99,102,241,0.1) 100%); padding: 30px; border-radius: 16px; text-align: center; margin-bottom: 25px;">
-          <h2 style="font-size: 32px; margin-bottom: 10px;">🎉 Campaign Sparked!</h2>
-          <p style="font-size: 18px; color: rgba(255,255,255,0.8);">
-            "${formData.trackTitle}" by ${formData.artistName}
-          </p>
-          <p style="font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 8px;">
-            ${formData.genre} • ₦${formData.budget.toLocaleString()}
-          </p>
-        </div>
-        
-        <div class="result-card">
-          <h3>Strategy Overview</h3>
-          <p style="color: rgba(255,255,255,0.8); line-height: 1.7;">
-            ${campaign.overview || 'AI-powered autonomous campaign strategy.'}
-          </p>
-        </div>
-        
-        <div class="result-card">
-          <h3>Platform Strategies</h3>
-          ${campaign.platforms ? campaign.platforms.map(p => `
-            <div class="platform-item">
-              <strong style="color: #9D4EDD; font-size: 16px; display: block; margin-bottom: 8px;">
-                ${(p.platform || 'Platform').toUpperCase()}
-              </strong>
-              <div style="color: #FF0066; font-size: 24px; font-weight: 900; margin: 8px 0;">
-                ₦${(p.budget || 0).toLocaleString()}
-              </div>
-              <p style="color: rgba(255,255,255,0.7); line-height: 1.6;">
-                ${Array.isArray(p.tactics) ? p.tactics.join(' • ') : 'AI-powered tactics'}
-              </p>
-            </div>
-          `).join('') : '<p>Generating platform strategies...</p>'}
-        </div>
-        
-        ${campaign.content ? `
-          <div class="result-card">
-            <h3>Content Ideas</h3>
-            ${campaign.content.captions ? campaign.content.captions.map((c, i) => `
-              <div style="background: rgba(255,255,255,0.03); padding: 18px; border-radius: 10px; margin: 12px 0;">
-                <div style="color: #FF0066; font-size: 11px; font-weight: 700; margin-bottom: 8px;">CAPTION ${i+1}</div>
-                <div style="color: rgba(255,255,255,0.8);">${c}</div>
-              </div>
-            `).join('') : ''}
+        <div id="campaignContent">
+          <div style="background: linear-gradient(135deg, rgba(255,0,102,0.1) 0%, rgba(99,102,241,0.1) 100%); padding: 30px; border-radius: 16px; text-align: center; margin-bottom: 25px;">
+            <h2 style="font-size: 32px; margin-bottom: 10px;">🎉 Campaign Sparked!</h2>
+            <p style="font-size: 18px; color: rgba(255,255,255,0.8);">
+              "${formData.trackTitle}" by ${formData.artistName}
+            </p>
+            <p style="font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 8px;">
+              ${formData.genre} • ₦${formData.budget.toLocaleString()}
+            </p>
           </div>
           
           <div class="result-card">
-            <h3>Hashtags</h3>
-            <div style="color: #9D4EDD; font-size: 16px; line-height: 2;">
-              ${campaign.content.hashtags ? campaign.content.hashtags.join(' ') : '#Music #Promotion'}
-            </div>
+            <h3>Strategy Overview</h3>
+            <p style="color: rgba(255,255,255,0.8); line-height: 1.7;">
+              ${campaign.overview}
+            </p>
           </div>
-        ` : ''}
+          
+          <div class="result-card">
+            <h3>Platform Strategies</h3>
+            ${campaign.platforms.map(p => `
+              <div class="platform-item">
+                <strong style="color: #9D4EDD; font-size: 16px; display: block; margin-bottom: 8px;">
+                  ${p.platform.toUpperCase()}
+                </strong>
+                <div style="color: #FF0066; font-size: 24px; font-weight: 900; margin: 8px 0;">
+                  ₦${p.budget.toLocaleString()}
+                </div>
+                <p style="color: rgba(255,255,255,0.7); line-height: 1.6;">
+                  ${p.tactics.join(' • ')}
+                </p>
+              </div>
+            `).join('')}
+          </div>
+          
+          ${campaign.content ? `
+            <div class="result-card">
+              <h3>Content Ideas</h3>
+              ${campaign.content.captions.map((c, i) => `
+                <div style="background: rgba(255,255,255,0.03); padding: 18px; border-radius: 10px; margin: 12px 0;">
+                  <div style="color: #FF0066; font-size: 11px; font-weight: 700; margin-bottom: 8px;">CAPTION ${i+1}</div>
+                  <div style="color: rgba(255,255,255,0.8);">${c}</div>
+                </div>
+              `).join('')}
+            </div>
+            
+            <div class="result-card">
+              <h3>Hashtags</h3>
+              <div style="color: #9D4EDD; font-size: 16px; line-height: 2;">
+                ${campaign.content.hashtags.join(' ')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
         
-        <button onclick="location.reload()" class="spark-btn" style="margin-top: 25px;">
-          Spark Another
+        <!-- EXPORT BUTTONS -->
+        <div class="export-actions">
+          <button onclick="downloadPDF()" class="export-btn">
+            📥 Download PDF
+          </button>
+          <button onclick="copyToClipboard()" class="export-btn">
+            📋 Copy Text
+          </button>
+          <button onclick="shareAsImage()" class="export-btn">
+            🎨 Share Image
+          </button>
+        </div>
+        
+        <!-- SPARK ANOTHER BUTTON -->
+        <button onclick="sparkAnother()" class="spark-btn" style="margin-top: 25px;">
+          ✨ Spark Another (Free Beta)
         </button>
       `;
       
       resultsDiv.innerHTML = html;
       resultsDiv.classList.add('show');
       resultsDiv.scrollIntoView({ behavior: 'smooth' });
+      
+      // Store campaign data globally for export functions
+      window.currentCampaign = { campaign, formData };
     }
     
-    // Log when page loads
-    console.log('✅ Dashboard ready - SPARK IT button active');
-  </script>
-</body>
-  </html>
-  
+    // EXPORT FUNCTIONS
+    
+    // 1. Download as PDF
+    window.downloadPDF = function() {
+      const content = document.getElementById('campaignContent');
+      const { jsPDF } = window.jspdf;
+      
+      html2canvas(content, { 
+        backgroundColor: '#12121a',
+        scale: 2 
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgWidth = 190;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+        pdf.save(`Sparkam-Campaign-${window.currentCampaign.formData.trackTitle}.pdf`);
+        
+        alert('✅ PDF downloaded!');
+      });
+    };
+    
+    // 2. Copy to Clipboard
+    window.copyToClipboard = function() {
+      const { campaign, formData } = window.currentCampaign;
+      
+      let text = `🎵 SPARKAM CAMPAIGN
+      
+Track: "${formData.trackTitle}" by ${formData.artistName}
+Genre: ${formData.genre}
+Budget: ₦${formData.budget.toLocaleString()}
+
+📊 STRATEGY OVERVIEW:
+${campaign.overview}
+
+💰 PLATFORM BREAKDOWN:
+${campaign.platforms.map(p => `
+${p.platform.toUpperCase()}: ₦${p.budget.toLocaleString()}
+${p.tactics.join(' • ')}
+`).join('\n')}
+
+${campaign.content ? `
+✍️ CONTENT IDEAS:
+${campaign.content.captions.map((c, i) => `${i+1}. ${c}`).join('\n\n')}
+
+🏷️ HASHTAGS:
+${campaign.content.hashtags.join(' ')}
+` : ''}
+
+Generated by Sparkam AI - sparkam.app
+      `;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✅ Campaign copied to clipboard!');
+      });
+    };
+    
+    // 3. Share as Image (generates collage-style graphic)
+    window.shareAsImage = function() {
+      const content = document.getElementById('campaignContent');
+      
+      html2canvas(content, {
+        backgroundColor: '#12121a',
+        scale: 2
+      }).then(canvas => {
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Sparkam-${window.currentCampaign.formData.trackTitle}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+          
+          alert('✅ Image downloaded! Share on Instagram/WhatsApp!');
+        });
+      });
+    };
+    
+    // SPARK ANOTHER FUNCTION
+    window.sparkAnother = function() {
+      // For BETA: Just reload to create another campaign (free)
+      // For PAID version: Check credits and redirect to checkout if needed
+      
+      const isBeta = true; // Change to false after beta
+      
+      if (isBeta) {
+        // Free beta - just reload dashboard
+        location.reload();
+      } else {
+        // Paid version logic (implement later)
+        const hasCredits = checkUserCredits(); // Implement this function
+        if (hasCredits) {
+          location.reload();
+        } else {
+          window.location.href = '/pricing?reason=out-of-credits';
+        }
+      }
+    };
+    
+    console.log('✅ Dashboard ready with export features');
+  </scrip
