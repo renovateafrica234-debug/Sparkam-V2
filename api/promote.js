@@ -1,6 +1,3 @@
-// api/promote.js - Bulletproof Sparkam Campaign Generator
-// This file handles campaign generation with Google AI + fallback
-
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Initialize Google AI (only if key exists)
