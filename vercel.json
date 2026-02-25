@@ -1,5 +1,9 @@
 {
   "version": 2,
+  "rewrites": [
+    { "source": "/", "destination": "/public/dashboard.html" },
+    { "source": "/dashboard", "destination": "/public/dashboard.html" }
+  ],
   "functions": {
     "api/**/*.js": {
       "maxDuration": 10
