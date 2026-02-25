@@ -6,20 +6,21 @@ module.exports = async function handler(req, res) {
   }
 
   const apiKey = process.env.GOOGLE_API_KEY;
-  const genAI = new GoogleGenerativeAI(apiKey);
+  if (!apiKey) {
+    return res.status(500).json({ error: "Missing API Key in Vercel" });
+  }
 
   try {
-    const { prompt } = req.body;
-    // FEB 2026: Using the live Gemini 3 Flash model
+    const genAI = new GoogleGenerativeAI(apiKey);
+    // Using Gemini 3 Flash for 2026
     const model = genAI.getGenerativeModel({ model: "gemini-3-flash" });
 
-    const result = await model.generateContent(prompt || "Generate music promo");
+    const result = await model.generateContent(req.body.prompt || "Generate music promo");
     const response = await result.response;
-    const text = response.text();
-
-    return res.status(200).json({ text });
+    
+    return res.status(200).json({ text: response.text() });
   } catch (error) {
-    console.error("Brain Error:", error);
-    return res.status(500).json({ error: "AI Brain failed to ignite." });
+    console.error(error);
+    return res.status(500).json({ error: "The AI Brain is offline." });
   }
 };
