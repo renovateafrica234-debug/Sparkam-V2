@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sparkam Dashboard</title>
+  <title>Sparkam - Autonomous AI Campaign</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #0a0a12;
@@ -14,21 +14,13 @@
       min-height: 100vh;
       display: flex;
     }
-    
     .sidebar {
       width: 280px;
       background: #050508;
       padding: 40px 30px;
       border-right: 1px solid rgba(255,255,255,0.05);
     }
-    
-    .logo {
-      font-size: 32px;
-      font-weight: 900;
-      margin-bottom: 60px;
-      color: white;
-    }
-    
+    .logo { font-size: 32px; font-weight: 900; margin-bottom: 60px; }
     .nav-item {
       display: flex;
       align-items: center;
@@ -40,37 +32,13 @@
       font-size: 14px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1px;
       cursor: pointer;
       transition: all 0.3s;
     }
-    
-    .nav-item.active {
-      background: rgba(255, 0, 102, 0.1);
-      color: #FF0066;
-    }
-    
-    .nav-icon { font-size: 20px; }
-    
-    .main {
-      flex: 1;
-      display: flex;
-      padding: 40px;
-      gap: 40px;
-    }
-    
-    .form-section {
-      flex: 1;
-      max-width: 700px;
-    }
-    
-    h1 {
-      font-size: 42px;
-      font-weight: 900;
-      margin-bottom: 10px;
-      letter-spacing: -1px;
-    }
-    
+    .nav-item.active { background: rgba(255, 0, 102, 0.1); color: #FF0066; }
+    .main { flex: 1; padding: 40px; }
+    .form-section { max-width: 700px; margin: 0 auto; }
+    h1 { font-size: 42px; font-weight: 900; margin-bottom: 10px; }
     .beta-badge {
       display: inline-block;
       background: rgba(255, 0, 102, 0.2);
@@ -79,20 +47,15 @@
       border-radius: 20px;
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
       margin-bottom: 40px;
     }
-    
     .form-container {
       background: #12121a;
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 24px;
       padding: 40px;
     }
-    
     .form-group { margin-bottom: 25px; }
-    
     label {
       display: block;
       font-size: 12px;
@@ -100,31 +63,18 @@
       margin-bottom: 10px;
       color: rgba(255,255,255,0.6);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
     }
-    
     input, select {
       width: 100%;
-      padding: 16px 18px;
+      padding: 16px;
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 12px;
       color: white;
       font-size: 15px;
-      transition: all 0.3s;
     }
-    
-    input:focus, select:focus {
-      outline: none;
-      border-color: #FF0066;
-      background: rgba(255,255,255,0.05);
-    }
-    
-    input::placeholder { color: rgba(255,255,255,0.3); }
-    select { cursor: pointer; }
-    select option { background: #12121a; color: white; }
-    
-    /* HIGHLIGHTED: DSP Link Section */
+    input:focus, select:focus { outline: none; border-color: #FF0066; }
+    select option { background: #12121a; }
     .dsp-section {
       background: rgba(255, 0, 102, 0.05);
       border: 2px solid rgba(255, 0, 102, 0.2);
@@ -132,19 +82,6 @@
       padding: 25px;
       margin-bottom: 30px;
     }
-    
-    .dsp-section label {
-      color: #FF0066;
-      font-size: 13px;
-    }
-    
-    .dsp-info {
-      margin-top: 10px;
-      font-size: 12px;
-      color: rgba(255,255,255,0.5);
-      line-height: 1.6;
-    }
-    
     .beta-notice {
       background: rgba(157, 78, 221, 0.1);
       border: 1px solid rgba(157, 78, 221, 0.3);
@@ -154,7 +91,6 @@
       font-size: 13px;
       color: #9D4EDD;
     }
-    
     .budget-section {
       margin: 35px 0;
       padding: 30px;
@@ -162,17 +98,6 @@
       border: 1px solid rgba(255, 0, 102, 0.15);
       border-radius: 20px;
     }
-    
-    .budget-label {
-      text-align: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.5);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 20px;
-    }
-    
     .budget-display {
       text-align: center;
       font-size: 56px;
@@ -182,19 +107,14 @@
       -webkit-text-fill-color: transparent;
       margin-bottom: 25px;
     }
-    
     input[type="range"] {
       width: 100%;
       height: 6px;
       background: rgba(255,255,255,0.1);
       border-radius: 10px;
-      outline: none;
       -webkit-appearance: none;
       cursor: pointer;
-      border: none;
-      margin-bottom: 15px;
     }
-    
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       width: 24px;
@@ -202,25 +122,7 @@
       background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
       border-radius: 50%;
       cursor: pointer;
-      box-shadow: 0 0 15px rgba(255, 0, 102, 0.5);
     }
-    
-    input[type="range"]::-moz-range-thumb {
-      width: 24px;
-      height: 24px;
-      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
-      border-radius: 50%;
-      cursor: pointer;
-      border: none;
-    }
-    
-    .budget-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      color: rgba(255,255,255,0.5);
-    }
-    
     .spark-btn {
       width: 100%;
       padding: 22px;
@@ -232,74 +134,65 @@
       font-weight: 800;
       cursor: pointer;
       text-transform: uppercase;
-      letter-spacing: 3px;
-      transition: all 0.3s;
       margin-top: 30px;
     }
-    
-    .spark-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 50px rgba(255, 0, 102, 0.4);
-    }
-    
-    .spark-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    
-    .spark-btn.loading::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      animation: shimmer 1.5s infinite;
-    }
-    
-    @keyframes shimmer {
-      0% { left: -100%; }
-      100% { left: 100%; }
-    }
-    
+    .spark-btn:hover { transform: translateY(-2px); }
     .status-message {
       margin-top: 25px;
       padding: 20px;
       border-radius: 14px;
-      font-size: 14px;
       text-align: center;
       display: none;
     }
-    
     .status-message.show { display: block; }
-    
-    .status-message.loading {
-      background: rgba(157, 78, 221, 0.1);
-      border: 1px solid rgba(157, 78, 221, 0.3);
-      color: #9D4EDD;
-    }
-    
-    .status-message.error {
-      background: rgba(255, 0, 0, 0.1);
-      border: 1px solid rgba(255, 0, 0, 0.3);
-      color: #ff6666;
-    }
-    
-    .status-message.success {
-      background: rgba(0, 255, 136, 0.1);
-      border: 1px solid rgba(0, 255, 136, 0.3);
-      color: #00ff88;
-    }
-    
-    .results {
-      display: none;
-      margin-top: 40px;
-      animation: fadeIn 0.5s;
-    }
-    
+    .status-message.loading { background: rgba(157, 78, 221, 0.1); color: #9D4EDD; }
+    .status-message.error { background: rgba(255, 0, 0, 0.1); color: #ff6666; }
+    .results { display: none; margin-top: 40px; }
     .results.show { display: block; }
     
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    /* METRICS SHOWCASE */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+      padding: 30px;
+      background: rgba(0, 255, 136, 0.05);
+      border: 2px solid rgba(0, 255, 136, 0.2);
+      border-radius: 20px;
+    }
+    .metric-box {
+      text-align: center;
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+    }
+    .metric-value {
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #00ff88 0%, #00d4ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .metric-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* AUTONOMOUS BADGE */
+    .autonomous-badge {
+      background: linear-gradient(135deg, #FF0066 0%, #9D4EDD 100%);
+      padding: 15px 25px;
+      border-radius: 30px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 20px 0;
+      letter-spacing: 2px;
     }
     
     .result-card {
@@ -309,15 +202,12 @@
       padding: 35px;
       margin: 20px 0;
     }
-    
     .result-card h3 {
       color: #FF0066;
       font-size: 18px;
       margin-bottom: 18px;
       text-transform: uppercase;
-      letter-spacing: 2px;
     }
-    
     .platform-item {
       background: rgba(157, 78, 221, 0.05);
       border-left: 3px solid #9D4EDD;
@@ -325,64 +215,110 @@
       margin: 15px 0;
       border-radius: 10px;
     }
-    
+    .platform-metrics {
+      display: flex;
+      gap: 20px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    .platform-metric {
+      background: rgba(255,255,255,0.03);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .platform-metric strong {
+      color: #00ff88;
+      display: block;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .automation-list {
+      list-style: none;
+      margin-top: 15px;
+    }
+    .automation-list li {
+      padding: 12px;
+      background: rgba(255,0,102,0.05);
+      border-left: 2px solid #FF0066;
+      margin: 8px 0;
+      border-radius: 6px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+    }
+    .automation-list li::before {
+      content: '🤖 ';
+      margin-right: 8px;
+    }
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .timeline-week {
+      background: rgba(255,255,255,0.03);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .timeline-week strong {
+      color: #9D4EDD;
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .pdf-btn {
+      width: 100%;
+      padding: 20px;
+      background: rgba(0, 255, 136, 0.1);
+      border: 2px solid rgba(0, 255, 136, 0.3);
+      border-radius: 14px;
+      color: #00ff88;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 25px 0;
+    }
     @media (max-width: 768px) {
       .sidebar { display: none; }
-      .main { padding: 20px; flex-direction: column; }
-      .form-section { max-width: 100%; }
+      .main { padding: 20px; }
       h1 { font-size: 32px; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 <body>
   <div class="sidebar">
     <div class="logo">SPARKAM.</div>
-    <div class="nav-item active">
-      <span class="nav-icon">🎯</span>
-      <span>AI ANALYSIS</span>
-    </div>
-    <div class="nav-item">
-      <span class="nav-icon">✍️</span>
-      <span>CONTENT CREATOR</span>
-    </div>
-    <div class="nav-item">
-      <span class="nav-icon">📱</span>
-      <span>SOCIAL MEDIA</span>
-    </div>
+    <div class="nav-item active"><span>🎯</span> AI ANALYSIS</div>
+    <div class="nav-item"><span>✍️</span> CONTENT CREATOR</div>
+    <div class="nav-item"><span>📱</span> SOCIAL MEDIA</div>
   </div>
   
   <div class="main">
     <div class="form-section">
-      <h1>AI STRATEGY ANALYSIS</h1>
-      <span class="beta-badge">BETA - FREE TESTING</span>
+      <h1>AUTONOMOUS AI CAMPAIGNS</h1>
+      <span class="beta-badge">100% AI-POWERED</span>
       
       <div class="form-container">
         <form id="sparkForm">
-          
-          <!-- DSP LINK SECTION - HIGHLIGHTED -->
           <div class="dsp-section">
-            <label>🎵 Spotify or Apple Music Link (Beta)</label>
-            <input 
-              type="url" 
-              id="dspLink" 
-              placeholder="https://open.spotify.com/track/..." 
-            >
-            <div class="dsp-info">
-              Paste your track link for AI analysis of tempo, mood, and audience
-            </div>
+            <label>🎵 Spotify or Apple Music Link</label>
+            <input type="url" id="dspLink" placeholder="https://open.spotify.com/track/...">
             <div class="beta-notice">
-              ⚠️ <strong>Beta Note:</strong> DSP analysis feature is in testing. For now, campaigns are generated based on genre and budget. Full track analysis coming soon with DSP partnerships!
+              ⚠️ DSP analysis in beta. Full track analysis coming with DSP partnerships!
             </div>
           </div>
           
           <div class="form-group">
             <label>Artist Name</label>
-            <input type="text" id="artistName" placeholder="Artist Name" required>
+            <input type="text" id="artistName" required>
           </div>
           
           <div class="form-group">
             <label>Track Title</label>
-            <input type="text" id="trackTitle" placeholder="Track Title" required>
+            <input type="text" id="trackTitle" required>
           </div>
           
           <div class="form-group">
@@ -399,14 +335,8 @@
           </div>
           
           <div class="budget-section">
-            <div class="budget-label">PROMO BUDGET</div>
             <div class="budget-display">₦<span id="budgetAmount">14,000</span></div>
             <input type="range" id="budgetSlider" min="3000" max="500000" value="14000" step="1000">
-            <div class="budget-info">
-              <span>₦3K</span>
-              <span>₦50K</span>
-              <span>₦500K</span>
-            </div>
           </div>
           
           <button type="submit" class="spark-btn" id="sparkBtn">SPARK IT</button>
@@ -419,22 +349,13 @@
   </div>
   
   <script>
-    console.log('🎵 Sparkam Dashboard Loaded');
-    
     const budgetSlider = document.getElementById('budgetSlider');
     const budgetDisplay = document.getElementById('budgetAmount');
-    
     budgetSlider.addEventListener('input', (e) => {
-      const value = parseInt(e.target.value);
-      budgetDisplay.textContent = value.toLocaleString();
+      budgetDisplay.textContent = parseInt(e.target.value).toLocaleString();
     });
     
-    const sparkForm = document.getElementById('sparkForm');
-    const sparkBtn = document.getElementById('sparkBtn');
-    const statusMessage = document.getElementById('statusMessage');
-    const resultsDiv = document.getElementById('results');
-    
-    sparkForm.addEventListener('submit', async (e) => {
+    document.getElementById('sparkForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const formData = {
@@ -445,23 +366,10 @@
         budget: parseInt(budgetSlider.value)
       };
       
-      console.log('🚀 Submitting:', formData);
-      
-      // DSP Link validation (for future use)
-      if (formData.dspLink) {
-        const isValidDSP = formData.dspLink.includes('spotify.com') || 
-                          formData.dspLink.includes('music.apple.com');
-        if (!isValidDSP) {
-          showStatus('error', '⚠️ Please enter a valid Spotify or Apple Music link');
-          return;
-        }
-      }
-      
-      sparkBtn.disabled = true;
-      sparkBtn.textContent = 'SPARKING...';
-      sparkBtn.classList.add('loading');
-      showStatus('loading', '🧠 AI Brain analyzing...');
-      resultsDiv.classList.remove('show');
+      document.getElementById('sparkBtn').disabled = true;
+      document.getElementById('sparkBtn').textContent = 'SPARKING...';
+      document.getElementById('statusMessage').className = 'status-message loading show';
+      document.getElementById('statusMessage').textContent = '🤖 AI Brain analyzing...';
       
       try {
         const response = await fetch('/api/promote', {
@@ -470,109 +378,224 @@
           body: JSON.stringify(formData)
         });
         
-        console.log('Response:', response.status);
-        
-        if (!response.ok) {
-          throw new Error(`API Error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`API Error: ${response.status}`);
         
         const result = await response.json();
-        console.log('Result:', result);
         
         if (result.success && result.campaign) {
-          showStatus('success', '✨ Campaign Generated!');
           displayResults(result.campaign, formData);
         } else {
-          throw new Error(result.error || 'Generation failed');
+          throw new Error(result.error || 'Failed');
         }
-        
       } catch (error) {
-        console.error('Error:', error);
-        showStatus('error', `❌ ${error.message}`);
+        document.getElementById('statusMessage').className = 'status-message error show';
+        document.getElementById('statusMessage').textContent = `❌ ${error.message}`;
       } finally {
-        sparkBtn.disabled = false;
-        sparkBtn.textContent = 'SPARK IT';
-        sparkBtn.classList.remove('loading');
+        document.getElementById('sparkBtn').disabled = false;
+        document.getElementById('sparkBtn').textContent = 'SPARK IT';
       }
     });
     
-    function showStatus(type, message) {
-      statusMessage.className = `status-message ${type} show`;
-      statusMessage.textContent = message;
-    }
-    
     function displayResults(campaign, formData) {
+      const metrics = campaign.metrics || {};
       const html = `
         <div style="background: linear-gradient(135deg, rgba(255,0,102,0.1) 0%, rgba(99,102,241,0.1) 100%); padding: 30px; border-radius: 16px; text-align: center; margin-bottom: 25px;">
-          <h2 style="font-size: 32px; margin-bottom: 10px;">🎉 Campaign Sparked!</h2>
+          <h2 style="font-size: 32px; margin-bottom: 10px;">🎉 Autonomous Campaign Ready!</h2>
           <p style="font-size: 18px; color: rgba(255,255,255,0.8);">
             "${formData.trackTitle}" by ${formData.artistName}
           </p>
-          <p style="font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 8px;">
-            ${formData.genre} • ₦${formData.budget.toLocaleString()}
-          </p>
-          ${formData.dspLink ? `
-            <p style="font-size: 12px; color: rgba(157,78,221,0.8); margin-top: 8px;">
-              📊 Track analyzed from DSP link
-            </p>
-          ` : ''}
+        </div>
+        
+        <div class="autonomous-badge">
+          🤖 100% AI-POWERED • ZERO MANUAL WORK • 24/7 AUTONOMOUS EXECUTION
+        </div>
+        
+        <!-- METRICS SHOWCASE -->
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="metric-value">${metrics.estimatedStreams ? metrics.estimatedStreams.toLocaleString() : '0'}+</span>
+            <span class="metric-label">Est. Streams</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-value">${metrics.totalReach ? metrics.totalReach.toLocaleString() : '0'}+</span>
+            <span class="metric-label">Total Reach</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-value">${metrics.engagementRate || '0%'}</span>
+            <span class="metric-label">Engagement</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-value">${metrics.roiProjection || '₦0'}</span>
+            <span class="metric-label">Projected ROI</span>
+          </div>
         </div>
         
         <div class="result-card">
-          <h3>Strategy Overview</h3>
-          <p style="color: rgba(255,255,255,0.8); line-height: 1.7;">
+          <h3>🎯 Strategy Overview</h3>
+          <p style="color: rgba(255,255,255,0.9); line-height: 1.7; font-size: 15px;">
             ${campaign.overview}
           </p>
         </div>
         
         <div class="result-card">
-          <h3>Platform Strategies</h3>
+          <h3>🤖 Platform Automation</h3>
           ${campaign.platforms.map(p => `
             <div class="platform-item">
-              <strong style="color: #9D4EDD; font-size: 16px; display: block; margin-bottom: 8px;">
+              <strong style="color: #9D4EDD; font-size: 18px; display: block; margin-bottom: 12px;">
                 ${p.platform.toUpperCase()}
               </strong>
-              <div style="color: #FF0066; font-size: 24px; font-weight: 900; margin: 8px 0;">
+              <div style="color: #FF0066; font-size: 28px; font-weight: 900; margin-bottom: 15px;">
                 ₦${p.budget.toLocaleString()}
               </div>
-              <p style="color: rgba(255,255,255,0.7); line-height: 1.6;">
-                ${p.tactics.join(' • ')}
-              </p>
+              
+              ${p.metrics ? `
+                <div class="platform-metrics">
+                  ${Object.entries(p.metrics).map(([key, value]) => `
+                    <div class="platform-metric">
+                      <strong>${value}</strong>
+                      <span>${key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+              
+              <ul class="automation-list">
+                ${p.automation.map(item => `<li>${item}</li>`).join('')}
+              </ul>
             </div>
           `).join('')}
         </div>
         
+        ${campaign.timeline ? `
+          <div class="result-card">
+            <h3>📅 30-Day Execution Timeline</h3>
+            <div class="timeline-grid">
+              ${Object.entries(campaign.timeline).map(([week, activity]) => `
+                <div class="timeline-week">
+                  <strong>${week.toUpperCase()}</strong>
+                  <div style="font-size: 13px; color: rgba(255,255,255,0.8);">${activity}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+        
         ${campaign.content ? `
           <div class="result-card">
-            <h3>Content Ideas</h3>
+            <h3>✍️ AI-Generated Content</h3>
             ${campaign.content.captions.map((c, i) => `
               <div style="background: rgba(255,255,255,0.03); padding: 18px; border-radius: 10px; margin: 12px 0;">
                 <div style="color: #FF0066; font-size: 11px; font-weight: 700; margin-bottom: 8px;">CAPTION ${i+1}</div>
                 <div style="color: rgba(255,255,255,0.8);">${c}</div>
               </div>
             `).join('')}
-          </div>
-          
-          <div class="result-card">
-            <h3>Hashtags</h3>
-            <div style="color: #9D4EDD; font-size: 16px; line-height: 2;">
-              ${campaign.content.hashtags.join(' ')}
+            <div style="margin-top: 20px; padding: 15px; background: rgba(157,78,221,0.05); border-radius: 10px;">
+              <div style="color: #9D4EDD; font-size: 16px; line-height: 2;">
+                ${campaign.content.hashtags.join(' ')}
+              </div>
+              ${campaign.content.automatedSchedule ? `
+                <div style="margin-top: 10px; font-size: 13px; color: rgba(255,255,255,0.6);">
+                  📅 ${campaign.content.automatedSchedule}
+                </div>
+              ` : ''}
             </div>
           </div>
         ` : ''}
         
-        <button onclick="location.reload()" class="spark-btn" style="margin-top: 25px;">
-          ✨ Spark Another (Free Beta)
+        <button onclick="downloadPDF()" class="pdf-btn">
+          📥 Download Campaign as PDF
+        </button>
+        
+        <button onclick="location.reload()" class="spark-btn">
+          ✨ Spark Another Campaign
         </button>
       `;
       
-      resultsDiv.innerHTML = html;
-      resultsDiv.classList.add('show');
-      resultsDiv.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('results').innerHTML = html;
+      document.getElementById('results').classList.add('show');
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('statusMessage').style.display = 'none';
+      
+      window.currentCampaign = { campaign, formData };
     }
     
-    console.log('✅ Dashboard ready');
-  </script>
-</body>
-  </html>
-  
+    window.downloadPDF = function() {
+      const { campaign, formData } = window.currentCampaign;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      let y = 20;
+      doc.setFontSize(20);
+      doc.setTextColor(255, 0, 102);
+      doc.text('SPARKAM AUTONOMOUS CAMPAIGN', 105, y, { align: 'center' });
+      
+      y += 12;
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`"${formData.trackTitle}" by ${formData.artistName}`, 105, y, { align: 'center' });
+      
+      y += 10;
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`${formData.genre} • ₦${formData.budget.toLocaleString()} • 100% AI-Powered`, 105, y, { align: 'center' });
+      
+      y += 15;
+      
+      if (campaign.metrics) {
+        doc.setFontSize(12);
+        doc.setTextColor(255, 0, 102);
+        doc.text('PROJECTED RESULTS', 20, y);
+        y += 8;
+        
+        doc.setFontSize(10);
+        doc.setTextColor(0);
+        doc.text(`Estimated Streams: ${campaign.metrics.estimatedStreams?.toLocaleString() || 'N/A'}`, 20, y);
+        y += 6;
+        doc.text(`Total Reach: ${campaign.metrics.totalReach?.toLocaleString() || 'N/A'}`, 20, y);
+        y += 6;
+        doc.text(`Engagement Rate: ${campaign.metrics.engagementRate || 'N/A'}`, 20, y);
+        y += 6;
+        doc.text(`ROI Projection: ${campaign.metrics.roiProjection || 'N/A'}`, 20, y);
+        y += 12;
+      }
+      
+      doc.setFontSize(12);
+      doc.setTextColor(255, 0, 102);
+      doc.text('STRATEGY OVERVIEW', 20, y);
+      y += 8;
+      
+      doc.setFontSize(10);
+      doc.setTextColor(0);
+      const overviewLines = doc.splitTextToSize(campaign.overview, 170);
+      doc.text(overviewLines, 20, y);
+      y += (overviewLines.length * 5) + 10;
+      
+      campaign.platforms.forEach(platform => {
+        if (y > 250) { doc.addPage(); y = 20; }
+        
+        doc.setFontSize(11);
+        doc.setTextColor(157, 78, 221);
+        doc.text(platform.platform.toUpperCase(), 20, y);
+        y += 6;
+        
+        doc.setFontSize(10);
+        doc.setTextColor(255, 0, 102);
+        doc.text(`Budget: ₦${platform.budget.toLocaleString()}`, 20, y);
+        y += 6;
+        
+        if (platform.automation) {
+          doc.setTextColor(0);
+          platform.automation.forEach(item => {
+            const lines = doc.splitTextToSize(`• ${item}`, 170);
+            doc.text(lines, 20, y);
+            y += lines.length * 5;
+          });
+        }
+        y += 8;
+      });
+      
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text('Generated by Sparkam AI - 100% Autonomous Campaigns', 105, 285, { align: 'center' });
+      
+      doc.save(`Spa
