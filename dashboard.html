@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sparkam Dashboard</title>
-  
-  <!-- Add jsPDF for PDF export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -128,6 +124,7 @@
     select { cursor: pointer; }
     select option { background: #12121a; color: white; }
     
+    /* HIGHLIGHTED: DSP Link Section */
     .dsp-section {
       background: rgba(255, 0, 102, 0.05);
       border: 2px solid rgba(255, 0, 102, 0.2);
@@ -238,8 +235,6 @@
       letter-spacing: 3px;
       transition: all 0.3s;
       margin-top: 30px;
-      position: relative;
-      overflow: hidden;
     }
     
     .spark-btn:hover {
@@ -331,37 +326,6 @@
       border-radius: 10px;
     }
     
-    /* PDF DOWNLOAD BUTTON */
-    .pdf-download-btn {
-      width: 100%;
-      padding: 20px;
-      background: rgba(0, 255, 136, 0.1);
-      border: 2px solid rgba(0, 255, 136, 0.3);
-      border-radius: 14px;
-      color: #00ff88;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      margin: 25px 0;
-      transition: all 0.3s;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-    }
-    
-    .pdf-download-btn:hover {
-      background: rgba(0, 255, 136, 0.2);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 255, 136, 0.3);
-    }
-    
-    .pdf-download-btn:active {
-      transform: translateY(0);
-    }
-    
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .main { padding: 20px; flex-direction: column; }
@@ -394,9 +358,15 @@
       
       <div class="form-container">
         <form id="sparkForm">
+          
+          <!-- DSP LINK SECTION - HIGHLIGHTED -->
           <div class="dsp-section">
             <label>🎵 Spotify or Apple Music Link (Beta)</label>
-            <input type="url" id="dspLink" placeholder="https://open.spotify.com/track/...">
+            <input 
+              type="url" 
+              id="dspLink" 
+              placeholder="https://open.spotify.com/track/..." 
+            >
             <div class="dsp-info">
               Paste your track link for AI analysis of tempo, mood, and audience
             </div>
@@ -449,7 +419,7 @@
   </div>
   
   <script>
-    console.log('🎵 Sparkam Dashboard with PDF Export');
+    console.log('🎵 Sparkam Dashboard Loaded');
     
     const budgetSlider = document.getElementById('budgetSlider');
     const budgetDisplay = document.getElementById('budgetAmount');
@@ -477,6 +447,7 @@
       
       console.log('🚀 Submitting:', formData);
       
+      // DSP Link validation (for future use)
       if (formData.dspLink) {
         const isValidDSP = formData.dspLink.includes('spotify.com') || 
                           formData.dspLink.includes('music.apple.com');
@@ -499,9 +470,14 @@
           body: JSON.stringify(formData)
         });
         
-        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        console.log('Response:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status}`);
+        }
         
         const result = await response.json();
+        console.log('Result:', result);
         
         if (result.success && result.campaign) {
           showStatus('success', '✨ Campaign Generated!');
@@ -535,6 +511,11 @@
           <p style="font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 8px;">
             ${formData.genre} • ₦${formData.budget.toLocaleString()}
           </p>
+          ${formData.dspLink ? `
+            <p style="font-size: 12px; color: rgba(157,78,221,0.8); margin-top: 8px;">
+              📊 Track analyzed from DSP link
+            </p>
+          ` : ''}
         </div>
         
         <div class="result-card">
@@ -580,12 +561,7 @@
           </div>
         ` : ''}
         
-        <!-- PDF DOWNLOAD BUTTON -->
-        <button onclick="downloadPDF()" class="pdf-download-btn">
-          📥 Download Campaign as PDF
-        </button>
-        
-        <button onclick="location.reload()" class="spark-btn" style="margin-top: 15px;">
+        <button onclick="location.reload()" class="spark-btn" style="margin-top: 25px;">
           ✨ Spark Another (Free Beta)
         </button>
       `;
@@ -593,102 +569,10 @@
       resultsDiv.innerHTML = html;
       resultsDiv.classList.add('show');
       resultsDiv.scrollIntoView({ behavior: 'smooth' });
-      
-      // Store campaign globally for PDF function
-      window.currentCampaign = { campaign, formData };
     }
     
-    // PDF DOWNLOAD FUNCTION
-    window.downloadPDF = function() {
-      const { campaign, formData } = window.currentCampaign;
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      
-      let y = 20;
-      
-      // Title
-      doc.setFontSize(22);
-      doc.setTextColor(255, 0, 102);
-      doc.text('SPARKAM CAMPAIGN', 105, y, { align: 'center' });
-      
-      y += 15;
-      doc.setFontSize(16);
-      doc.setTextColor(0, 0, 0);
-      doc.text(`"${formData.trackTitle}" by ${formData.artistName}`, 105, y, { align: 'center' });
-      
-      y += 10;
-      doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`${formData.genre} • Budget: ₦${formData.budget.toLocaleString()}`, 105, y, { align: 'center' });
-      
-      y += 15;
-      
-      // Strategy Overview
-      doc.setFontSize(14);
-      doc.setTextColor(255, 0, 102);
-      doc.text('STRATEGY OVERVIEW', 20, y);
-      
-      y += 8;
-      doc.setFontSize(10);
-      doc.setTextColor(0, 0, 0);
-      const overviewLines = doc.splitTextToSize(campaign.overview, 170);
-      doc.text(overviewLines, 20, y);
-      y += (overviewLines.length * 5) + 10;
-      
-      // Platform Strategies
-      doc.setFontSize(14);
-      doc.setTextColor(255, 0, 102);
-      doc.text('PLATFORM STRATEGIES', 20, y);
-      y += 10;
-      
-      campaign.platforms.forEach(platform => {
-        if (y > 250) {
-          doc.addPage();
-          y = 20;
-        }
-        
-        doc.setFontSize(12);
-        doc.setTextColor(157, 78, 221);
-        doc.text(platform.platform.toUpperCase(), 20, y);
-        
-        y += 6;
-        doc.setFontSize(11);
-        doc.setTextColor(255, 0, 102);
-        doc.text(`Budget: ₦${platform.budget.toLocaleString()}`, 20, y);
-        
-        y += 6;
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        const tacticsText = platform.tactics.join(' • ');
-        const tacticsLines = doc.splitTextToSize(tacticsText, 170);
-        doc.text(tacticsLines, 20, y);
-        y += (tacticsLines.length * 5) + 8;
-      });
-      
-      // Content Ideas
-      if (campaign.content && y < 240) {
-        y += 5;
-        doc.setFontSize(14);
-        doc.setTextColor(255, 0, 102);
-        doc.text('CONTENT IDEAS', 20, y);
-        y += 10;
-        
-        campaign.content.captions.forEach((caption, i) => {
-          if (y > 250) {
-            doc.addPage();
-            y = 20;
-          }
-          
-          doc.setFontSize(10);
-          doc.setTextColor(100, 100, 100);
-          doc.text(`Caption ${i + 1}:`, 20, y);
-          
-          y += 5;
-          doc.setTextColor(0, 0, 0);
-          const captionLines = doc.splitTextToSize(caption, 170);
-          doc.text(captionLines, 20, y);
-          y += (captionLines.length * 5) + 5;
-        });
-      }
-      
-      // Footer
+    console.log('✅ Dashboard ready');
+  </script>
+</body>
+  </html>
+  
