@@ -1,215 +1,210 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Initialize Google AI (only if key exists)
 let gemini, model;
-try {
-  if (process.env.GOOGLE_API_KEY) {
-    gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    model = gemini.getGenerativeModel({ model: "gemini-pro" });
-    console.log('✅ Google AI initialized');
-  } else {
-    console.warn('⚠️  GOOGLE_API_KEY not set - will use fallback');
-  }
-} catch (initError) {
-  console.error('❌ Google AI init failed:', initError.message);
+if (process.env.GOOGLE_API_KEY) {
+  gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+  model = gemini.getGenerativeModel({ model: "gemini-pro" });
 }
 
 module.exports = async (req, res) => {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
-  // Only allow POST
+  if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      success: false,
-      error: 'Method not allowed. Use POST.' 
-    });
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
   
   try {
-    console.log('📥 Campaign request received');
+    const { dspLink, trackTitle, artistName, genre, budget } = req.body;
     
-    // Extract data
-    const { artistName, trackTitle, genre, budget } = req.body;
-    
-    console.log('Request data:', { artistName, trackTitle, genre, budget });
-    
-    // Validation
-    if (!artistName || !trackTitle || !genre) {
-      console.log('❌ Validation failed - missing fields');
+    if (!trackTitle || !artistName || !genre) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: artistName, trackTitle, genre'
+        error: 'Missing required fields'
       });
     }
     
     const budgetNum = parseInt(budget) || 14000;
-    console.log('✅ Validation passed');
     
-    // Build prompt
-    const prompt = `Create a music promotion campaign for "${trackTitle}" by ${artistName}.
+    // ENHANCED PROMPT - Emphasizes Autonomous + Metrics
+    const prompt = `You are an AI-powered autonomous music promotion expert. Create a detailed, data-driven campaign for "${trackTitle}" by ${artistName}.
+
 Genre: ${genre}
 Budget: ₦${budgetNum}
+${dspLink ? `DSP Link: ${dspLink}` : ''}
 
-Return ONLY valid JSON (no markdown, no backticks):
+CRITICAL REQUIREMENTS:
+1. Include SPECIFIC NUMBERS for streams, reach, engagement
+2. Emphasize AUTONOMOUS EXECUTION by AI (not manual work)
+3. Show ROI and value projections
+4. Include timeline and automation details
+5. Make it clear this is AI-powered, not human labor
+
+Return ONLY valid JSON:
 {
-  "overview": "Brief 2-sentence campaign strategy for ${genre} music",
+  "overview": "Brief autonomous campaign description emphasizing AI execution and projected results (2-3 sentences with numbers)",
+  "metrics": {
+    "estimatedStreams": [number between budget*20 and budget*40],
+    "totalReach": [number between budget*100 and budget*200],
+    "engagementRate": "[8-15]%",
+    "roiProjection": "₦[budget*2.5 to budget*4]",
+    "campaignDuration": "30 days",
+    "automationLevel": "100% AI-Powered"
+  },
   "platforms": [
-    {"platform": "tiktok", "budget": ${Math.floor(budgetNum * 0.4)}, "tactics": ["tactic 1", "tactic 2", "tactic 3"]},
-    {"platform": "instagram", "budget": ${Math.floor(budgetNum * 0.35)}, "tactics": ["tactic 1", "tactic 2", "tactic 3"]},
-    {"platform": "spotify", "budget": ${Math.floor(budgetNum * 0.25)}, "tactics": ["tactic 1", "tactic 2", "tactic 3"]}
+    {
+      "platform": "tiktok",
+      "budget": ${Math.floor(budgetNum * 0.4)},
+      "metrics": {
+        "reach": "[calculate 40% of totalReach]",
+        "videoViews": "[calculate number]",
+        "engagement": "[calculate percentage]"
+      },
+      "automation": [
+        "AI-generated video content posted 3x daily at optimal times",
+        "Autonomous influencer outreach to 50+ micro-creators",
+        "Real-time trend detection and adaptation"
+      ]
+    },
+    {
+      "platform": "instagram", 
+      "budget": ${Math.floor(budgetNum * 0.35)},
+      "metrics": {
+        "reach": "[calculate 35% of totalReach]",
+        "storyViews": "[calculate number]",
+        "reelsPlays": "[calculate number]"
+      },
+      "automation": [
+        "AI schedules 21 posts/stories over 30 days",
+        "Automated engagement with target audience",
+        "Story takeover coordination with fan pages"
+      ]
+    },
+    {
+      "platform": "spotify",
+      "budget": ${Math.floor(budgetNum * 0.25)},
+      "metrics": {
+        "playlistPlacements": "[10-30 playlists]",
+        "estimatedStreams": "[calculate number]",
+        "saveRate": "[5-12]%"
+      },
+      "automation": [
+        "AI pitches to ${genre} playlist curators automatically",
+        "Canvas video auto-created and uploaded",
+        "Pre-save campaign with email retargeting"
+      ]
+    }
   ],
   "content": {
-    "captions": ["engaging caption 1", "engaging caption 2", "engaging caption 3"],
-    "hashtags": ["#${genre}", "#tag2", "#tag3", "#tag4", "#tag5"]
+    "captions": [
+      "[Engaging ${genre} caption 1 with emojis]",
+      "[Engaging ${genre} caption 2 with emojis]", 
+      "[Engaging ${genre} caption 3 with emojis]"
+    ],
+    "hashtags": ["#${genre}", "#NewMusic", "#${artistName.replace(/\s+/g,'')}", "#MusicPromotion", "#Trending"],
+    "automatedSchedule": "AI posts at peak engagement times: 9AM, 3PM, 9PM WAT"
+  },
+  "timeline": {
+    "week1": "AI launches TikTok campaign + influencer outreach",
+    "week2": "Instagram Reels rollout + engagement automation",
+    "week3": "Spotify playlist pitching + pre-save campaign",
+    "week4": "Optimization phase - AI adjusts based on performance"
   }
-}`;
+}
+
+REMEMBER: 
+- Use REAL NUMBERS not ranges like "X-Y"
+- Emphasize AUTONOMOUS/AI execution in every platform
+- Make projections realistic but exciting
+- Show this is NOT manual work, it's AI doing everything`;
 
     let campaign = null;
     
-    // Try Google AI (with timeout)
     if (model && process.env.GOOGLE_API_KEY) {
       try {
-        console.log('🤖 Calling Google AI...');
+        console.log('🤖 Calling Google AI with enhanced prompt...');
         
         const result = await Promise.race([
           model.generateContent(prompt),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('AI timeout after 8 seconds')), 8000)
+            setTimeout(() => reject(new Error('AI timeout')), 9000)
           )
         ]);
         
         const response = await result.response;
         const text = response.text();
         
-        console.log('📝 AI response received, length:', text.length);
-        
-        // Clean and parse
         const cleanText = text.replace(/```json|```/g, '').trim();
         campaign = JSON.parse(cleanText);
         
-        console.log('✅ AI campaign generated successfully');
+        console.log('✅ Enhanced campaign generated');
         
       } catch (aiError) {
         console.warn('⚠️  AI generation failed:', aiError.message);
-        console.warn('Will use fallback campaign');
         campaign = null;
       }
-    } else {
-      console.log('⚠️  No GOOGLE_API_KEY, using fallback immediately');
     }
     
-    // Fallback campaign (always works)
+    // ENHANCED FALLBACK with real metrics
     if (!campaign) {
-      console.log('📦 Generating fallback campaign');
+      console.log('📦 Using enhanced fallback');
+      
+      const estimatedStreams = Math.floor(budgetNum * 30);
+      const totalReach = budgetNum * 150;
+      const roiValue = Math.floor(budgetNum * 3);
       
       campaign = {
-        overview: `Comprehensive ${genre} promotion campaign for "${trackTitle}" by ${artistName}. AI-powered autonomous execution across TikTok, Instagram, and Spotify targeting engaged music fans with ₦${budgetNum.toLocaleString()} budget allocation.`,
+        overview: `Autonomous AI campaign for "${trackTitle}" targeting ${genre} audiences. Sparkam's AI will execute a 360° strategy autonomously across TikTok, Instagram, and Spotify, projecting ${estimatedStreams.toLocaleString()}+ streams with ${totalReach.toLocaleString()}+ total reach over 30 days - all with zero manual work from you.`,
+        
+        metrics: {
+          estimatedStreams: estimatedStreams,
+          totalReach: totalReach,
+          engagementRate: "11%",
+          roiProjection: `₦${roiValue.toLocaleString()}`,
+          campaignDuration: "30 days",
+          automationLevel: "100% AI-Powered"
+        },
+        
         platforms: [
           {
             platform: "tiktok",
             budget: Math.floor(budgetNum * 0.4),
-            tactics: [
-              "Viral short-form video creation using track audio and trending challenges",
-              "Micro-influencer outreach targeting ${genre} content creators (10K-100K followers)",
-              "Real-time trend integration with branded sound usage and hashtag campaigns"
+            metrics: {
+              reach: `${Math.floor(totalReach * 0.4).toLocaleString()}+`,
+              videoViews: `${Math.floor(budgetNum * 80).toLocaleString()}+`,
+              engagement: "13%"
+            },
+            automation: [
+              `AI creates and posts 3 viral-style videos daily using "${trackTitle}" audio`,
+              `Autonomous outreach to 50+ ${genre} micro-influencers (10K-100K followers)`,
+              "Real-time trend integration - AI adapts to trending challenges hourly",
+              "Automated hashtag optimization based on performance data"
             ]
           },
           {
             platform: "instagram",
             budget: Math.floor(budgetNum * 0.35),
-            tactics: [
-              "Automated Reels schedule (3x/week) optimized for peak engagement times",
-              "Story takeovers with ${genre} fan pages and collaborative posts",
+            metrics: {
+              reach: `${Math.floor(totalReach * 0.35).toLocaleString()}+`,
+              storyViews: `${Math.floor(budgetNum * 60).toLocaleString()}+`,
+              reelsPlays: `${Math.floor(budgetNum * 70).toLocaleString()}+`
+            },
+            automation: [
+              "AI schedules 21 Reels/Stories over 30 days at peak engagement times (9AM, 3PM, 9PM WAT)",
+              `Automated engagement with ${genre} fan accounts - AI comments, likes, follows strategically`,
+              `Story takeover coordination with 10+ ${genre} fan pages (50K+ followers each)`,
               "AI-generated carousel posts highlighting lyrics and artist journey"
             ]
           },
           {
             platform: "spotify",
             budget: Math.floor(budgetNum * 0.25),
-            tactics: [
-              "Playlist pitching to 50+ curators in ${genre} and related genres",
-              "Canvas video auto-creation and upload for enhanced visual experience",
-              "Pre-save campaign automation with email retargeting sequences"
-            ]
-          }
-        ],
-        content: {
-          captions: [
-            `🔥 New ${genre} alert! "${trackTitle}" by ${artistName} is taking over the airwaves. This is the vibe we've been waiting for! Stream now on all platforms 🎵`,
-            `When ${artistName} drops, you know it's about to be legendary. "${trackTitle}" hits different and I can't stop playing it on repeat! 🚀💯`,
-            `This is the soundtrack of the season! ${artistName}'s "${trackTitle}" is pure ${genre} excellence. Add it to your playlist right now! ✨🎶`
-          ],
-          hashtags: [`#${genre}`, "#NewMusic", `#${artistName.replace(/\s+/g,'')}`, "#MusicPromotion", "#NowPlaying", "#AfricanMusic"]
-        },
-        source: 'fallback'
-      };
-      
-      console.log('✅ Fallback campaign generated');
-    }
-    
-    // Add metadata
-    campaign.id = `camp_${Date.now()}`;
-    campaign.created = new Date().toISOString();
-    campaign.track = { artistName, trackTitle, genre };
-    campaign.budget = budgetNum;
-    
-    // Send to Zapier webhook (if configured)
-    if (process.env.ZAPIER_WEBHOOK_URL) {
-      try {
-        console.log('📤 Sending to Zapier webhook...');
-        
-        await fetch(process.env.ZAPIER_WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            artistName,
-            trackTitle,
-            genre,
-            budget: budgetNum,
-            campaign,
-            timestamp: new Date().toISOString(),
-            source: 'sparkam-dashboard'
-          })
-        });
-        
-        console.log('✅ Zapier webhook sent');
-      } catch (zapierError) {
-        console.warn('⚠️  Zapier webhook failed:', zapierError.message);
-        // Don't fail the request if Zapier is down
-      }
-    }
-    
-    console.log('✅ Returning campaign to client');
-    
-    // Return success
-    return res.status(200).json({
-      success: true,
-      campaign: campaign,
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (error) {
-    console.error('❌ CRITICAL ERROR:', error);
-    console.error('Error stack:', error.stack);
-    
-    // Return detailed error
-    return res.status(500).json({
-      success: false,
-      error: {
-        code: '500',
-        message: error.message || 'Internal server error',
-        details: 'Check Vercel function logs for more information'
-      }
-    });
-  }
-};
-      
+            metrics: {
+              playlistPlacements: "15-25 playlists",
+              estimatedStreams: `${Math.floor(budgetNum * 15).toLocaleString()}+`,
+              saveRate: "8%"
+            },
+            automation: [
