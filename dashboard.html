@@ -535,9 +535,14 @@
               <div style="color: #FF0066; font-size: 24px; font-weight: 900; margin: 8px 0;">
                 ₦${p.budget.toLocaleString()}
               </div>
-              <p style="color: rgba(255,255,255,0.7); line-height: 1.6;">
-                ${p.tactics.join(' • ')}
-              </p>
+              <!-- Show tactics as separate items -->
+              <div style="margin-top: 15px;">
+                ${p.tactics.map(tactic => `
+                  <div style="background: rgba(255,0,102,0.05); border-left: 2px solid #FF0066; padding: 12px; margin: 8px 0; border-radius: 6px; font-size: 14px; color: rgba(255,255,255,0.9); line-height: 1.6;">
+                    ${tactic}
+                  </div>
+                `).join('')}
+              </div>
             </div>
           `).join('')}
         </div>
