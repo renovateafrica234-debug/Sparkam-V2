@@ -11,6 +11,14 @@
         body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .spark-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
+        
+        /* Loading spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-6">
@@ -27,13 +35,25 @@
                 <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Selected Plan</span>
                 <span class="text-[10px] font-bold text-pink-500 uppercase">Regular</span>
             </div>
-            <div class="flex justify-between border-t border-white/10 pt-3">
+            <div class="flex justify-between items-center border-t border-white/10 pt-3">
                 <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Total Amount</span>
-                <span class="text-xl font-black text-white">₦14,000</span>
+                <div>
+                    <span class="text-2xl font-black text-white">₦14,000</span>
+                    <span class="text-[10px] text-gray-500 ml-2">~$9 USD</span>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-white/10">
+                <p class="text-[9px] text-gray-500 text-left leading-relaxed">
+                    • 1 AI-powered campaign<br>
+                    • 90 TikTok videos created<br>
+                    • 150 influencer pitches<br>
+                    • 30-day autonomous execution<br>
+                    • Campaign PDF download
+                </p>
             </div>
         </div>
 
-        <button onclick="payWithPaystack()" id="pay-btn" class="spark-gradient w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-lg shadow-pink-500/20 hover:scale-[1.02] transition">
+        <button onclick="payWithPaystack()" id="pay-btn" class="spark-gradient w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-lg shadow-pink-500/20 hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed">
             Proceed to Payment
         </button>
         
@@ -43,33 +63,170 @@
         </div>
     </div>
 
+    <!-- Loading overlay for verification -->
+    <div id="verifying" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; justify-content:center; align-items:center;">
+        <div class="text-center">
+            <div class="text-pink-500 text-6xl mb-4">
+                <i class="fa-solid fa-circle-notch spinner"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-2">Verifying Payment...</h3>
+            <p class="text-gray-400 text-sm">Please wait while we confirm your transaction</p>
+            <p class="text-gray-600 text-xs mt-4">This should only take a few seconds</p>
+        </div>
+    </div>
+
     <script>
-        function payWithPaystack() {
-            // Retrieve artist info saved during signup
-            const email = localStorage.getItem('sparkam_email') || 'artist@sparkam.ai';
-            const btn = document.getElementById('pay-btn');
+        console.log('🔒 Secure Checkout Loaded - ₦14,000 Regular Plan');
+        
+        // Paystack public key (loaded from backend for security)
+        let PAYSTACK_PUBLIC_KEY = null;
+        
+        // Fetch public key from backend on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/get-paystack-key');
+                const data = await response.json();
+                
+                if (data.success && data.publicKey) {
+                    PAYSTACK_PUBLIC_KEY = data.publicKey;
+                    console.log('✅ Payment system ready');
+                } else {
+                    throw new Error('Failed to load payment configuration');
+                }
+            } catch (error) {
+                console.error('❌ Payment system error:', error);
+                alert('Payment system is currently unavailable. Please try again later or contact support.');
+                document.getElementById('pay-btn').disabled = true;
+                document.getElementById('pay-btn').innerText = 'Payment Unavailable';
+            }
+        });
+        
+        async function payWithPaystack() {
+            // Check if payment system is ready
+            if (!PAYSTACK_PUBLIC_KEY) {
+                alert('⚠️ Payment system not ready. Please refresh the page and try again.');
+                return;
+            }
             
-            btn.innerText = "INITIALIZING...";
+            // Get artist info from signup
+            const email = localStorage.getItem('sparkam_email');
+            const artistName = localStorage.getItem('sparkam_artist_name') || 'Artist';
+            
+            if (!email) {
+                alert('⚠️ Please complete signup first!');
+                window.location.href = '/signup.html';
+                return;
+            }
+            
+            const btn = document.getElementById('pay-btn');
+            btn.innerText = "INITIALIZING PAYMENT...";
             btn.disabled = true;
 
-            let handler = PaystackPop.setup({
-                // PASTE YOUR KEY BELOW
-                key: 'pk_live_15c2888be0b9dcf61840714ba5972865e0d259bc', 
-                email: email,
-                amount: 14000 * 100, // Amount in kobo
-                currency: "NGN",
-                callback: function(response){
-                    // Success! Store reference and redirect
-                    localStorage.setItem('sparkam_payment_ref', response.reference);
-                    window.location.href = "/dashboard.html?status=paid&ref=" + response.reference;
-                },
-                onClose: function(){
-                    btn.innerText = "Proceed to Payment";
-                    btn.disabled = false;
-                    alert('Transaction cancelled. Launch your campaign when you are ready.');
+            // Generate unique reference
+            const reference = 'SPARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            console.log('💳 Initializing Paystack with reference:', reference);
+
+            try {
+                let handler = PaystackPop.setup({
+                    key: PAYSTACK_PUBLIC_KEY,
+                    email: email,
+                    amount: 1400000, // ₦14,000 in kobo (multiply by 100)
+                    currency: "NGN",
+                    ref: reference,
+                    metadata: {
+                        custom_fields: [
+                            {
+                                display_name: "Artist Name",
+                                variable_name: "artist_name",
+                                value: artistName
+                            },
+                            {
+                                display_name: "Plan",
+                                variable_name: "plan",
+                                value: "Regular"
+                            },
+                            {
+                                display_name: "Amount",
+                                variable_name: "amount",
+                                value: "₦14,000"
+                            }
+                        ]
+                    },
+                    callback: function(response){
+                        console.log('✅ Payment callback received:', response.reference);
+                        verifyPayment(response.reference);
+                    },
+                    onClose: function(){
+                        console.log('❌ Payment popup closed');
+                        btn.innerText = "Proceed to Payment";
+                        btn.disabled = false;
+                    }
+                });
+                
+                handler.openIframe();
+                
+            } catch (error) {
+                console.error('❌ Paystack initialization error:', error);
+                alert('Failed to initialize payment. Please try again.');
+                btn.innerText = "Proceed to Payment";
+                btn.disabled = false;
+            }
+        }
+        
+        async function verifyPayment(reference) {
+            const verifyingDiv = document.getElementById('verifying');
+            verifyingDiv.style.display = 'flex';
+            
+            console.log('🔍 Verifying payment with backend:', reference);
+            
+            try {
+                const response = await fetch('/api/verify-payment', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({ 
+                        reference: reference,
+                        email: localStorage.getItem('sparkam_email')
+                    })
+                });
+                
+                const data = await response.json();
+                
+                console.log('📊 Verification response:', data);
+                
+                if (data.success) {
+                    // Payment verified successfully!
+                    console.log('✅ Payment verified successfully');
+                    
+                    // Store payment info
+                    localStorage.setItem('sparkam_payment_ref', reference);
+                    localStorage.setItem('sparkam_payment_status', 'verified');
+                    localStorage.setItem('sparkam_plan', 'regular');
+                    localStorage.setItem('sparkam_payment_amount', '14000');
+                    localStorage.setItem('sparkam_payment_date', new Date().toISOString());
+                    
+                    // Redirect to dashboard with success flag
+                    window.location.href = '/dashboard.html?payment=success&plan=regular';
+                    
+                } else {
+                    // Verification failed
+                    verifyingDiv.style.display = 'none';
+                    console.error('❌ Verification failed:', data.error);
+                    
+                    alert('⚠️ Payment verification failed: ' + (data.error || 'Unknown error') + '\n\nPlease contact support with reference: ' + reference);
+                    
+                    document.getElementById('pay-btn').disabled = false;
+                    document.getElementById('pay-btn').innerText = "Proceed to Payment";
                 }
-            });
-            handler.openIframe();
+                
+            } catch (error) {
+                verifyingDiv.style.display = 'none';
+                console.error('❌ Verification request error:', error);
+                
+                alert('⚠️ Unable to verify payment. Your payment may have succeeded.\n\nPlease contact support with reference: ' + reference + '\n\nError: ' + error.message);
+            }
         }
     </script>
 </body>
