@@ -1,574 +1,375 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Sparkam - Your mini record label powered by AI. Autonomous music promotion in 30 seconds.">
-  <title>Sparkam - AI-Powered Music Promotion</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-      background: linear-gradient(135deg, #0a0118 0%, #1a0533 50%, #2d0a4e 100%);
-      color: white;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    
-    /* Navigation */
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 25px 60px;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    
-    .logo {
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: -1px;
-    }
-    
-    .nav-links {
-      display: flex;
-      gap: 40px;
-      align-items: center;
-    }
-    
-    .nav-links a {
-      color: rgba(255, 255, 255, 0.8);
-      text-decoration: none;
-      font-size: 15px;
-      font-weight: 600;
-      transition: color 0.3s;
-    }
-    
-    .nav-links a:hover {
-      color: white;
-    }
-    
-    .launch-btn {
-      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
-      padding: 12px 28px;
-      border-radius: 30px;
-      color: white !important;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.3s;
-      box-shadow: 0 4px 20px rgba(255, 0, 102, 0.3);
-    }
-    
-    .launch-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 30px rgba(255, 0, 102, 0.5);
-    }
-    
-    /* Hero Section */
-    .hero {
-      text-align: center;
-      padding: 100px 40px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
-    h1 {
-      font-size: clamp(48px, 8vw, 90px);
-      font-weight: 900;
-      line-height: 1.1;
-      margin-bottom: 30px;
-      letter-spacing: -2px;
-    }
-    
-    h1 .gradient-text {
-      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    .hero-subtitle {
-      font-size: clamp(18px, 3vw, 22px);
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.8);
-      max-width: 800px;
-      margin: 0 auto 50px;
-    }
-    
-    .cta-buttons {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 80px;
-    }
-    
-    .btn-primary,
-    .btn-secondary {
-      padding: 20px 45px;
-      border-radius: 12px;
-      font-size: 18px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
-      color: white;
-      border: none;
-      box-shadow: 0 10px 40px rgba(255, 0, 102, 0.4);
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 60px rgba(255, 0, 102, 0.6);
-    }
-    
-    .btn-secondary {
-      background: transparent;
-      color: white;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-    
-    .btn-secondary:hover {
-      border-color: #FF0066;
-      background: rgba(255, 0, 102, 0.1);
-    }
-    
-    /* Stats */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 40px;
-      max-width: 1000px;
-      margin: 80px auto;
-      padding: 60px 40px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    
-    .stat {
-      text-align: center;
-    }
-    
-    .stat-number {
-      font-size: 56px;
-      font-weight: 900;
-      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      display: block;
-      margin-bottom: 15px;
-    }
-    
-    .stat-label {
-      font-size: 16px;
-      color: rgba(255, 255, 255, 0.7);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      font-weight: 600;
-    }
-    
-    /* Features Section */
-    .section {
-      padding: 100px 40px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
-    .section-title {
-      text-align: center;
-      font-size: clamp(36px, 6vw, 52px);
-      font-weight: 900;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, white 0%, #FF0066 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    .section-subtitle {
-      text-align: center;
-      font-size: 20px;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 80px;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 40px;
-    }
-    
-    .feature {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 40px;
-      transition: all 0.3s;
-    }
-    
-    .feature:hover {
-      transform: translateY(-10px);
-      border-color: #FF0066;
-      box-shadow: 0 20px 60px rgba(255, 0, 102, 0.3);
-    }
-    
-    .feature-icon {
-      font-size: 48px;
-      margin-bottom: 25px;
-      display: block;
-    }
-    
-    .feature h3 {
-      font-size: 24px;
-      margin-bottom: 15px;
-      color: #FF0066;
-    }
-    
-    .feature p {
-      color: rgba(255, 255, 255, 0.8);
-      line-height: 1.7;
-    }
-    
-    /* Pricing */
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 40px;
-      max-width: 1100px;
-      margin: 80px auto;
-    }
-    
-    .pricing-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      padding: 50px 40px;
-      position: relative;
-      transition: all 0.3s;
-    }
-    
-    .pricing-card:hover {
-      transform: translateY(-8px);
-      border-color: rgba(255, 0, 102, 0.5);
-    }
-    
-    .pricing-card.featured {
-      border-color: #FF0066;
-      box-shadow: 0 20px 80px rgba(255, 0, 102, 0.3);
-    }
-    
-    .pricing-card.featured::before {
-      content: 'BETA SPECIAL';
-      position: absolute;
-      top: -18px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
-      padding: 8px 24px;
-      border-radius: 30px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-    }
-    
-    .tier-name {
-      font-size: 28px;
-      font-weight: 800;
-      margin-bottom: 15px;
-      color: #FF0066;
-    }
-    
-    .tier-price {
-      font-size: 64px;
-      font-weight: 900;
-      color: white;
-      margin: 25px 0;
-      line-height: 1;
-    }
-    
-    .tier-price small {
-      font-size: 24px;
-      color: rgba(255, 255, 255, 0.5);
-      font-weight: 600;
-    }
-    
-    .tier-description {
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 35px;
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    
-    .tier-features {
-      list-style: none;
-      margin-bottom: 40px;
-    }
-    
-    .tier-features li {
-      padding: 15px 0;
-      color: rgba(255, 255, 255, 0.9);
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      font-size: 15px;
-    }
-    
-    .tier-features li:last-child {
-      border-bottom: none;
-    }
-    
-    .tier-features li::before {
-      content: '✓';
-      color: #FF0066;
-      font-weight: 900;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-    
-    .tier-btn {
-      width: 100%;
-      padding: 18px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 16px;
-      text-decoration: none;
-      display: block;
-      text-align: center;
-      transition: all 0.3s;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      cursor: pointer;
-      border: none;
-    }
-    
-    .tier-btn-primary {
-      background: linear-gradient(135deg, #FF0066 0%, #6366F1 100%);
-      color: white;
-    }
-    
-    .tier-btn-secondary {
-      background: transparent;
-      color: white;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .tier-btn:hover {
-      transform: translateY(-3px);
-    }
-    
-    /* Footer */
-    footer {
-      text-align: center;
-      padding: 60px 20px;
-      color: rgba(255, 255, 255, 0.5);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      margin-top: 100px;
-    }
-    
-    footer p {
-      margin: 8px 0;
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      nav {
-        padding: 20px 30px;
-      }
-      
-      .nav-links {
-        gap: 20px;
-      }
-      
-      .hero {
-        padding: 60px 20px;
-      }
-      
-      .stats {
-        grid-template-columns: 1fr;
-        padding: 40px 20px;
-      }
-      
-      .features-grid,
-      .pricing-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .pricing-card.featured {
-        transform: scale(1);
-      }
-      
-      .section {
-        padding: 60px 20px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sparkam - Your AI Music Marketing Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .spark-btn {
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .spark-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 0, 204, 0.3);
+        }
+        .feature-card {
+            transition: transform 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .floating { animation: float 3s ease-in-out infinite; }
+    </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav>
-    <div class="logo">SPARKAM.</div>
-    <div class="nav-links">
-      <a href="#how-it-works">HOW IT WORKS</a>
-      <a href="#pricing">PRICING</a>
-      <a href="signup.html" class="launch-btn">LAUNCH BRAIN →</a>
-    </div>
-  </nav>
-  
-  <!-- Hero Section -->
-  <section class="hero">
-    <h1>
-      Your Mini Record Label, <span class="gradient-text">Powered by AI</span>
-    </h1>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-black gradient-text">SPARKAM</div>
+            <div class="hidden md:flex gap-8 items-center">
+                <a href="#how-it-works" class="text-gray-300 hover:text-white transition">How It Works</a>
+                <a href="#pricing" class="text-gray-300 hover:text-white transition">Pricing</a>
+                <a href="#features" class="text-gray-300 hover:text-white transition">Features</a>
+                <a href="/signup.html" class="spark-btn px-6 py-2 rounded-full font-bold text-sm">Get Started Free</a>
+            </div>
+            <button class="md:hidden text-white text-2xl">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center px-6 pt-20">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="mb-6">
+                <span class="glass px-4 py-2 rounded-full text-sm font-bold text-pink-400 border border-pink-500/30">
+                    🤖 AI-Powered Music Promotion
+                </span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">
+                Your Mini Record Label<br/>
+                <span class="gradient-text">For Independent Artists</span>
+            </h1>
+            <p class="text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
+                Sparkam's autonomous AI brain generates professional marketing campaigns in 2 minutes. 
+                Claude music assistant guides you 24/7. Get 90 content pieces, playlist strategies, 
+                and influencer targets—all for the price of one consultant session.
+            </p>
+            
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <a href="/signup.html?tier=free" class="spark-btn px-8 py-4 rounded-xl font-bold text-lg">
+                    Start Free Trial
+                </a>
+                <a href="#how-it-works" class="glass px-8 py-4 rounded-xl font-bold text-lg border-2 border-pink-500/50 hover:bg-pink-500/10 transition">
+                    See How It Works
+                </a>
+            </div>
+
+            <!-- Social Proof -->
+            <div class="flex flex-wrap justify-center gap-8 text-center">
+                <div>
+                    <div class="text-3xl font-black gradient-text">2 min</div>
+                    <div class="text-sm text-gray-400">Campaign Generation</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-black gradient-text">90+</div>
+                    <div class="text-sm text-gray-400">Content Pieces</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-black gradient-text">24/7</div>
+                    <div class="text-sm text-gray-400">AI Assistant</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-black gradient-text">₦49K</div>
+                    <div class="text-sm text-gray-400">Starting Price</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black mb-4">
+                    How <span class="gradient-text">Sparkam</span> Works
+                </h2>
+                <p class="text-gray-400 text-lg">
+                    From track upload to campaign execution in 3 simple steps
+                </p>
+            </div>
+
+            <!-- Steps -->
+            <div class="grid md:grid-cols-3 gap-8 mb-16">
+                <!-- Step 1 -->
+                <div class="glass rounded-3xl p-8 text-center feature-card">
+                    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-2xl font-black">
+                        1
+                    </div>
+                    <h3 class="text-2xl font-black mb-4">Upload Track Info</h3>
+                    <p class="text-gray-400 mb-6">
+                        Enter your artist name, track title, genre, and budget. Add your Spotify link if you have one.
+                    </p>
+                    <div class="bg-black/30 rounded-lg p-4 text-left text-sm">
+                        <div class="text-pink-400 mb-2">📝 Quick Form:</div>
+                        <div class="text-gray-500">• Artist Name</div>
+                        <div class="text-gray-500">• Track Title</div>
+                        <div class="text-gray-500">• Genre (Afropop, Alté, etc.)</div>
+                        <div class="text-gray-500">• Budget (₦50K-₦500K)</div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="glass rounded-3xl p-8 text-center feature-card">
+                    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-2xl font-black">
+                        2
+                    </div>
+                    <h3 class="text-2xl font-black mb-4">AI Generates Strategy</h3>
+                    <p class="text-gray-400 mb-6">
+                        Our autonomous AI brain analyzes your track and creates a complete 30-day campaign in 120 seconds.
+                    </p>
+                    <div class="bg-black/30 rounded-lg p-4 text-left text-sm">
+                        <div class="text-pink-400 mb-2">🤖 AI Generates:</div>
+                        <div class="text-gray-500">✓ 90 TikTok video concepts</div>
+                        <div class="text-gray-500">✓ 21 Instagram Reels ideas</div>
+                        <div class="text-gray-500">✓ 150 influencer targets</div>
+                        <div class="text-gray-500">✓ 50+ playlist curator contacts</div>
+                        <div class="text-gray-500">✓ Budget optimization plan</div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="glass rounded-3xl p-8 text-center feature-card">
+                    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-2xl font-black">
+                        3
+                    </div>
+                    <h3 class="text-2xl font-black mb-4">Execute & Track</h3>
+                    <p class="text-gray-400 mb-6">
+                        Download your campaign, execute with Claude AI guidance, or let us auto-post for you (Pro tier).
+                    </p>
+                    <div class="bg-black/30 rounded-lg p-4 text-left text-sm">
+                        <div class="text-pink-400 mb-2">📊 You Get:</div>
+                        <div class="text-gray-500">✓ Campaign PDF download</div>
+                        <div class="text-gray-500">✓ 90 branded content pieces</div>
+                        <div class="text-gray-500">✓ Claude AI chat support</div>
+                        <div class="text-gray-500">✓ Performance tracking</div>
+                        <div class="text-gray-500">✓ Real-time optimization tips</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Showcase -->
+            <div class="glass rounded-3xl p-8 md:p-12">
+                <h3 class="text-3xl font-black mb-8 text-center">
+                    <span class="gradient-text">Powered by Claude AI</span> - Your 24/7 Music Advisor
+                </h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <div class="flex items-start gap-4 mb-6">
+                            <div class="text-3xl">🤖</div>
+                            <div>
+                                <h4 class="text-xl font-bold mb-2">Unlimited Chat Support</h4>
+                                <p class="text-gray-400">Ask Claude anything about music marketing. Get instant, expert advice on TikTok strategy, playlist pitching, influencer outreach, and more.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4 mb-6">
+                            <div class="text-3xl">🎨</div>
+                            <div>
+                                <h4 class="text-xl font-bold mb-2">Content Generation</h4>
+                                <p class="text-gray-400">90 TikTok videos, 21 Instagram Reels—all planned, branded, and ready to post. Template-based system creates professional content in minutes.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-start gap-4 mb-6">
+                            <div class="text-3xl">📊</div>
+                            <div>
+                                <h4 class="text-xl font-bold mb-2">Performance Tracking</h4>
+                                <p class="text-gray-400">Track views, engagement, streams. Claude analyzes performance and suggests optimizations in real-time.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="text-3xl">🚀</div>
+                            <div>
+                                <h4 class="text-xl font-bold mb-2">Auto-Posting (Pro)</h4>
+                                <p class="text-gray-400">Pro members get hands-off execution. We schedule and post content to your accounts automatically.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black mb-4">
+                    Choose Your <span class="gradient-text">Plan</span>
+                </h2>
+                <p class="text-gray-400 text-lg mb-6">
+                    Affordable pricing for Nigerian independent artists
+                </p>
+                <div class="inline-block bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/50 rounded-full px-6 py-3">
+                    <p class="text-pink-400 font-bold">
+                        🎁 Beta Special: First 100 customers get 50% off forever!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Pricing Cards -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Free -->
+                <div class="glass rounded-3xl p-6 border-2 border-white/10">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-black mb-2">FREE</h3>
+                        <div class="text-4xl font-black mb-2">₦0</div>
+                        <p class="text-gray-400 text-sm">Try before you buy</p>
+                    </div>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                            <span>1 campaign per month</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                            <span>30 content concepts</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                            <span>Limited chat (10 msg/day)</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm text-gray-500">
+                            <i class="fa-solid fa-times text-gray-600 mt-1"></i>
+                            <span>No downloads</span>
+                        </li>
+                    </ul>
+                    <a href="/signup.html?tier=free" class="block w-full py-3 bg-gray-700 rounded-xl text-center font-bold hover:bg-gray-600 transition">
+                        Start Free
+                    </a>
+                </div>
+
+                <!-- Essential -->
+                <div class="glass rounded-3xl p-6 border-2 border-white/10">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-black mb-2">ESSENTIAL</h3>
+                        <div class="mb-2">
+                            <span class="text-xl text-gray-500 line-through">₦49,000</span>
+                        </div>
+                        <div class="text-4xl font-black text-pink-500 mb-2">₦24,500</div>
+                        <p class="text-green-400 text-xs font-bold">50% OFF FOREVER 🎁</p>
+                        <p class="text-gray-400 text-sm">per month</p>
+                    </div>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                            <span>Unlimited campaigns</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                            <span>90 branded content pieces</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                            <span>Unlimited Claude AI chat</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                            <span>Full downloads</span>
+                        </li>
+                    </ul>
+                    <a href="/pricing.html" class="block w-full py-3 border-2 border-pink-500 rounded-xl text-center font-bold hover:bg-pink-500/10 transition">
+                        Get Started
+                    </a>
+                </div>
+
+                <!-- Pro -->
+                <div class="glass rounded-3xl p-6 border-2 border-pink-500/50 relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-full text-xs font-black">
+                            MOST POPULAR
+                        </span>
+                    </div>
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-black mb-2">PRO</h3>
+                        <div class="mb-2">
+                            <span class="text-xl text-gray-500 line-through">₦99,000</span>
+                        </div>
+                        <div class="text-4xl font-black text-pink-500 mb-2">₦49,500</div>
+                        <p class="text-green-400 text-xs font-bold">50% OFF FOREVER 🎁</p>
+                        <p class="text-gray-400 text-sm">per month</p>
+                    </div>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-pink-400 mt-1"></i>
+                            <span class="font-bold">Everything in Essential</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-pink-400 mt-1"></i>
+                            <span>Auto-posting to socials</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-pink-400 mt-1"></i>
+                            <span>Weekly 15-min calls</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-pink-400 mt-1"></i>
+                            <span>Priority support</span>
+                        </li>
+                    </ul>
+                    <a href="/pricing.html" class="block w-full py-3 spark-btn rounded-xl text-center font-bold">
+                        Go Pro
+                    </a>
+                </div>
+
+                <!-- Platinum -->
+                <div class="glass rounded-3xl p-6 border-2 border-purple-500/50">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-black mb-2">PLATINUM</h3>
+                        <div class="mb-2">
+                            <span class="text-xl text-gray-500 line-through">₦199,000</span>
+                        </div>
+                        <div class="text-4xl font-black text-purple-500 mb-2">₦99,500</div>
+                        <p class="text-green-400 text-xs font-bold">50% OFF FOREVER 🎁</p>
+                        <p class="text-gray-400 text-sm">per month</p>
+                    </div>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-purple-400 mt-1"></i>
+                            <span class="font-bold">Everything in Pro</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-purple-400 mt-1"></i>
+                            <span>Dedicated manager</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-sm">
+                            <i class="fa-solid fa-check text-purple-400 mt-1"></i>
+                            <span>Bi-weekly 30-min calls</span>
+                        </li>
     
-    <p class="hero-subtitle">
-      Paste your music link. Our AI Brain analyzes your sound, finds your audience, and autonomously handles your entire 360° promotion campaign.
-    </p>
-    
-    <div class="cta-buttons">
-      <a href="/signup.html" class="btn-primary">START FREE CAMPAIGN</a>
-      <a href="#how-it-works" class="btn-secondary">SEE HOW IT WORKS</a>
-    </div>
-    
-    <div class="stats">
-      <div class="stat">
-        <span class="stat-number">100%</span>
-        <span class="stat-label">Autonomous</span>
-      </div>
-      <div class="stat">
-        <span class="stat-number">360°</span>
-        <span class="stat-label">Full Campaign</span>
-      </div>
-      <div class="stat">
-        <span class="stat-number">24/7</span>
-        <span class="stat-label">AI Working</span>
-      </div>
-      <div class="stat">
-        <span class="stat-number">₦9</span>
-        <span class="stat-label">Starting Price</span>
-      </div>
-    </div>
-  </section>
-  
-  <!-- Features Section -->
-  <section class="section" id="how-it-works">
-    <h2 class="section-title">What Sparkam Does For You</h2>
-    <p class="section-subtitle">Your autonomous record label handles everything while you create</p>
-    
-    <div class="features-grid">
-      <div class="feature">
-        <span class="feature-icon">🎵</span>
-        <h3>Analyze Your Music</h3>
-        <p>AI analyzes your track's genre, mood, tempo, and target audience from your DSP link in seconds.</p>
-      </div>
-      
-      <div class="feature">
-        <span class="feature-icon">🎯</span>
-        <h3>Find Your Audience</h3>
-        <p>Identifies where your listeners are, what they engage with, and the best platforms to reach them.</p>
-      </div>
-      
-      <div class="feature">
-        <span class="feature-icon">🚀</span>
-        <h3>Launch Campaigns</h3>
-        <p>Autonomously executes multi-platform promotion across TikTok, Instagram, Spotify, YouTube & more.</p>
-      </div>
-      
-      <div class="feature">
-        <span class="feature-icon">✍️</span>
-        <h3>Create Content</h3>
-        <p>AI generates and schedules social media posts, captions, hashtags, and content calendars.</p>
-      </div>
-      
-      <div class="feature">
-        <span class="feature-icon">📊</span>
-        <h3>Track Analytics</h3>
-        <p>Real-time dashboard showing streams, engagement, ROI, and campaign performance.</p>
-      </div>
-      
-      <div class="feature">
-        <span class="feature-icon">💰</span>
-        <h3>Budget Control</h3>
-        <p>Slider from ₦9-₦500K lets you choose your budget. AI optimizes spend for maximum impact.</p>
-      </div>
-    </div>
-  </section>
-  
-  <!-- Pricing Section -->
-  <section class="section" id="pricing">
-    <h2 class="section-title">Simple, Transparent Pricing</h2>
-    <p class="section-subtitle">Choose the plan that fits your career stage</p>
-    
-    <div class="pricing-grid">
-      <div class="pricing-card">
-        <div class="tier-name">Free</div>
-        <div class="tier-price">₦0<small></small></div>
-        <p class="tier-description">Perfect for trying out Sparkam</p>
-        <ul class="tier-features">
-          <li>Content creation tools</li>
-          <li>Artist page setup</li>
-          <li>Campaign planning</li>
-          <li>Analytics preview</li>
-          <li>1 campaign preview</li>
-        </ul>
-        <a href="/signup.html" class="tier-btn tier-btn-secondary">Start Free</a>
-      </div>
-      
-      <div class="pricing-card featured">
-        <div class="tier-name">Regular</div>
-        <div class="tier-price">₦9<small>/campaign</small></div>
-        <p class="tier-description">One song, professional promotion</p>
-        <ul class="tier-features">
-          <li>Full AI music analysis</li>
-          <li>1 song campaign rollout</li>
-          <li>Autonomous social media</li>
-          <li>Playlist pitching</li>
-          <li>Limited but quality reach</li>
-          <li>Campaign analytics</li>
-          <li>Budget slider (₦9-₦500K)</li>
-        </ul>
-        <a href="/dashboard" class="tier-btn tier-btn-primary">Launch Campaign</a>
-      </div>
-      
-      <div class="pricing-card">
-        <div class="tier-name">Pro</div>
-        <div class="tier-price">₦39<small>/month</small></div>
-        <p class="tier-description">For serious artists & labels</p>
-        <ul class="tier-features">
-          <li>Everything in Regular</li>
-          <li>Multiple artist profiles</li>
-          <li>Unlimited song campaigns</li>
-          <li>Advanced analytics</li>
-          <li>Priority support</li>
-          <li>Team collaboration</li>
-          <li>White-label option</li>
-        </ul>
-        <a href="/dashboard" class="tier-btn tier-btn-secondary">Coming Soon</a>
-      </div>
-    </div>
-  </section>
-  
-  <!-- Footer -->
-  <footer>
-    <p><strong>© 2026 Sparkam</strong> - Autonomous Music Promotion Platform</p>
-    <p>Built for independent artists who deserve a fighting chance.</p>
-    <p style="margin-top: 20px;">🇳🇬 Made in Nigeria with AI 🤖</p>
-  </footer>
-</body>
-  </html>
-  
