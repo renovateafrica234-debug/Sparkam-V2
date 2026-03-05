@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Sparkam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .plan-card {
+            transition: all 0.3s ease;
+        }
+        .plan-card:hover {
+            transform: translateY(-8px);
+        }
+        .popular-badge {
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-16 mt-8">
+            <h1 class="text-5xl font-black mb-4">
+                <span class="bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+                    Choose Your Plan
+                </span>
+            </h1>
+            <p class="text-gray-400 text-lg" id="location-text">
+                Loading pricing...
+            </p>
+            <div id="beta-banner" class="mt-6 hidden">
+                <div class="inline-block bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/50 rounded-full px-6 py-3">
+                    <p class="text-pink-400 font-bold">
+                        🎁 Beta Special: First 100 customers get 50% off forever!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Cards -->
+        <div id="pricing-grid" class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            <!-- Cards loaded dynamically -->
+        </div>
+
+        <!-- FAQ / Contact -->
+        <div class="mt-16 max-w-3xl mx-auto text-center">
+            <p class="text-gray-400 text-sm mb-4">
+                <i class="fa-solid fa-lock mr-2"></i>
+                Secure payments via Paystack (Nigeria) or Stripe (International)
+            </p>
+            <p class="text-gray-500 text-xs">
+                Questions? <a href="mailto:hello@sparkam.ai" class="text-pink-500 underline">Contact us</a> | 
+                <a href="/faq.html" class="text-pink-500 underline">View FAQ</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let pricingData = null;
+        
+        // Load pricing on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/get-pricing');
+                const data = await response.json();
+                
+                if (data.success) {
+                    pricingData = data;
+                    displayPricing(data);
+                } else {
+                    throw new Error('Failed to load pricing');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                displayDefaultPricing();
+            }
+        });
+        
+        function displayPricing(data) {
+            // Update location
+            document.getElementById('location-text').textContent = 
+                `Pricing for ${data.countryName} (${data.currency})`;
+            
+            // Show beta banner
+            if (data.betaDiscount?.active) {
+                document.getElementById('beta-banner').classList.remove('hidden');
+            }
+            
+            // Build pricing cards
+            const grid = document.getElementById('pricing-grid');
+            const tiers = ['free', 'essential', 'pro', 'platinum'];
+            
+            grid.innerHTML = tiers.map(tierKey => {
+                const tier = data.tiers[tierKey];
+                const isPopular = tier.popular;
+                const isFree = tierKey === 'free';
+                
+                // Calculate beta discount price
+                let displayPrice = tier.priceFormatted;
+                let betaPrice = null;
+                if (data.betaDiscount?.active && !isFree) {
+                    const discountedPrice = tier.price * 0.5;
+                    betaPrice = `${data.currencySymbol}${Math.floor(discountedPrice).toLocaleString()}`;
+                }
+                
+                return `
+                    <div class="glass rounded-3xl p-6 plan-card border-2 ${isPopular ? 'border-pink-500/50' : 'border-white/10'} relative">
+                        ${isPopular ? `
+                            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                                <span class="popular-badge px-4 py-2 rounded-full text-xs font-black uppercase">
+                                    Most Popular
+                                </span>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="mb-6">
+                            <h3 class="text-2xl font-black mb-2 uppercase">${tier.name}</h3>
+                            ${tier.interval ? `<p class="text-gray-400 text-xs">Billed ${tier.interval}</p>` : ''}
+                        </div>
+                        
+                        <div class="mb-6">
+                            ${betaPrice ? `
+                                <div class="mb-2">
+                                    <span class="text-gray-500 line-through text-xl">${displayPrice}</span>
+                                </div>
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-4xl font-black text-pink-500">${betaPrice}</span>
+                                    <span class="text-gray-400 text-sm">/${tier.interval}</span>
+                                </div>
+                                <p class="text-green-400 text-xs mt-2 font-bold">50% OFF FOREVER 🎁</p>
+                            ` : `
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-4xl font-black">${displayPrice}</span>
+                                    ${tier.interval && tier.interval !== 'forever' ? `<span class="text-gray-400 text-sm">/${tier.interval}</span>` : ''}
+                                </div>
+                            `}
+                        </div>
+
+                        <ul class="space-y-3 mb-8 min-h-[300px]">
+                            ${tier.features.map(feature => `
+                                <li class="flex items-start gap-2 text-sm">
+                                    <i class="fa-solid fa-check ${isPopular ? 'text-pink-400' : 'text-green-400'} mt-1 flex-shrink-0"></i>
+                                    <span class="text-gray-300">${feature}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+
+                        ${isFree ? `
+                            <a href="/signup.html?tier=free" class="block w-full py-3 bg-gray-700 rounded-xl text-center font-bold uppercase tracking-wide hover:bg-gray-600 transition">
+                                Start Free
+                            </a>
+                        ` : tierKey === 'enterprise' ? `
+                            <a href="mailto:hello@sparkam.ai?subject=Enterprise Inquiry" class="block w-full py-3 border-2 border-purple-500 rounded-xl text-center font-bold uppercase tracking-wide hover:bg-purple-500/10 transition">
+                                Contact Sales
+                            </a>
+                        ` : `
+                            <button onclick="selectPlan('${tierKey}')" class="w-full py-3 ${isPopular ? 'bg-gradient-to-r from-pink-500 to-purple-600' : 'border-2 border-pink-500'} rounded-xl text-center font-bold uppercase tracking-wide hover:opacity-90 transition">
+                                Get Started
+                            </button>
+                        `}
+                    </div>
+                `;
+            }).join('');
+            
+            // Store pricing for checkout
+            localStorage.setItem('sparkam_pricing', JSON.stringify(data));
+        }
+        
+        function displayDefaultPricing() {
+            // Fallback if API fails
+            const defaultData = {
+                countryName: 'International',
+                currency: 'USD',
+                currencySymbol: '$',
+                betaDiscount: { active: true },
+                tiers: {
+                    free: {
+                        name: 'Free',
+                        price: 0,
+                        priceFormatted: '$0',
+                        interval: 'forever',
+                        features: ['1 campaign/month', 'Basic features', 'Limited chat']
+                    },
+                    essential: {
+                        name: 'Essential',
+                        price: 49,
+                        priceFormatted: '$49',
+                        interval: 'month',
+                        features: ['Unlimited campaigns', '90 content pieces', 'Unlimited chat']
+                    },
+                    pro: {
+                        name: 'Pro',
+                        price: 99,
+                        priceFormatted: '$99',
+                        interval: 'month',
+                        popular: true,
+                        features: ['Everything in Essential', 'Auto-posting', 'Weekly calls']
+                    },
+                    platinum: {
+                        name: 'Platinum',
+                        price: 199,
+                        priceFormatted: '$199',
+                        interval: 'month',
+                        features: ['Everything in Pro', 'Dedicated manager', 'VIP support']
+                    }
+                }
+            };
+            displayPricing(defaultData);
+        }
+        
+        function selectPlan(tier) {
+            localStorage.setItem('sparkam_selected_tier', tier);
+            window.location.href = `/checkout.html?tier=${tier}`;
+        }
+    </script>
+</body>
+</html>
+
