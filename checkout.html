@@ -6,19 +6,14 @@
     <title>Secure Checkout - Sparkam</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .spark-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
-        
-        /* Loading spinner */
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .spinner {
-            animation: spin 1s linear infinite;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { animation: spin 1s linear infinite; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-6">
@@ -27,205 +22,303 @@
         <div class="text-pink-500 mb-6 text-4xl">
             <i class="fa-solid fa-shield-check"></i>
         </div>
-        <h2 class="text-2xl font-black mb-2 uppercase tracking-tight">Activate Regular</h2>
-        <p class="text-gray-400 text-[10px] mb-8 uppercase tracking-[0.2em]">360° Managed AI Campaign</p>
+        <h2 class="text-2xl font-black mb-2 uppercase tracking-tight" id="plan-title">Loading...</h2>
+        <p class="text-gray-400 text-[10px] mb-8 uppercase tracking-[0.2em]">AI-Powered Music Marketing</p>
         
         <div class="bg-white/5 p-6 rounded-2xl mb-8 border border-white/5">
             <div class="flex justify-between mb-3">
                 <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Selected Plan</span>
-                <span class="text-[10px] font-bold text-pink-500 uppercase">Regular</span>
+                <span class="text-[10px] font-bold text-pink-500 uppercase" id="plan-badge">Loading</span>
             </div>
             <div class="flex justify-between items-center border-t border-white/10 pt-3">
-                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Total Amount</span>
+                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Monthly Price</span>
                 <div>
-                    <span class="text-2xl font-black text-white">₦14,000</span>
-                    <span class="text-[10px] text-gray-500 ml-2">~$9 USD</span>
+                    <span class="text-2xl font-black text-white" id="plan-price">...</span>
                 </div>
             </div>
             <div class="mt-4 pt-4 border-t border-white/10">
-                <p class="text-[9px] text-gray-500 text-left leading-relaxed">
-                    • 1 AI-powered campaign<br>
-                    • 90 TikTok videos created<br>
-                    • 150 influencer pitches<br>
-                    • 30-day autonomous execution<br>
-                    • Campaign PDF download
-                </p>
+                <div id="plan-features" class="text-[9px] text-gray-400 text-left leading-relaxed">
+                    <!-- Features loaded here -->
+                </div>
+            </div>
+            
+            <!-- Beta Discount Badge -->
+            <div id="beta-discount" class="mt-4 pt-4 border-t border-pink-500/30 hidden">
+                <div class="bg-pink-500/10 p-3 rounded-lg">
+                    <p class="text-pink-500 text-xs font-bold mb-1">🎁 BETA SPECIAL</p>
+                    <p class="text-white text-sm font-black" id="discount-price">50% OFF FOREVER</p>
+                    <p class="text-gray-400 text-[9px] mt-1">First 100 sign-ups only</p>
+                </div>
             </div>
         </div>
 
-        <button onclick="payWithPaystack()" id="pay-btn" class="spark-gradient w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-lg shadow-pink-500/20 hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed">
+        <button onclick="initiatePayment()" id="pay-btn" class="spark-gradient w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-lg shadow-pink-500/20 hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed">
             Proceed to Payment
         </button>
         
         <div class="mt-8 flex items-center justify-center gap-2 opacity-30">
             <i class="fa-solid fa-lock text-[10px]"></i>
-            <p class="text-[8px] uppercase tracking-widest font-bold">Secured by Paystack</p>
+            <p class="text-[8px] uppercase tracking-widest font-bold" id="payment-provider">
+                Secured by Paystack/Stripe
+            </p>
         </div>
     </div>
 
-    <!-- Loading overlay for verification -->
-    <div id="verifying" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; justify-content:center; align-items:center;">
+    <!-- Loading/Verifying overlay -->
+    <div id="processing" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; justify-content:center; align-items:center;">
         <div class="text-center">
             <div class="text-pink-500 text-6xl mb-4">
                 <i class="fa-solid fa-circle-notch spinner"></i>
             </div>
-            <h3 class="text-2xl font-bold mb-2">Verifying Payment...</h3>
-            <p class="text-gray-400 text-sm">Please wait while we confirm your transaction</p>
-            <p class="text-gray-600 text-xs mt-4">This should only take a few seconds</p>
+            <h3 class="text-2xl font-bold mb-2" id="processing-text">Processing Payment...</h3>
+            <p class="text-gray-400 text-sm">Please wait</p>
         </div>
     </div>
 
     <script>
-        console.log('🔒 Secure Checkout Loaded - ₦14,000 Regular Plan');
+        console.log('🔒 Secure Multi-Currency Checkout Loaded');
         
-        // Paystack public key (loaded from backend for security)
-        let PAYSTACK_PUBLIC_KEY = null;
+        let pricingData = null;
+        let selectedTier = null;
+        let stripe = null;
         
-        // Fetch public key from backend on page load
+        // Initialize on page load
         window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('/api/get-paystack-key');
-                const data = await response.json();
-                
-                if (data.success && data.publicKey) {
-                    PAYSTACK_PUBLIC_KEY = data.publicKey;
-                    console.log('✅ Payment system ready');
-                } else {
-                    throw new Error('Failed to load payment configuration');
+            // Get selected tier from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            selectedTier = urlParams.get('tier') || 'pro';
+            
+            // Load pricing data
+            pricingData = JSON.parse(localStorage.getItem('sparkam_pricing'));
+            
+            if (!pricingData) {
+                // Fetch if not in localStorage
+                try {
+                    const response = await fetch('/api/get-pricing');
+                    const data = await response.json();
+                    if (data.success) {
+                        pricingData = data;
+                        localStorage.setItem('sparkam_pricing', JSON.stringify(data));
+                    }
+                } catch (error) {
+                    console.error('Failed to load pricing:', error);
+                    alert('Unable to load pricing. Please try again.');
+                    return;
                 }
-            } catch (error) {
-                console.error('❌ Payment system error:', error);
-                alert('Payment system is currently unavailable. Please try again later or contact support.');
-                document.getElementById('pay-btn').disabled = true;
-                document.getElementById('pay-btn').innerText = 'Payment Unavailable';
+            }
+            
+            // Display pricing for selected tier
+            displayCheckout();
+            
+            // Initialize payment provider
+            if (pricingData.tiers[selectedTier].paymentProvider === 'stripe') {
+                // Initialize Stripe
+                const stripeKey = await getStripePublicKey();
+                if (stripeKey) {
+                    stripe = Stripe(stripeKey);
+                }
             }
         });
         
-        async function payWithPaystack() {
-            // Check if payment system is ready
-            if (!PAYSTACK_PUBLIC_KEY) {
-                alert('⚠️ Payment system not ready. Please refresh the page and try again.');
-                return;
+        function displayCheckout() {
+            const tier = pricingData.tiers[selectedTier];
+            
+            document.getElementById('plan-title').textContent = 
+                `Activate ${tier.name}`;
+            document.getElementById('plan-badge').textContent = 
+                tier.name.toUpperCase();
+            document.getElementById('plan-price').textContent = 
+                tier.priceFormatted + '/mo';
+            
+            // Show features
+            const featuresHTML = tier.features.map(f => `• ${f}`).join('<br>');
+            document.getElementById('plan-features').innerHTML = featuresHTML;
+            
+            // Show beta discount if applicable
+            // TODO: Check if user is in first 100 sign-ups
+            const showDiscount = true; // For now, always show
+            if (showDiscount) {
+                const discountPrice = tier.price * 0.5;
+                const discountFormatted = `${pricingData.currencySymbol}${discountPrice.toLocaleString()}`;
+                document.getElementById('discount-price').textContent = 
+                    `${discountFormatted}/month forever`;
+                document.getElementById('beta-discount').classList.remove('hidden');
             }
             
-            // Get artist info from signup
-            const email = localStorage.getItem('sparkam_email');
-            const artistName = localStorage.getItem('sparkam_artist_name') || 'Artist';
+            // Update payment provider text
+            const provider = tier.paymentProvider === 'paystack' ? 'Paystack' : 'Stripe';
+            document.getElementById('payment-provider').textContent = 
+                `Secured by ${provider}`;
+        }
+        
+        async function initiatePayment() {
+            const tier = pricingData.tiers[selectedTier];
+            const provider = tier.paymentProvider;
+            
+            // Get user email
+            const email = localStorage.getItem('sparkam_email') || 
+                         prompt('Enter your email to continue:');
             
             if (!email) {
-                alert('⚠️ Please complete signup first!');
-                window.location.href = '/signup.html';
+                alert('Email is required');
                 return;
             }
             
-            const btn = document.getElementById('pay-btn');
-            btn.innerText = "INITIALIZING PAYMENT...";
-            btn.disabled = true;
-
-            // Generate unique reference
-            const reference = 'SPARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('sparkam_email', email);
             
-            console.log('💳 Initializing Paystack with reference:', reference);
-
+            // Apply beta discount
+            const finalPrice = tier.price * 0.5; // 50% off for beta
+            
+            if (provider === 'paystack') {
+                await payWithPaystack(email, finalPrice, tier);
+            } else if (provider === 'stripe') {
+                await payWithStripe(email, finalPrice, tier);
+            } else {
+                alert('Payment provider not supported yet');
+            }
+        }
+        
+        async function payWithPaystack(email, amount, tier) {
             try {
+                // Get Paystack public key
+                const keyResponse = await fetch('/api/get-paystack-key');
+                const keyData = await keyResponse.json();
+                
+                if (!keyData.success) {
+                    throw new Error('Failed to load payment configuration');
+                }
+                
+                const reference = 'SPARK_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                // Convert to kobo for Paystack
+                const amountInKobo = amount * 100;
+                
                 let handler = PaystackPop.setup({
-                    key: PAYSTACK_PUBLIC_KEY,
+                    key: keyData.publicKey,
                     email: email,
-                    amount: 1400000, // ₦14,000 in kobo (multiply by 100)
-                    currency: "NGN",
+                    amount: amountInKobo,
+                    currency: pricingData.currency,
                     ref: reference,
                     metadata: {
                         custom_fields: [
                             {
-                                display_name: "Artist Name",
-                                variable_name: "artist_name",
-                                value: artistName
-                            },
-                            {
                                 display_name: "Plan",
                                 variable_name: "plan",
-                                value: "Regular"
+                                value: tier.name
                             },
                             {
-                                display_name: "Amount",
-                                variable_name: "amount",
-                                value: "₦14,000"
+                                display_name: "Country",
+                                variable_name: "country",
+                                value: pricingData.country
                             }
                         ]
                     },
                     callback: function(response){
-                        console.log('✅ Payment callback received:', response.reference);
-                        verifyPayment(response.reference);
+                        console.log('✅ Payment successful:', response.reference);
+                        verifyPayment(response.reference, 'paystack');
                     },
                     onClose: function(){
-                        console.log('❌ Payment popup closed');
-                        btn.innerText = "Proceed to Payment";
-                        btn.disabled = false;
+                        console.log('❌ Payment cancelled');
                     }
                 });
                 
                 handler.openIframe();
                 
             } catch (error) {
-                console.error('❌ Paystack initialization error:', error);
-                alert('Failed to initialize payment. Please try again.');
-                btn.innerText = "Proceed to Payment";
-                btn.disabled = false;
+                console.error('Paystack error:', error);
+                alert('Payment initialization failed. Please try again.');
             }
         }
         
-        async function verifyPayment(reference) {
-            const verifyingDiv = document.getElementById('verifying');
-            verifyingDiv.style.display = 'flex';
+        async function payWithStripe(email, amount, tier) {
+            if (!stripe) {
+                alert('Stripe not initialized');
+                return;
+            }
             
-            console.log('🔍 Verifying payment with backend:', reference);
+            try {
+                // Create Stripe checkout session
+                const response = await fetch('/api/create-stripe-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        tier: selectedTier,
+                        amount: amount,
+                        currency: pricingData.currency
+                    })
+                });
+                
+                const session = await response.json();
+                
+                if (session.success) {
+                    // Redirect to Stripe Checkout
+                    const result = await stripe.redirectToCheckout({
+                        sessionId: session.sessionId
+                    });
+                    
+                    if (result.error) {
+                        alert(result.error.message);
+                    }
+                } else {
+                    throw new Error('Failed to create checkout session');
+                }
+                
+            } catch (error) {
+                console.error('Stripe error:', error);
+                alert('Payment initialization failed. Please try again.');
+            }
+        }
+        
+        async function verifyPayment(reference, provider) {
+            const processingDiv = document.getElementById('processing');
+            processingDiv.style.display = 'flex';
+            document.getElementById('processing-text').textContent = 
+                'Verifying Payment...';
             
             try {
                 const response = await fetch('/api/verify-payment', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json' 
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         reference: reference,
+                        provider: provider,
                         email: localStorage.getItem('sparkam_email')
                     })
                 });
                 
                 const data = await response.json();
                 
-                console.log('📊 Verification response:', data);
-                
                 if (data.success) {
-                    // Payment verified successfully!
-                    console.log('✅ Payment verified successfully');
+                    // Store subscription info
+                    localStorage.setItem('sparkam_subscription', JSON.stringify({
+                        tier: selectedTier,
+                        reference: reference,
+                        startDate: new Date().toISOString(),
+                        status: 'active'
+                    }));
                     
-                    // Store payment info
-                    localStorage.setItem('sparkam_payment_ref', reference);
-                    localStorage.setItem('sparkam_payment_status', 'verified');
-                    localStorage.setItem('sparkam_plan', 'regular');
-                    localStorage.setItem('sparkam_payment_amount', '14000');
-                    localStorage.setItem('sparkam_payment_date', new Date().toISOString());
-                    
-                    // Redirect to dashboard with success flag
-                    window.location.href = '/dashboard.html?payment=success&plan=regular';
-                    
+                    // Redirect to dashboard
+                    window.location.href = '/dashboard.html?welcome=true';
                 } else {
-                    // Verification failed
-                    verifyingDiv.style.display = 'none';
-                    console.error('❌ Verification failed:', data.error);
-                    
-                    alert('⚠️ Payment verification failed: ' + (data.error || 'Unknown error') + '\n\nPlease contact support with reference: ' + reference);
-                    
-                    document.getElementById('pay-btn').disabled = false;
-                    document.getElementById('pay-btn').innerText = "Proceed to Payment";
+                    throw new Error(data.error || 'Verification failed');
                 }
                 
             } catch (error) {
-                verifyingDiv.style.display = 'none';
-                console.error('❌ Verification request error:', error);
-                
-                alert('⚠️ Unable to verify payment. Your payment may have succeeded.\n\nPlease contact support with reference: ' + reference + '\n\nError: ' + error.message);
+                processingDiv.style.display = 'none';
+                console.error('Verification error:', error);
+                alert('Payment verification failed. Please contact support with reference: ' + reference);
+            }
+        }
+        
+        async function getStripePublicKey() {
+            try {
+                const response = await fetch('/api/get-stripe-key');
+                const data = await response.json();
+                return data.success ? data.publicKey : null;
+            } catch (error) {
+                console.error('Failed to get Stripe key:', error);
+                return null;
             }
         }
     </script>
