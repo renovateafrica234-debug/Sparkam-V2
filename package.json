@@ -1,11 +1,13 @@
 {
-  "name": "sparkam-v2",
-  "version": "2.0.0",
-  "description": "AI-powered music promotion platform",
-  "engines": {
-    "node": "20.x"
-  },
+  "name": "sparkam",
+  "version": "1.0.0",
   "dependencies": {
-    "@google/generative-ai": "0.21.0"
+    "@google/generative-ai": "^0.1.3"
+  }
+{
+  "name": "sparkam",
+  "version": "1.0.0",
+  "dependencies": {
+    "@google/generative-ai": "^0.1.3"
   }
 }
