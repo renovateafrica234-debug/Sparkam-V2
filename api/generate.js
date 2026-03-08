@@ -1,6 +1,3 @@
-// api/generate-campaign.js
-// Using Google Gemini API
-
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 module.exports = async (req, res) => {
