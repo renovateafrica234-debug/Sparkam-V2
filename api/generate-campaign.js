@@ -28,15 +28,42 @@ module.exports = async (req, res) => {
     }
     
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
-    const prompt = `Create a 30-day music marketing campaign for ${artistName} - "${trackTitle}" (${genre}, Budget: ₦${budget.toLocaleString()}).
+    // Try multiple models in order until one works
+    const modelsToTry = [
+      "gemini-1.5-pro",
+      "gemini-1.5-flash", 
+      "gemini-2.0-flash-exp",
+      "gemini-pro"
+    ];
+    
+    let result;
+    let lastError;
+    
+    for (const modelName of modelsToTry) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        
+        const prompt = `Create a 30-day music marketing campaign for ${artistName} - "${trackTitle}" (${genre}, Budget: ₦${budget.toLocaleString()}).
 
 Include TikTok strategy with 30 video concepts, Instagram strategy with 21 Reels concepts, Spotify playlists (20 targets), influencer targets, budget breakdown, and week-by-week plan.
 
 Return as JSON.`;
+        
+        result = await model.generateContent(prompt);
+        console.log(`Success with model: ${modelName}`);
+        break; // Success! Exit loop
+      } catch (error) {
+        console.log(`Model ${modelName} failed, trying next...`);
+        lastError = error;
+        continue; // Try next model
+      }
+    }
     
-    const result = await model.generateContent(prompt);
+    if (!result) {
+      throw new Error(`All models failed. Last error: ${lastError.message}`);
+    }
+    
     const responseText = result.response.text();
     
     let campaignData;
@@ -71,4 +98,4 @@ Return as JSON.`;
     });
   }
 };
-                      
+                                                                 
