@@ -31,8 +31,8 @@ Include TikTok strategy with 30 video concepts, Instagram strategy with 21 Reels
 
 Return as JSON.`;
     
-    // Use gemini-1.5-flash (available on free tier)
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GOOGLE_API_KEY}`;
+    // Try v1 endpoint instead of v1beta
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GOOGLE_API_KEY}`;
     
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -47,7 +47,14 @@ Return as JSON.`;
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(JSON.stringify(data.error || data));
+      // Return detailed error for debugging
+      return res.status(500).json({
+        success: false,
+        error: 'Google API Error',
+        details: data,
+        api_key_exists: !!process.env.GOOGLE_API_KEY,
+        api_key_prefix: process.env.GOOGLE_API_KEY ? process.env.GOOGLE_API_KEY.substring(0, 10) + '...' : 'NOT SET'
+      });
     }
     
     const responseText = data.candidates[0].content.parts[0].text;
@@ -76,7 +83,9 @@ Return as JSON.`;
     console.error('Error:', error);
     return res.status(500).json({
       success: false,
-      error: error.message || 'Failed to generate campaign'
+      error: error.message,
+      api_key_exists: !!process.env.GOOGLE_API_KEY
     });
   }
 };
+        
