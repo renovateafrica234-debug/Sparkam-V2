@@ -31,8 +31,7 @@ Include TikTok strategy with 30 video concepts, Instagram strategy with 21 Reels
 
 Return as JSON.`;
     
-    // Try v1 endpoint instead of v1beta
-    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GOOGLE_API_KEY}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GOOGLE_API_KEY}`;
     
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -47,13 +46,18 @@ Return as JSON.`;
     const data = await response.json();
     
     if (!response.ok) {
-      // Return detailed error for debugging
-      return res.status(500).json({
+      // Return FULL error details
+      return res.status(200).json({
         success: false,
-        error: 'Google API Error',
-        details: data,
-        api_key_exists: !!process.env.GOOGLE_API_KEY,
-        api_key_prefix: process.env.GOOGLE_API_KEY ? process.env.GOOGLE_API_KEY.substring(0, 10) + '...' : 'NOT SET'
+        error: 'Google API Error - See details below',
+        http_status: response.status,
+        error_code: data.error?.code,
+        error_message: data.error?.message,
+        error_status: data.error?.status,
+        full_response: data,
+        api_key_set: true,
+        api_key_length: process.env.GOOGLE_API_KEY.length,
+        endpoint_used: 'v1beta/gemini-1.5-flash'
       });
     }
     
@@ -80,12 +84,11 @@ Return as JSON.`;
     });
     
   } catch (error) {
-    console.error('Error:', error);
-    return res.status(500).json({
+    return res.status(200).json({
       success: false,
       error: error.message,
+      error_stack: error.stack,
       api_key_exists: !!process.env.GOOGLE_API_KEY
     });
   }
 };
-        
