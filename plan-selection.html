@@ -1,41 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Your Path - Sparkam</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Your Plan - Sparkam</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .spark-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
+        body {
+            background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .spark-btn {
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+        }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-6">
-    <h2 class="text-3xl font-black mb-12">Choose Your Campaign Tier</h2>
-    <div class="grid md:grid-cols-3 gap-6 max-w-5xl w-full">
-        <div class="glass p-8 rounded-[2rem] border-pink-500/50 border flex flex-col justify-between">
-            <div>
-                <h4 class="text-xs font-bold text-pink-500 uppercase tracking-widest mb-4">Beta Access</h4>
-                <div class="text-4xl font-black mb-4">Free</div>
-                <p class="text-gray-400 text-xs mb-6">Test the AI Brain with full analysis and content creation tools.</p>
+<body class="min-h-screen flex items-center justify-center px-6 py-12">
+    <div class="max-w-6xl w-full">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-black mb-4">
+                Choose Your <span class="gradient-text">Plan</span>
+            </h1>
+            <p class="text-gray-400 text-lg">Select the plan that fits your music marketing needs</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Essential Plan -->
+            <div class="glass rounded-3xl p-8 hover:border-pink-500/50 transition">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-black mb-2">ESSENTIAL</h3>
+                    <div class="text-5xl font-black mb-2 gradient-text">₦49K</div>
+                    <p class="text-gray-400 text-sm">per month</p>
+                </div>
+
+                <ul class="space-y-4 mb-8">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                        <span class="text-sm">Unlimited campaign generation</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                        <span class="text-sm">90 branded content pieces per release</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                        <span class="text-sm">Unlimited Claude AI chat</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                        <span class="text-sm">Spotify playlist strategies</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                        <span class="text-sm">Influencer target lists</span>
+                    </li>
+                </ul>
+
+                <a href="/signup.html?plan=essential" class="block w-full py-4 border-2 border-pink-500 rounded-xl text-center font-bold hover:bg-pink-500/10 transition">
+                    Get Started
+                </a>
             </div>
-            <a href="/dashboard.html" class="spark-gradient text-center py-4 rounded-xl font-black uppercase text-xs tracking-widest">Select Free</a>
+
+            <!-- Pro Plan (Most Popular) -->
+            <div class="glass rounded-3xl p-8 border-2 border-pink-500/50 relative">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span class="spark-btn px-4 py-2 rounded-full text-xs font-black">MOST POPULAR</span>
+                </div>
+
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-black mb-2">PRO</h3>
+                    <div class="text-5xl font-black mb-2 gradient-text">₦99K</div>
+                    <p class="text-gray-400 text-sm">per month</p>
+                </div>
+
+                <ul class="space-y-4 mb-8">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
+                        <span class="text-sm font-bold">Everything in Essential, plus:</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
+                        <span class="text-sm">Auto-posting to social media</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
+                        <span class="text-sm">Weekly 15-min strategy calls</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
+                        <span class="text-sm">Priority support</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
+                        <span class="text-sm">Advanced analytics dashboard</span>
+                    </li>
+                </ul>
+
+                <a href="/signup.html?plan=pro" class="block w-full py-4 spark-btn rounded-xl text-center font-bold hover:opacity-90 transition">
+                    Go Pro
+                </a>
+            </div>
+
+            <!-- Platinum Plan -->
+            <div class="glass rounded-3xl p-8 hover:border-purple-500/50 transition">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-black mb-2">PLATINUM</h3>
+                    <div class="text-5xl font-black mb-2 gradient-text">₦199K</div>
+                    <p class="text-gray-400 text-sm">per month</p>
+                </div>
+
+                <ul class="space-y-4 mb-8">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
+                        <span class="text-sm font-bold">Everything in Pro, plus:</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
+                        <span class="text-sm">Dedicated marketing manager</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
+                        <span class="text-sm">Full campaign execution</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
+                        <span class="text-sm">VIP support (24/7)</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
+                        <span class="text-sm">Monthly strategy review</span>
+                    </li>
+                </ul>
+
+                <a href="/signup.html?plan=platinum" class="block w-full py-4 border-2 border-purple-500 rounded-xl text-center font-bold hover:bg-purple-500/10 transition">
+                    Go Platinum
+                </a>
+            </div>
         </div>
 
-        <div class="glass p-8 rounded-[2rem] opacity-50 relative overflow-hidden">
-            <div class="absolute top-4 right-4"><i class="fa-solid fa-lock"></i></div>
-            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Regular</h4>
-            <div class="text-4xl font-black mb-4">₦14,000</div>
-            <p class="text-gray-400 text-xs">Full 360° Managed Campaign execution.</p>
-        </div>
-
-        <div class="glass p-8 rounded-[2rem] opacity-50 relative overflow-hidden">
-             <div class="absolute top-4 right-4"><i class="fa-solid fa-lock"></i></div>
-            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Pro</h4>
-            <div class="text-4xl font-black mb-4">₦60,000</div>
-            <p class="text-gray-400 text-xs">Unlimited artists and label-tier distribution.</p>
+        <!-- Beta Testing Note -->
+        <div class="mt-12 text-center">
+            <div class="glass rounded-2xl p-6 inline-block">
+                <p class="text-sm text-gray-400 mb-2">
+                    <i class="fa-solid fa-flask text-pink-500 mr-2"></i>
+                    Currently in Beta Testing
+                </p>
+                <p class="text-xs text-gray-500">
+                    All features are being tested with our beta community. Your feedback shapes Sparkam!
+                </p>
+            </div>
         </div>
     </div>
 </body>
-</html>
-
+                            </html>
+    
