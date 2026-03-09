@@ -31,8 +31,8 @@ Include TikTok strategy with 30 video concepts, Instagram strategy with 21 Reels
 
 Return as JSON.`;
     
-    // Use v1beta API with gemini-pro (works with free tier)
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GOOGLE_API_KEY}`;
+    // Use gemini-1.5-flash (available on free tier)
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GOOGLE_API_KEY}`;
     
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -47,7 +47,7 @@ Return as JSON.`;
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(data.error?.message || 'API request failed');
+      throw new Error(JSON.stringify(data.error || data));
     }
     
     const responseText = data.candidates[0].content.parts[0].text;
