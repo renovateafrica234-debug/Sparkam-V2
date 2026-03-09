@@ -18,57 +18,76 @@ module.exports = async (req, res) => {
       });
     }
     
-    if (!process.env.GOOGLE_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return res.status(500).json({ 
         success: false, 
-        error: 'Google API key not configured' 
+        error: 'Groq API key not configured' 
       });
     }
     
-    const prompt = `Create a 30-day music marketing campaign for ${artistName} - "${trackTitle}" (${genre}, Budget: ₦${budget.toLocaleString()}).
+    const prompt = `You are a professional music marketing strategist specializing in Nigerian and African music (Afrobeats, Afropop, Alté, etc.).
 
-Include TikTok strategy with 30 video concepts, Instagram strategy with 21 Reels concepts, Spotify playlists (20 targets), influencer targets, budget breakdown, and week-by-week plan.
+Create a comprehensive 30-day marketing campaign for:
+- Artist: ${artistName}
+- Track: ${trackTitle}
+- Genre: ${genre}
+- Budget: ₦${budget.toLocaleString()}
 
-Return as JSON.`;
+Generate a detailed JSON strategy with:
+1. campaign_overview (summary)
+2. tiktok_strategy (30 video concepts, hashtags, posting times)
+3. instagram_strategy (21 Reels concepts, Story ideas)
+4. spotify_strategy (20 playlist targets, curator outreach template)
+5. influencer_strategy (target influencers, outreach approach)
+6. budget_breakdown (how to allocate ₦${budget.toLocaleString()})
+7. week_by_week_plan (4 weeks of activities)
+8. kpis (target streams, followers, engagement rate)
+
+Return ONLY valid JSON, no markdown, no explanation.`;
     
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GOOGLE_API_KEY}`;
-    
-    const response = await fetch(apiUrl, {
+    // Groq API call
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+      },
       body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }]
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a Nigerian music marketing expert. Always return valid JSON only.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 4000
       })
     });
     
     const data = await response.json();
     
     if (!response.ok) {
-      // Return FULL error details
-      return res.status(200).json({
-        success: false,
-        error: 'Google API Error - See details below',
-        http_status: response.status,
-        error_code: data.error?.code,
-        error_message: data.error?.message,
-        error_status: data.error?.status,
-        full_response: data,
-        api_key_set: true,
-        api_key_length: process.env.GOOGLE_API_KEY.length,
-        endpoint_used: 'v1beta/gemini-1.5-flash'
-      });
+      throw new Error(data.error?.message || 'Groq API error');
     }
     
-    const responseText = data.candidates[0].content.parts[0].text;
+    const responseText = data.choices[0].message.content;
     
     let campaignData;
     try {
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      campaignData = jsonMatch ? JSON.parse(jsonMatch[0]) : { campaign_overview: responseText.substring(0, 500) };
+      // Remove markdown code blocks if present
+      const cleanText = responseText.replace(/```json\n?|\n?```/g, '').trim();
+      campaignData = JSON.parse(cleanText);
     } catch (e) {
-      campaignData = { campaign_overview: responseText.substring(0, 500) };
+      // If JSON parsing fails, create structured data from text
+      campaignData = {
+        campaign_overview: responseText.substring(0, 500),
+        raw_strategy: responseText
+      };
     }
     
     return res.status(200).json({
@@ -79,16 +98,17 @@ Return as JSON.`;
         genre,
         budget,
         strategy: campaignData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        ai_model: 'Llama 3.3 70B (via Groq)'
       }
     });
     
   } catch (error) {
-    return res.status(200).json({
+    console.error('Campaign generation error:', error);
+    return res.status(500).json({
       success: false,
-      error: error.message,
-      error_stack: error.stack,
-      api_key_exists: !!process.env.GOOGLE_API_KEY
+      error: error.message || 'Failed to generate campaign'
     });
   }
 };
+      
