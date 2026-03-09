@@ -25,13 +25,13 @@ module.exports = async (req, res) => {
       });
     }
     
-    // Use REST API directly (works with free tier)
     const prompt = `Create a 30-day music marketing campaign for ${artistName} - "${trackTitle}" (${genre}, Budget: ₦${budget.toLocaleString()}).
 
 Include TikTok strategy with 30 video concepts, Instagram strategy with 21 Reels concepts, Spotify playlists (20 targets), influencer targets, budget breakdown, and week-by-week plan.
 
 Return as JSON.`;
     
+    // Use v1beta API with gemini-pro (works with free tier)
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GOOGLE_API_KEY}`;
     
     const response = await fetch(apiUrl, {
@@ -80,4 +80,3 @@ Return as JSON.`;
     });
   }
 };
-        
