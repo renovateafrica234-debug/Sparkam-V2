@@ -61,6 +61,10 @@
                     </li>
                     <li class="flex items-start gap-3">
                         <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                        <span class="text-sm">30-day workflow execution</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
                         <span class="text-sm">Download campaign PDFs</span>
                     </li>
                     <li class="flex items-start gap-3">
@@ -69,7 +73,7 @@
                     </li>
                 </ul>
 
-                <!-- DIRECT LINK TO DASHBOARD -->
+                <!-- DIRECT LINK - NO SLASH -->
                 <a href="dashboard.html" class="block w-full py-4 spark-btn rounded-xl text-center font-bold hover:opacity-90 transition">
                     Start Free Beta
                 </a>
@@ -95,6 +99,10 @@
                     <li class="flex items-start gap-3">
                         <i class="fa-solid fa-check text-pink-400 mt-1"></i>
                         <span class="text-sm">Weekly strategy calls</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
+                        <span class="text-sm">Priority support</span>
                     </li>
                 </ul>
 
@@ -124,6 +132,10 @@
                         <i class="fa-solid fa-check text-purple-400 mt-1"></i>
                         <span class="text-sm">Full execution</span>
                     </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
+                        <span class="text-sm">24/7 VIP support</span>
+                    </li>
                 </ul>
 
                 <button class="w-full py-4 border-2 border-gray-600 rounded-xl font-bold cursor-not-allowed" disabled>
@@ -139,11 +151,24 @@
                     <i class="fa-solid fa-flask mr-2"></i>Beta Testing
                 </h3>
                 <p class="text-sm text-gray-300">
-                    Essential tier FREE during beta. Help us test and improve Sparkam!
+                    <strong>Essential tier is completely FREE</strong> during beta. Help us test and improve!
                 </p>
             </div>
         </div>
     </div>
+
+    <script>
+        // Ensure dashboard link works even with navigation issues
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.querySelector('a[href="dashboard.html"]');
+            if (btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = 'dashboard.html';
+                });
+            }
+        });
+    </script>
 </body>
-                    </html>
-                            
+    </html>
+                
