@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Workflow - Sparkam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .task-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #666;
+            transition: all 0.3s;
+        }
+        .task-card.completed {
+            border-left-color: #10b981;
+            opacity: 0.7;
+        }
+        .task-card.active {
+            border-left-color: #ff00cc;
+        }
+        .category-content { background: #1a0520; }
+        .category-ads { background: #1a1020; }
+        .category-influencer { background: #0f1a20; }
+        .category-playlist { background: #1a0f20; }
+        .category-community { background: #0f200f; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="glass border-b border-white/10 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-black gradient-text">SPARKAM</div>
+            <div class="flex items-center gap-6">
+                <a href="/dashboard.html" class="text-gray-400 hover:text-white text-sm">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400">ESSENTIAL (FREE)</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Campaign Header -->
+        <div class="glass rounded-3xl p-8 mb-8">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-3xl font-black mb-2" id="campaign-title">Campaign Workflow</h1>
+                    <p class="text-gray-400" id="campaign-subtitle">30-Day Marketing Plan</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-gray-400">Total Budget</div>
+                    <div class="text-3xl font-black gradient-text" id="total-budget">₦0</div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-gray-400">Progress</span>
+                    <span id="progress-text">0/0 tasks completed</span>
+                </div>
+                <div class="w-full bg-black/50 rounded-full h-3">
+                    <div id="progress-bar" class="h-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full transition-all" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Budget Tracker -->
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-black/30 rounded-xl p-4">
+                    <div class="text-xs text-gray-400 mb-1">Spent</div>
+                    <div class="text-2xl font-black text-red-400" id="budget-spent">₦0</div>
+                </div>
+                <div class="bg-black/30 rounded-xl p-4">
+                    <div class="text-xs text-gray-400 mb-1">Remaining</div>
+                    <div class="text-2xl font-black text-green-400" id="budget-remaining">₦0</div>
+                </div>
+                <div class="bg-black/30 rounded-xl p-4">
+                    <div class="text-xs text-gray-400 mb-1">On Track</div>
+                    <div class="text-2xl font-black text-blue-400" id="budget-status">✓</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week Tabs -->
+        <div class="flex gap-4 mb-6 overflow-x-auto">
+            <button onclick="filterWeek(1)" class="week-tab px-6 py-3 rounded-xl font-bold bg-pink-500 text-white">Week 1</button>
+            <button onclick="filterWeek(2)" class="week-tab px-6 py-3 rounded-xl font-bold glass">Week 2</button>
+            <button onclick="filterWeek(3)" class="week-tab px-6 py-3 rounded-xl font-bold glass">Week 3</button>
+            <button onclick="filterWeek(4)" class="week-tab px-6 py-3 rounded-xl font-bold glass">Week 4</button>
+            <button onclick="filterWeek(0)" class="week-tab px-6 py-3 rounded-xl font-bold glass">All Tasks</button>
+        </div>
+
+        <!-- Tasks List -->
+        <div id="tasks-container" class="space-y-4">
+            <!-- Tasks will be rendered here -->
+        </div>
+
+        <!-- Weekly Goals -->
+        <div class="glass rounded-3xl p-8 mt-8">
+            <h3 class="text-xl font-black mb-6">📈 Weekly Goals</h3>
+            <div id="weekly-goals" class="grid md:grid-cols-4 gap-4">
+                <!-- Goals will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let workflow = null;
+        let currentWeek = 1;
+        let completedTasks = new Set();
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadWorkflow();
+        });
+
+        function loadWorkflow() {
+            const workflowData = localStorage.getItem('sparkam_current_workflow');
+            
+            if (!workflowData) {
+                alert('No workflow found. Please generate a campaign first.');
+                window.location.href = '/dashboard.html';
+                return;
+            }
+            
+            workflow = JSON.parse(workflowData);
+            
+            // Load completed tasks
+            const saved = localStorage.getItem('sparkam_workflow_progress');
+            if (saved) {
+                completedTasks = new Set(JSON.parse(saved));
+            }
+            
+            renderWorkflow();
+        }
+
+        function renderWorkflow() {
+            const { campaign_info, total_budget, currency, tasks, weekly_goals } = workflow;
+            
+            // Header
+            document.getElementById('campaign-title').textContent = 
+                `"${campaign_info.trackTitle}" by ${campaign_info.artistName}`;
+            document.getElementById('campaign-subtitle').textContent = 
+                `${campaign_info.genre} • 30-Day Workflow`;
+            document.getElementById('total-budget').textContent = 
+                `${currency}${total_budget.toLocaleString()}`;
+            
+            // Progress
+            const totalTasks = tasks.length;
+            const completed = completedTasks.size;
+            const progress = (completed / totalTasks * 100).toFixed(0);
+            
+            document.getElementById('progress-text').textContent = 
+                `${completed}/${totalTasks} tasks completed`;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            
+            // Budget
+            const spent = tasks
+                .filter(t => completedTasks.has(t.day))
+                .reduce((sum, t) => sum + (t.budget || 0), 0);
+            const remaining = total_budget - spent;
+            
+            document.getElementById('budget-spent').textContent = `${currency}${spent.toLocaleString()}`;
+            document.getElementById('budget-remaining').textContent = `${currency}${remaining.toLocaleString()}`;
+            document.getElementById('budget-status').textContent = 
+                spent <= total_budget ? '✓' : '⚠️';
+            
+            // Tasks
+            renderTasks();
+            
+            // Weekly Goals
+            renderWeeklyGoals(weekly_goals, currency);
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            const { tasks, currency } = workflow;
+            
+            const filteredTasks = currentWeek === 0 
+                ? tasks 
+                : tasks.filter(t => Math.ceil(t.day / 7) === currentWeek);
+            
+            container.innerHTML = filteredTasks.map(task => {
+                const isCompleted = completedTasks.has(task.day);
+                const categoryClass = `category-${task.category}`;
+                
+                return `
+                    <div class="task-card ${categoryClass} ${isCompleted ? 'completed' : 'active'} rounded-xl p-6">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0">
+                                <input type="checkbox" 
+                                       ${isCompleted ? 'checked' : ''} 
+                                       onchange="toggleTask(${task.day})"
+                                       class="w-6 h-6 rounded border-2 border-pink-500 cursor-pointer">
+                            </div>
+                            
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <div class="text-xs text-gray-400 mb-1">Day ${task.day} • ${task.category}</div>
+                                        <h4 class="text-lg font-bold ${isCompleted ? 'line-through text-gray-500' : ''}">${task.title}</h4>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs text-gray-400">Budget</div>
+                                        <div class="text-xl font-black text-pink-400">${currency}${task.budget.toLocaleString()}</div>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-sm text-gray-300 mb-3">${task.description}</p>
+                                
+                                <div class="grid grid-cols-2 gap-3 text-xs">
+                                    <div class="bg-black/30 rounded-lg p-2">
+                                        <div class="text-gray-500">Expected Result</div>
+                                        <div class="font-bold">${task.expected_result}</div>
+                                    </div>
+                                    <div class="bg-black/30 rounded-lg p-2">
+                                        <div class="text-gray-500">Priority</div>
+                                        <div class="font-bold ${task.priority === 'high' ? 'text-red-400' : task.priority === 'medium' ? 'text-yellow-400' : 'text-green-400'}">${task.priority.toUpperCase()}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderWeeklyGoals(goals, currency) {
+            const container = document.getElementById('weekly-goals');
+            
+            if (!goals || goals.length === 0) return;
+            
+            container.innerHTML = goals.map(goal => `
+                <div class="bg-black/30 rounded-xl p-4">
+                    <div class="text-sm text-gray-400 mb-2">Week ${goal.week}</div>
+                    <div class="text-2xl font-black text-pink-400 mb-2">${goal.streams.toLocaleString()}</div>
+                    <div class="text-xs text-gray-500">streams goal</div>
+                    <div class="text-xs text-gray-500 mt-2">${currency}${goal.budget_checkpoint.toLocaleString()} budget checkpoint</div>
+                </div>
+            `).join('');
+        }
+
+        function toggleTask(day) {
+            if (completedTasks.has(day)) {
+                completedTasks.delete(day);
+            } else {
+                completedTasks.add(day);
+            }
+            
+            // Save progress
+            localStorage.setItem('sparkam_workflow_progress', JSON.stringify([...completedTasks]));
+            
+            // Re-render
+            renderWorkflow();
+        }
+
+        function filterWeek(week) {
+            currentWeek = week;
+            
+            // Update tab styles
+            document.querySelectorAll('.week-tab').forEach(btn => {
+                btn.classList.remove('bg-pink-500', 'text-white');
+                btn.classList.add('glass');
+            });
+            
+            event.target.classList.remove('glass');
+            event.target.classList.add('bg-pink-500', 'text-white');
+            
+            renderTasks();
+        }
+    </script>
+</body>
+</html>
+
