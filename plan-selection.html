@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Your Plan - Sparkam</title>
+    <title>Dashboard - Sparkam</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
@@ -25,144 +26,320 @@
         .spark-btn {
             background: linear-gradient(90deg, #ff00cc, #3333ff);
         }
+        .section-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #ff00cc;
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center px-6 py-12">
-    <div class="max-w-6xl w-full">
-        <div class="text-center mb-12">
-            <h1 class="text-4xl md:text-5xl font-black mb-4">
-                Choose Your <span class="gradient-text">Plan</span>
+<body class="min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="glass border-b border-white/10 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-black gradient-text">SPARKAM</div>
+            <div class="flex items-center gap-6">
+                <span class="text-sm text-gray-400" id="user-email">Beta Tester</span>
+                <span id="tier-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400">ESSENTIAL (FREE BETA)</span>
+                <a href="/profile.html" class="text-gray-400 hover:text-white"><i class="fa-solid fa-user"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Welcome -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-black mb-2">
+                Welcome, <span class="gradient-text" id="artist-name">Artist</span>!
             </h1>
-            <p class="text-gray-400 text-lg">Select the plan that fits your music marketing needs</p>
+            <p class="text-gray-400">Generate AI-powered campaigns in seconds</p>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-8">
-            <!-- Essential Plan -->
-            <div class="glass rounded-3xl p-8 hover:border-pink-500/50 transition">
-                <div class="text-center mb-6">
-                    <h3 class="text-2xl font-black mb-2">ESSENTIAL</h3>
-                    <div class="text-5xl font-black mb-2 gradient-text">₦49K</div>
-                    <p class="text-gray-400 text-sm">per month</p>
+        <!-- Campaign Generator -->
+        <div class="glass rounded-3xl p-8 mb-8">
+            <h2 class="text-2xl font-black mb-6">
+                <i class="fa-solid fa-bolt text-pink-500 mr-2"></i>
+                Generate New Campaign
+            </h2>
+
+            <form id="campaign-form" class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold mb-2">Artist Name</label>
+                    <input type="text" id="artistName" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" placeholder="Your artist name" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold mb-2">Track Title</label>
+                    <input type="text" id="trackTitle" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" placeholder="Your track name" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold mb-2">Genre</label>
+                    <select id="genre" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" required>
+                        <option value="">Select genre</option>
+                        <option value="Afropop">Afropop</option>
+                        <option value="Afrobeats">Afrobeats</option>
+                        <option value="Hip-Hop">Hip-Hop</option>
+                        <option value="R&B">R&B</option>
+                        <option value="Pop">Pop</option>
+                        <option value="Indie">Indie</option>
+                        <option value="Electronic">Electronic</option>
+                        <option value="Rock">Rock</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold mb-2">Budget</label>
+                    <input type="number" id="budget" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" placeholder="50000" min="10000" value="150000" required>
+                    <p class="text-xs text-gray-500 mt-1">Enter in ₦ (Nigeria) or $ (International)</p>
                 </div>
 
-                <ul class="space-y-4 mb-8">
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
-                        <span class="text-sm">Unlimited campaign generation</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
-                        <span class="text-sm">90 branded content pieces per release</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
-                        <span class="text-sm">Unlimited Claude AI chat</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
-                        <span class="text-sm">Spotify playlist strategies</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-green-400 mt-1"></i>
-                        <span class="text-sm">Influencer target lists</span>
-                    </li>
-                </ul>
-
-                <a href="/dashboard.html?plan=essential" class="block w-full py-4 border-2 border-pink-500 rounded-xl text-center font-bold hover:bg-pink-500/10 transition">
-                    Get Started
-                </a>
-            </div>
-
-            <!-- Pro Plan (Most Popular) -->
-            <div class="glass rounded-3xl p-8 border-2 border-pink-500/50 relative">
-                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span class="spark-btn px-4 py-2 rounded-full text-xs font-black">MOST POPULAR</span>
+                <div class="md:col-span-2">
+                    <button type="submit" id="spark-btn" class="w-full spark-btn py-4 rounded-xl font-bold text-lg uppercase tracking-wide hover:opacity-90 transition">
+                        <i class="fa-solid fa-bolt mr-2"></i>SPARK IT
+                    </button>
                 </div>
-
-                <div class="text-center mb-6">
-                    <h3 class="text-2xl font-black mb-2">PRO</h3>
-                    <div class="text-5xl font-black mb-2 gradient-text">₦99K</div>
-                    <p class="text-gray-400 text-sm">per month</p>
-                </div>
-
-                <ul class="space-y-4 mb-8">
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
-                        <span class="text-sm font-bold">Everything in Essential, plus:</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
-                        <span class="text-sm">Auto-posting to social media</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
-                        <span class="text-sm">Weekly 15-min strategy calls</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
-                        <span class="text-sm">Priority support</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-pink-400 mt-1"></i>
-                        <span class="text-sm">Advanced analytics dashboard</span>
-                    </li>
-                </ul>
-
-                <a href="/signup.html?plan=pro" class="block w-full py-4 spark-btn rounded-xl text-center font-bold hover:opacity-90 transition">
-                    Go Pro
-                </a>
-            </div>
-
-            <!-- Platinum Plan -->
-            <div class="glass rounded-3xl p-8 hover:border-purple-500/50 transition">
-                <div class="text-center mb-6">
-                    <h3 class="text-2xl font-black mb-2">PLATINUM</h3>
-                    <div class="text-5xl font-black mb-2 gradient-text">₦199K</div>
-                    <p class="text-gray-400 text-sm">per month</p>
-                </div>
-
-                <ul class="space-y-4 mb-8">
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
-                        <span class="text-sm font-bold">Everything in Pro, plus:</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
-                        <span class="text-sm">Dedicated marketing manager</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
-                        <span class="text-sm">Full campaign execution</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
-                        <span class="text-sm">VIP support (24/7)</span>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <i class="fa-solid fa-check text-purple-400 mt-1"></i>
-                        <span class="text-sm">Monthly strategy review</span>
-                    </li>
-                </ul>
-
-                <a href="/signup.html?plan=platinum" class="block w-full py-4 border-2 border-purple-500 rounded-xl text-center font-bold hover:bg-purple-500/10 transition">
-                    Go Platinum
-                </a>
-            </div>
+            </form>
         </div>
 
-        <!-- Beta Testing Note -->
-        <div class="mt-12 text-center">
-            <div class="glass rounded-2xl p-6 inline-block">
-                <p class="text-sm text-gray-400 mb-2">
-                    <i class="fa-solid fa-flask text-pink-500 mr-2"></i>
-                    Currently in Beta Testing
-                </p>
-                <p class="text-xs text-gray-500">
-                    All features are being tested with our beta community. Your feedback shapes Sparkam!
-                </p>
+        <!-- Results Section -->
+        <div id="results-section" class="glass rounded-3xl p-8 mb-8" style="display: none;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black">
+                    <i class="fa-solid fa-check-circle text-green-400 mr-2"></i>
+                    Campaign Ready!
+                </h2>
+                <div class="flex gap-3">
+                    <button onclick="downloadPDF()" class="px-4 py-2 spark-btn rounded-lg font-bold text-sm">
+                        <i class="fa-solid fa-download mr-2"></i>PDF
+                    </button>
+                </div>
             </div>
+            
+            <div id="campaign-results"></div>
         </div>
     </div>
+
+    <script>
+        let currentCampaign = null;
+
+        document.getElementById('campaign-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                artistName: document.getElementById('artistName').value.trim(),
+                trackTitle: document.getElementById('trackTitle').value.trim(),
+                genre: document.getElementById('genre').value,
+                budget: parseInt(document.getElementById('budget').value)
+            };
+            
+            const btn = document.getElementById('spark-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING (10-15 seconds)...';
+            
+            try {
+                const response = await fetch('/api/generate-campaign', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentCampaign = data.campaign;
+                    displayCampaign(data.campaign);
+                } else {
+                    alert('Error: ' + (data.error || 'Failed'));
+                }
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i>SPARK IT';
+            }
+        });
+
+        function displayCampaign(campaign) {
+            const section = document.getElementById('results-section');
+            const resultsDiv = document.getElementById('campaign-results');
+            const strategy = campaign.strategy;
+            
+            // Header Card
+            let html = `
+                <div class="bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl p-6 mb-6 border border-pink-500/20">
+                    <h3 class="text-2xl font-bold mb-3">"${campaign.trackTitle}" by ${campaign.artistName}</h3>
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <div class="text-gray-400 text-xs">Genre</div>
+                            <div class="font-bold">${campaign.genre}</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-400 text-xs">Budget</div>
+                            <div class="font-bold">${campaign.currency || '₦'}${campaign.budget.toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-400 text-xs">Campaign Type</div>
+                            <div class="font-bold text-xs">${strategy.campaign_type || 'Indie Campaign'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Expected Results (Big Numbers)
+            if (strategy.realistic_expectations) {
+                html += `
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="section-card rounded-xl p-4">
+                            <div class="text-gray-400 text-xs mb-1">Expected Streams</div>
+                            <div class="text-2xl font-black text-pink-400">${strategy.realistic_expectations.streams_30_days}</div>
+                            <div class="text-xs text-gray-500">30 days</div>
+                        </div>
+                        <div class="section-card rounded-xl p-4">
+                            <div class="text-gray-400 text-xs mb-1">New Followers</div>
+                            <div class="text-2xl font-black text-purple-400">${strategy.realistic_expectations.new_followers}</div>
+                            <div class="text-xs text-gray-500">across platforms</div>
+                        </div>
+                        <div class="section-card rounded-xl p-4">
+                            <div class="text-gray-400 text-xs mb-1">Playlists</div>
+                            <div class="text-2xl font-black text-blue-400">${strategy.realistic_expectations.playlist_adds}</div>
+                            <div class="text-xs text-gray-500">expected adds</div>
+                        </div>
+                        <div class="section-card rounded-xl p-4">
+                            <div class="text-gray-400 text-xs mb-1">ROI</div>
+                            <div class="text-2xl font-black text-green-400">${strategy.realistic_expectations.roi_percentage}</div>
+                            <div class="text-xs text-gray-500">first campaign</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Budget Breakdown
+            if (strategy.budget_breakdown) {
+                html += `
+                    <div class="section-card rounded-xl p-6 mb-6">
+                        <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-coins text-yellow-400"></i>
+                            Budget Allocation
+                        </h4>
+                        <div class="grid md:grid-cols-3 gap-4">
+                `;
+                Object.keys(strategy.budget_breakdown).forEach(key => {
+                    if (key !== 'total') {
+                        html += `
+                            <div class="bg-black/30 rounded-lg p-3">
+                                <div class="text-xs text-gray-400">${formatKey(key)}</div>
+                                <div class="font-bold text-pink-400">${strategy.budget_breakdown[key]}</div>
+                            </div>
+                        `;
+                    }
+                });
+                html += `</div></div>`;
+            }
+
+            // Main Strategy Sections
+            const sections = [
+                { key: 'market_research', icon: '📊', title: 'Market Research' },
+                { key: 'influencer_strategy', icon: '👥', title: 'Influencer Strategy' },
+                { key: 'content_strategy', icon: '📱', title: 'Content Strategy' },
+                { key: 'playlist_strategy', icon: '🎵', title: 'Playlist Strategy' },
+                { key: 'action_plan', icon: '📅', title: 'Week-by-Week Action Plan' },
+                { key: 'roi_projections', icon: '💰', title: 'ROI Projections' }
+            ];
+
+            sections.forEach(section => {
+                if (strategy[section.key]) {
+                    html += `
+                        <div class="section-card rounded-xl p-6 mb-4">
+                            <h4 class="font-bold text-lg mb-3 flex items-center gap-2">
+                                <span>${section.icon}</span>
+                                ${section.title}
+                            </h4>
+                            <div class="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                                ${formatContent(strategy[section.key])}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            // Best Practices
+            if (strategy.global_best_practices && Array.isArray(strategy.global_best_practices)) {
+                html += `
+                    <div class="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl p-6 border border-blue-500/20">
+                        <h4 class="font-bold mb-3">💡 Key Success Factors</h4>
+                        <ul class="space-y-2 text-sm">
+                `;
+                strategy.global_best_practices.forEach(tip => {
+                    html += `<li class="flex items-start gap-2"><i class="fa-solid fa-check-circle text-green-400 mt-1"></i><span>${tip}</span></li>`;
+                });
+                html += `</ul></div>`;
+            }
+
+            resultsDiv.innerHTML = html;
+            section.style.display = 'block';
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function formatKey(key) {
+            return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function formatContent(content) {
+            if (typeof content === 'string') {
+                return content.replace(/\n\n/g, '<br><br>');
+            }
+            return JSON.stringify(content, null, 2);
+        }
+
+        function downloadPDF() {
+            if (!currentCampaign) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(20);
+            doc.setTextColor(255, 0, 204);
+            doc.text('SPARKAM CAMPAIGN', 20, 20);
+            
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`${currentCampaign.trackTitle} by ${currentCampaign.artistName}`, 20, 35);
+            
+            doc.setFontSize(10);
+            doc.text(`Genre: ${currentCampaign.genre} | Budget: ${currentCampaign.currency || '₦'}${currentCampaign.budget.toLocaleString()}`, 20, 45);
+            
+            const strategy = currentCampaign.strategy;
+            let y = 55;
+            
+            if (strategy.realistic_expectations) {
+                doc.setFontSize(12);
+                doc.setTextColor(255, 0, 204);
+                doc.text('Expected Results (30 Days):', 20, y);
+                y += 8;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`• Streams: ${strategy.realistic_expectations.streams_30_days}`, 20, y);
+                y += 6;
+                doc.text(`• New Followers: ${strategy.realistic_expectations.new_followers}`, 20, y);
+                y += 6;
+                doc.text(`• Playlist Adds: ${strategy.realistic_expectations.playlist_adds}`, 20, y);
+                y += 6;
+                doc.text(`• ROI: ${strategy.realistic_expectations.roi_percentage}`, 20, y);
+                y += 10;
+            }
+            
+            doc.setFontSize(8);
+            doc.setTextColor(128, 128, 128);
+            doc.text('Generated by Sparkam - AI Music Promotion', 20, 285);
+            doc.text('sparkam.ai | hello@sparkam.ai', 20, 290);
+            
+            doc.save(`Sparkam_${currentCampaign.trackTitle.replace(/\s/g, '_')}.pdf`);
+        }
+    </script>
 </body>
-                            </html>
-    
+                    </html>
+                    
