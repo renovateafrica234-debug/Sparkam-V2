@@ -105,14 +105,9 @@
                     <i class="fa-solid fa-check-circle text-green-400 mr-2"></i>
                     Campaign Ready!
                 </h2>
-                <div class="flex gap-3">
-                    <button onclick="executeWorkflow()" id="workflow-btn" class="px-6 py-3 bg-gradient-to-r from-green-500 to-cyan-500 rounded-xl font-bold hover:opacity-90 transition">
-                        <i class="fa-solid fa-rocket mr-2"></i>Execute Workflow
-                    </button>
-                    <button onclick="downloadPDF()" class="px-4 py-2 spark-btn rounded-xl font-bold">
-                        <i class="fa-solid fa-download mr-2"></i>PDF
-                    </button>
-                </div>
+                <button onclick="downloadPDF()" class="px-6 py-3 spark-btn rounded-xl font-bold">
+                    <i class="fa-solid fa-download mr-2"></i>Download PDF
+                </button>
             </div>
             
             <div id="campaign-results"></div>
@@ -167,6 +162,7 @@
             const currency = campaign.currency || '₦';
             
             let html = `
+                <!-- Header -->
                 <div class="bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl p-6 mb-6 border border-pink-500/20">
                     <h3 class="text-2xl font-bold mb-3">"${campaign.trackTitle}" by ${campaign.artistName}</h3>
                     <div class="grid grid-cols-3 gap-4">
@@ -186,6 +182,7 @@
                 </div>
             `;
 
+            // Expected Results
             if (strategy.realistic_expectations) {
                 html += `
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -209,6 +206,7 @@
                 `;
             }
 
+            // Budget Breakdown with allocations
             if (strategy.budget_breakdown) {
                 const breakdown = strategy.budget_breakdown;
                 const sections = [
@@ -241,16 +239,17 @@
                 html += `</div></div>`;
             }
 
-            const sectionsList = [
+            // Strategy Sections with text content
+            const sections = [
                 { key: 'market_research', icon: '📊', title: 'Market Research' },
                 { key: 'influencer_strategy', icon: '👥', title: 'Influencer Strategy' },
-                { key: 'content_strategy', icon: '📱', title: 'Content Strategy' },
+                { key: 'content_strategy', icon: '📱', title: 'Content Strategy (TikTok/IG)' },
                 { key: 'playlist_strategy', icon: '🎵', title: 'Playlist Strategy' },
                 { key: 'action_plan', icon: '📅', title: 'Week-by-Week Action Plan' },
                 { key: 'roi_projections', icon: '💰', title: 'ROI Projections' }
             ];
 
-            sectionsList.forEach(sec => {
+            sections.forEach(sec => {
                 if (strategy[sec.key]) {
                     html += `
                         <div class="section-card rounded-xl p-6 mb-4">
@@ -265,6 +264,7 @@
                 }
             });
 
+            // Best Practices
             if (strategy.global_best_practices) {
                 html += `
                     <div class="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl p-6 border border-blue-500/20">
@@ -292,45 +292,130 @@
             return text;
         }
 
-        async function executeWorkflow() {
-            if (!currentCampaign) return;
-            
-            const btn = document.getElementById('workflow-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating Workflow...';
-            
-            try {
-                const response = await fetch('/api/generate-workflow', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ campaign: currentCampaign })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Save workflow
-                    localStorage.setItem('sparkam_current_workflow', JSON.stringify(data.workflow));
-                    // Redirect to workflow page
-                    window.location.href = '/workflow.html';
-                } else {
-                    alert('Error: ' + (data.error || 'Failed to create workflow'));
-                }
-                
-            } catch (error) {
-                alert('Error: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-rocket mr-2"></i>Execute Workflow';
-            }
-        }
-
         function downloadPDF() {
-            // PDF generation code (keeping existing)
             if (!currentCampaign) return;
-            alert('PDF download - keeping existing code');
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const strategy = currentCampaign.strategy;
+            const currency = currentCampaign.currency || '₦';
+            
+            let y = 20;
+            
+            // Title
+            doc.setFontSize(22);
+            doc.setTextColor(255, 0, 204);
+            doc.text('SPARKAM CAMPAIGN', 20, y);
+            y += 15;
+            
+            // Campaign Info
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`"${currentCampaign.trackTitle}" by ${currentCampaign.artistName}`, 20, y);
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.text(`Genre: ${currentCampaign.genre} | Budget: ${currency}${currentCampaign.budget.toLocaleString()}`, 20, y);
+            y += 15;
+            
+            // Expected Results
+            if (strategy.realistic_expectations) {
+                doc.setFontSize(14);
+                doc.setTextColor(255, 0, 204);
+                doc.text('Expected Results (30 Days)', 20, y);
+                y += 8;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                const results = [
+                    `Streams: ${strategy.realistic_expectations.streams_30_days}`,
+                    `New Followers: ${strategy.realistic_expectations.new_followers}`,
+                    `Playlist Adds: ${strategy.realistic_expectations.playlist_adds}`,
+                    `ROI: ${strategy.realistic_expectations.roi_percentage}`
+                ];
+                
+                results.forEach(line => {
+                    doc.text(`• ${line}`, 20, y);
+                    y += 6;
+                });
+                y += 5;
+            }
+            
+            // Budget Breakdown
+            if (strategy.budget_breakdown) {
+                doc.setFontSize(14);
+                doc.setTextColor(255, 0, 204);
+                doc.text('Budget Allocation', 20, y);
+                y += 8;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                Object.keys(strategy.budget_breakdown).forEach(key => {
+                    if (key !== 'total' && y < 270) {
+                        const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        doc.text(`${label}: ${strategy.budget_breakdown[key]}`, 20, y);
+                        y += 6;
+                    }
+                });
+                y += 5;
+            }
+            
+            // Add sections
+            const sections = [
+                { key: 'market_research', title: 'Market Research' },
+                { key: 'influencer_strategy', title: 'Influencer Strategy' },
+                { key: 'content_strategy', title: 'Content Strategy' },
+                { key: 'playlist_strategy', title: 'Playlist Strategy' }
+            ];
+            
+            sections.forEach(sec => {
+                if (strategy[sec.key] && y < 270) {
+                    // New page if needed
+                    if (y > 250) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(255, 0, 204);
+                    doc.text(sec.title, 20, y);
+                    y += 8;
+                    
+                    doc.setFontSize(9);
+                    doc.setTextColor(0, 0, 0);
+                    
+                    let content = typeof strategy[sec.key] === 'string' 
+                        ? strategy[sec.key] 
+                        : JSON.stringify(strategy[sec.key]);
+                    
+                    // Truncate and split
+                    content = content.substring(0, 800);
+                    const lines = doc.splitTextToSize(content, 170);
+                    
+                    lines.slice(0, 20).forEach(line => {
+                        if (y > 280) {
+                            doc.addPage();
+                            y = 20;
+                        }
+                        doc.text(line, 20, y);
+                        y += 5;
+                    });
+                    y += 5;
+                }
+            });
+            
+            // Footer
+            doc.setFontSize(8);
+            doc.setTextColor(128, 128, 128);
+            doc.text('Generated by Sparkam - AI Music Promotion', 20, 285);
+            doc.text('sparkam.ai | hello@sparkam.ai', 20, 290);
+            
+            // Download
+            doc.save(`Sparkam_${currentCampaign.trackTitle.replace(/\s/g, '_')}.pdf`);
         }
     </script>
 </body>
-                            </html>
-            
+    </html>
+                        
