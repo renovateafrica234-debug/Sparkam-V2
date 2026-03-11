@@ -6,7 +6,6 @@
     <title>Dashboard - Sparkam</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
@@ -26,90 +25,43 @@
         .spark-btn {
             background: linear-gradient(90deg, #ff00cc, #3333ff);
         }
-        .section-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 3px solid #ff00cc;
-        }
     </style>
 </head>
 <body class="min-h-screen">
-
-    <!-- Navigation -->
     <nav class="glass border-b border-white/10 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto px-6 py-4">
             <div class="text-2xl font-black gradient-text">SPARKAM</div>
-            <div class="flex items-center gap-6">
-                <span class="text-sm text-gray-400">Beta Tester</span>
-                <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400">ESSENTIAL (FREE)</span>
-            </div>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto px-6 py-8">
-        
-        <div class="mb-8">
-            <h1 class="text-4xl font-black mb-2">
-                Welcome, <span class="gradient-text">Artist</span>!
-            </h1>
-            <p class="text-gray-400">Generate AI-powered campaigns instantly</p>
-        </div>
+        <h1 class="text-4xl font-black mb-8">Dashboard</h1>
 
-        <!-- Campaign Form -->
         <div class="glass rounded-3xl p-8 mb-8">
-            <h2 class="text-2xl font-black mb-6">
-                <i class="fa-solid fa-bolt text-pink-500 mr-2"></i>
-                Generate Campaign
-            </h2>
-
+            <h2 class="text-2xl font-black mb-6">Generate Campaign</h2>
             <form id="campaign-form" class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-bold mb-2">Artist Name</label>
-                    <input type="text" id="artistName" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" placeholder="Your name" required>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-bold mb-2">Track Title</label>
-                    <input type="text" id="trackTitle" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" placeholder="Track name" required>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-bold mb-2">Genre</label>
-                    <select id="genre" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" required>
-                        <option value="">Select genre</option>
-                        <option value="Afropop">Afropop</option>
-                        <option value="Afrobeats">Afrobeats</option>
-                        <option value="Hip-Hop">Hip-Hop</option>
-                        <option value="R&B">R&B</option>
-                        <option value="Pop">Pop</option>
-                        <option value="Indie">Indie</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-bold mb-2">Budget (₦ or $)</label>
-                    <input type="number" id="budget" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" value="150000" min="10000" required>
-                </div>
-
-                <div class="md:col-span-2">
-                    <button type="submit" id="spark-btn" class="w-full spark-btn py-4 rounded-xl font-bold text-lg uppercase">
-                        <i class="fa-solid fa-bolt mr-2"></i>SPARK IT
-                    </button>
-                </div>
+                <input type="text" id="artistName" placeholder="Artist Name" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white" required>
+                <input type="text" id="trackTitle" placeholder="Track Title" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white" required>
+                <select id="genre" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white" required>
+                    <option value="">Select Genre</option>
+                    <option value="Afropop">Afropop</option>
+                    <option value="Hip-Hop">Hip-Hop</option>
+                </select>
+                <input type="number" id="budget" value="150000" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white" required>
+                <button type="submit" id="spark-btn" class="md:col-span-2 spark-btn py-4 rounded-xl font-bold">SPARK IT</button>
             </form>
         </div>
 
-        <!-- Results -->
         <div id="results-section" class="glass rounded-3xl p-8" style="display: none;">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-black">
-                    <i class="fa-solid fa-check-circle text-green-400 mr-2"></i>
-                    Campaign Ready!
-                </h2>
-                <button onclick="downloadPDF()" class="px-6 py-3 spark-btn rounded-xl font-bold">
-                    <i class="fa-solid fa-download mr-2"></i>Download PDF
-                </button>
+            <div class="bg-green-500/20 border-2 border-green-500 rounded-2xl p-6 mb-6">
+                <h2 class="text-2xl font-black mb-4">Campaign Ready!</h2>
+                <div class="flex gap-4">
+                    <button onclick="executeWorkflow()" id="workflow-btn" class="px-8 py-4 bg-green-500 hover:bg-green-600 rounded-xl font-black text-lg">
+                        🚀 EXECUTE WORKFLOW
+                    </button>
+                    <button class="px-6 py-4 spark-btn rounded-xl font-bold">📄 PDF</button>
+                </div>
             </div>
-            
             <div id="campaign-results"></div>
         </div>
     </div>
@@ -119,303 +71,75 @@
 
         document.getElementById('campaign-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const formData = {
-                artistName: document.getElementById('artistName').value.trim(),
-                trackTitle: document.getElementById('trackTitle').value.trim(),
-                genre: document.getElementById('genre').value,
-                budget: parseInt(document.getElementById('budget').value)
-            };
-            
             const btn = document.getElementById('spark-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING (10-15 sec)...';
+            btn.textContent = 'GENERATING...';
             
             try {
                 const response = await fetch('/api/generate-campaign', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify({
+                        artistName: document.getElementById('artistName').value,
+                        trackTitle: document.getElementById('trackTitle').value,
+                        genre: document.getElementById('genre').value,
+                        budget: parseInt(document.getElementById('budget').value)
+                    })
                 });
                 
                 const data = await response.json();
-                
                 if (data.success) {
                     currentCampaign = data.campaign;
-                    displayCampaign(data.campaign);
-                } else {
-                    alert('Error: ' + (data.error || 'Failed'));
+                    document.getElementById('results-section').style.display = 'block';
+                    document.getElementById('campaign-results').innerHTML = '<p>Campaign generated! Click Execute Workflow above.</p>';
                 }
-                
             } catch (error) {
                 alert('Error: ' + error.message);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i>SPARK IT';
+                btn.textContent = 'SPARK IT';
             }
         });
 
-        function displayCampaign(campaign) {
-            const section = document.getElementById('results-section');
-            const resultsDiv = document.getElementById('campaign-results');
-            const strategy = campaign.strategy;
-            const currency = campaign.currency || '₦';
+        async function executeWorkflow() {
+            console.log('🚀 EXECUTE WORKFLOW CLICKED');
+            console.log('Campaign data:', currentCampaign);
             
-            let html = `
-                <!-- Header -->
-                <div class="bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl p-6 mb-6 border border-pink-500/20">
-                    <h3 class="text-2xl font-bold mb-3">"${campaign.trackTitle}" by ${campaign.artistName}</h3>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <div class="text-gray-400 text-xs">Genre</div>
-                            <div class="font-bold">${campaign.genre}</div>
-                        </div>
-                        <div>
-                            <div class="text-gray-400 text-xs">Total Budget</div>
-                            <div class="font-bold text-pink-400">${currency}${campaign.budget.toLocaleString()}</div>
-                        </div>
-                        <div>
-                            <div class="text-gray-400 text-xs">Campaign Type</div>
-                            <div class="font-bold text-xs">${strategy.campaign_type || 'Indie'}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Expected Results
-            if (strategy.realistic_expectations) {
-                html += `
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">Streams (30d)</div>
-                            <div class="text-2xl font-black text-pink-400">${strategy.realistic_expectations.streams_30_days}</div>
-                        </div>
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">New Followers</div>
-                            <div class="text-2xl font-black text-purple-400">${strategy.realistic_expectations.new_followers}</div>
-                        </div>
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">Playlists</div>
-                            <div class="text-2xl font-black text-blue-400">${strategy.realistic_expectations.playlist_adds}</div>
-                        </div>
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">ROI</div>
-                            <div class="text-2xl font-black text-green-400">${strategy.realistic_expectations.roi_percentage}</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Budget Breakdown with allocations
-            if (strategy.budget_breakdown) {
-                const breakdown = strategy.budget_breakdown;
-                const sections = [
-                    { key: 'micro_influencers', name: 'Micro-Influencer Collabs', icon: '👥' },
-                    { key: 'tiktok_youtube_shorts', name: 'TikTok/YouTube Shorts', icon: '📱' },
-                    { key: 'instagram_content', name: 'Instagram Content', icon: '📸' },
-                    { key: 'playlist_pitching', name: 'Playlist Pitching', icon: '🎵' },
-                    { key: 'content_creation', name: 'Content Creation', icon: '🎬' },
-                    { key: 'community_misc', name: 'Community & Misc', icon: '🌟' }
-                ];
-
-                html += `<div class="section-card rounded-xl p-6 mb-6">
-                    <h4 class="font-bold text-lg mb-4"><i class="fa-solid fa-coins text-yellow-400 mr-2"></i>Budget Allocation</h4>
-                    <div class="grid md:grid-cols-3 gap-4">`;
+            const btn = document.getElementById('workflow-btn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ CREATING WORKFLOW...';
+            
+            try {
+                console.log('Calling /api/generate-workflow...');
                 
-                sections.forEach(sec => {
-                    if (breakdown[sec.key]) {
-                        html += `
-                            <div class="bg-black/40 rounded-lg p-4 border border-white/5">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-lg">${sec.icon}</span>
-                                    <span class="text-xs text-gray-400">${sec.name}</span>
-                                </div>
-                                <div class="font-black text-xl text-pink-400">${breakdown[sec.key]}</div>
-                            </div>
-                        `;
-                    }
+                const response = await fetch('/api/generate-workflow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ campaign: currentCampaign })
                 });
                 
-                html += `</div></div>`;
-            }
-
-            // Strategy Sections with text content
-            const sections = [
-                { key: 'market_research', icon: '📊', title: 'Market Research' },
-                { key: 'influencer_strategy', icon: '👥', title: 'Influencer Strategy' },
-                { key: 'content_strategy', icon: '📱', title: 'Content Strategy (TikTok/IG)' },
-                { key: 'playlist_strategy', icon: '🎵', title: 'Playlist Strategy' },
-                { key: 'action_plan', icon: '📅', title: 'Week-by-Week Action Plan' },
-                { key: 'roi_projections', icon: '💰', title: 'ROI Projections' }
-            ];
-
-            sections.forEach(sec => {
-                if (strategy[sec.key]) {
-                    html += `
-                        <div class="section-card rounded-xl p-6 mb-4">
-                            <h4 class="font-bold text-lg mb-3">
-                                <span class="mr-2">${sec.icon}</span>${sec.title}
-                            </h4>
-                            <div class="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto">
-                                ${truncateText(strategy[sec.key], 2000)}
-                            </div>
-                        </div>
-                    `;
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success) {
+                    console.log('✅ SUCCESS! Saving workflow...');
+                    localStorage.setItem('sparkam_current_workflow', JSON.stringify(data.workflow));
+                    console.log('Redirecting to workflow.html...');
+                    window.location.href = 'workflow.html';
+                } else {
+                    console.error('❌ API Error:', data.error);
+                    alert('Error: ' + data.error);
                 }
-            });
-
-            // Best Practices
-            if (strategy.global_best_practices) {
-                html += `
-                    <div class="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl p-6 border border-blue-500/20">
-                        <h4 class="font-bold mb-3">💡 Key Success Factors</h4>
-                        <ul class="space-y-2 text-sm">
-                `;
-                strategy.global_best_practices.forEach(tip => {
-                    html += `<li class="flex gap-2"><i class="fa-solid fa-check-circle text-green-400 mt-1"></i><span>${tip}</span></li>`;
-                });
-                html += `</ul></div>`;
+            } catch (error) {
+                console.error('❌ Network Error:', error);
+                alert('Network error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🚀 EXECUTE WORKFLOW';
             }
-
-            resultsDiv.innerHTML = html;
-            section.style.display = 'block';
-            section.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function truncateText(text, maxLength) {
-            if (typeof text !== 'string') {
-                text = JSON.stringify(text, null, 2);
-            }
-            if (text.length > maxLength) {
-                return text.substring(0, maxLength) + '\n\n... (See full details in PDF)';
-            }
-            return text;
-        }
-
-        function downloadPDF() {
-            if (!currentCampaign) return;
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const strategy = currentCampaign.strategy;
-            const currency = currentCampaign.currency || '₦';
-            
-            let y = 20;
-            
-            // Title
-            doc.setFontSize(22);
-            doc.setTextColor(255, 0, 204);
-            doc.text('SPARKAM CAMPAIGN', 20, y);
-            y += 15;
-            
-            // Campaign Info
-            doc.setFontSize(16);
-            doc.setTextColor(0, 0, 0);
-            doc.text(`"${currentCampaign.trackTitle}" by ${currentCampaign.artistName}`, 20, y);
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.text(`Genre: ${currentCampaign.genre} | Budget: ${currency}${currentCampaign.budget.toLocaleString()}`, 20, y);
-            y += 15;
-            
-            // Expected Results
-            if (strategy.realistic_expectations) {
-                doc.setFontSize(14);
-                doc.setTextColor(255, 0, 204);
-                doc.text('Expected Results (30 Days)', 20, y);
-                y += 8;
-                
-                doc.setFontSize(10);
-                doc.setTextColor(0, 0, 0);
-                
-                const results = [
-                    `Streams: ${strategy.realistic_expectations.streams_30_days}`,
-                    `New Followers: ${strategy.realistic_expectations.new_followers}`,
-                    `Playlist Adds: ${strategy.realistic_expectations.playlist_adds}`,
-                    `ROI: ${strategy.realistic_expectations.roi_percentage}`
-                ];
-                
-                results.forEach(line => {
-                    doc.text(`• ${line}`, 20, y);
-                    y += 6;
-                });
-                y += 5;
-            }
-            
-            // Budget Breakdown
-            if (strategy.budget_breakdown) {
-                doc.setFontSize(14);
-                doc.setTextColor(255, 0, 204);
-                doc.text('Budget Allocation', 20, y);
-                y += 8;
-                
-                doc.setFontSize(10);
-                doc.setTextColor(0, 0, 0);
-                
-                Object.keys(strategy.budget_breakdown).forEach(key => {
-                    if (key !== 'total' && y < 270) {
-                        const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        doc.text(`${label}: ${strategy.budget_breakdown[key]}`, 20, y);
-                        y += 6;
-                    }
-                });
-                y += 5;
-            }
-            
-            // Add sections
-            const sections = [
-                { key: 'market_research', title: 'Market Research' },
-                { key: 'influencer_strategy', title: 'Influencer Strategy' },
-                { key: 'content_strategy', title: 'Content Strategy' },
-                { key: 'playlist_strategy', title: 'Playlist Strategy' }
-            ];
-            
-            sections.forEach(sec => {
-                if (strategy[sec.key] && y < 270) {
-                    // New page if needed
-                    if (y > 250) {
-                        doc.addPage();
-                        y = 20;
-                    }
-                    
-                    doc.setFontSize(12);
-                    doc.setTextColor(255, 0, 204);
-                    doc.text(sec.title, 20, y);
-                    y += 8;
-                    
-                    doc.setFontSize(9);
-                    doc.setTextColor(0, 0, 0);
-                    
-                    let content = typeof strategy[sec.key] === 'string' 
-                        ? strategy[sec.key] 
-                        : JSON.stringify(strategy[sec.key]);
-                    
-                    // Truncate and split
-                    content = content.substring(0, 800);
-                    const lines = doc.splitTextToSize(content, 170);
-                    
-                    lines.slice(0, 20).forEach(line => {
-                        if (y > 280) {
-                            doc.addPage();
-                            y = 20;
-                        }
-                        doc.text(line, 20, y);
-                        y += 5;
-                    });
-                    y += 5;
-                }
-            });
-            
-            // Footer
-            doc.setFontSize(8);
-            doc.setTextColor(128, 128, 128);
-            doc.text('Generated by Sparkam - AI Music Promotion', 20, 285);
-            doc.text('sparkam.ai | hello@sparkam.ai', 20, 290);
-            
-            // Download
-            doc.save(`Sparkam_${currentCampaign.trackTitle.replace(/\s/g, '_')}.pdf`);
         }
     </script>
 </body>
-    </html>
-                        
+                </html>
+    
