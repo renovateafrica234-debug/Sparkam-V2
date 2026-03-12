@@ -3,71 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join Sparkam Beta</title>
+    <title>Sign Up - Sparkam</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f051a; color: white; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .spark-gradient { background: linear-gradient(90deg, #ff00cc, #3333ff); }
+        body {
+            background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .spark-btn {
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6">
-    <div class="glass p-10 rounded-[2.5rem] w-full max-w-md text-center border-white/10">
-        <h2 class="text-3xl font-black mb-2 uppercase tracking-tight">Beta Access</h2>
-        <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-[0.3em]">Join the Sparkam Leads Pool</p>
-        
-        <form id="signupForm" class="space-y-4 text-left">
-            <div>
-                <label class="text-[10px] uppercase font-bold text-gray-500 ml-2 tracking-widest">Full Name</label>
-                <input type="text" id="fullName" required placeholder="John Doe" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-pink-500 transition mt-1 text-sm">
-            </div>
-            <div>
-                <label class="text-[10px] uppercase font-bold text-gray-500 ml-2 tracking-widest">Email Address</label>
-                <input type="email" id="email" required placeholder="john@example.com" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-pink-500 transition mt-1 text-sm">
-            </div>
-            <div>
-                <label class="text-[10px] uppercase font-bold text-gray-500 ml-2 tracking-widest">Artist Name</label>
-                <input type="text" id="artistName" required placeholder="Artist Stage Name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-pink-500 transition mt-1 text-sm">
-            </div>
-            
-            <button type="submit" id="submitBtn" class="spark-gradient w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-lg shadow-pink-500/20 mt-4 hover:scale-[1.02] transition">
-                Create Account
-            </button>
-        </form>
+<body class="min-h-screen flex items-center justify-center px-6">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-black gradient-text mb-2">SPARKAM</h1>
+            <p class="text-gray-400">Create your account</p>
+        </div>
+
+        <div class="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
+            <form id="signup-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-white">Artist Name</label>
+                    <input type="text" id="artistName" required
+                           class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500"
+                           placeholder="Your stage name">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-white">Email</label>
+                    <input type="email" id="email" required
+                           class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500"
+                           placeholder="your@email.com">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-white">Phone Number (Optional)</label>
+                    <input type="tel" id="phoneNumber"
+                           class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500"
+                           placeholder="+234...">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-white">Password</label>
+                    <input type="password" id="password" required minlength="6"
+                           class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500"
+                           placeholder="At least 6 characters">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-white">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required minlength="6"
+                           class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500"
+                           placeholder="Re-enter password">
+                </div>
+
+                <div id="error-message" class="text-red-400 text-sm hidden"></div>
+
+                <button type="submit" id="signup-btn"
+                        class="w-full spark-btn py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                    Create Account
+                </button>
+            </form>
+
+            <p class="text-center text-gray-400 text-sm mt-6">
+                Already have an account? 
+                <a href="login.html" class="text-pink-400 hover:text-pink-300">Login</a>
+            </p>
+        </div>
+
+        <p class="text-center text-gray-500 text-xs mt-6">
+            Beta testers get Essential tier FREE
+        </p>
     </div>
 
-    <script>
-        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        // Initialize Supabase
+        const SUPABASE_URL = // https://avlbrhnsjylaaokjofoo.supabase.co
+        const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const form = document.getElementById('signup-form');
+        const btn = document.getElementById('signup-btn');
+        const errorDiv = document.getElementById('error-message');
+
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const email = document.getElementById('email').value;
-            const name = document.getElementById('fullName').value;
-            const artist = document.getElementById('artistName').value;
+            
+            const artistName = document.getElementById('artistName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
-            btn.innerText = "CONNECTING BRAIN...";
+            // Validate
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+
             btn.disabled = true;
-
-            // Save for Dashboard Use
-            localStorage.setItem('sparkam_email', email);
-            localStorage.setItem('sparkam_name', name);
-            localStorage.setItem('sparkam_artist', artist);
-
-            const leadData = { name, email, artist, timestamp: new Date().toISOString() };
+            btn.textContent = 'Creating account...';
+            errorDiv.classList.add('hidden');
 
             try {
-                // IMPORTANT: Removed 'no-cors' to ensure data actually sends. 
-                // Replace with your URL from
-                await fetch('https://hooks.zapier.com/hooks/catch/21578502/27vsqx1/', {
-                    method: 'POST',
-                    body: JSON.stringify(leadData)
+                // 1. Create auth user
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            artist_name: artistName,
+                            phone_number: phoneNumber
+                        }
+                    }
                 });
+
+                if (authError) throw authError;
+
+                // 2. Create user profile
+                const { error: profileError } = await supabase
+                    .from('users')
+                    .insert([{
+                        id: authData.user.id,
+                        email,
+                        artist_name: artistName,
+                        phone_number: phoneNumber || null,
+                        is_beta_tester: true,
+                        tier: 'essential'
+                    }]);
+
+                if (profileError) throw profileError;
+
+                // Success!
+                alert('Account created! Redirecting to dashboard...');
+                window.location.href = 'dashboard.html';
+
             } catch (error) {
-                console.warn("External Brain link slow, proceeding with local cache.");
-            } finally {
-                window.location.href = 'plan-selection.html';
+                console.error('Signup error:', error);
+                showError(error.message || 'Failed to create account');
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
             }
         });
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
