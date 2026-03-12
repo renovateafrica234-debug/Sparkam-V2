@@ -86,9 +86,9 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-        // Initialize Supabase
-        const SUPABASE_URL = // https://avlbrhnsjylaaokjofoo.supabase.co
-        const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8
+        // YOUR ACTUAL CREDENTIALS
+        const SUPABASE_URL = 'https://avlbrhnsjylaaokjofoo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8';
         
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -121,6 +121,8 @@
             errorDiv.classList.add('hidden');
 
             try {
+                console.log('Step 1: Creating auth user...');
+                
                 // 1. Create auth user
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email,
@@ -133,7 +135,13 @@
                     }
                 });
 
-                if (authError) throw authError;
+                if (authError) {
+                    console.error('Auth error:', authError);
+                    throw authError;
+                }
+
+                console.log('Step 2: Auth user created:', authData.user.id);
+                console.log('Step 3: Creating profile in users table...');
 
                 // 2. Create user profile
                 const { error: profileError } = await supabase
@@ -147,15 +155,20 @@
                         tier: 'essential'
                     }]);
 
-                if (profileError) throw profileError;
+                if (profileError) {
+                    console.error('Profile error:', profileError);
+                    throw profileError;
+                }
+
+                console.log('Step 4: Profile created! Redirecting...');
 
                 // Success!
-                alert('Account created! Redirecting to dashboard...');
+                alert('Account created successfully! Welcome to Sparkam!');
                 window.location.href = 'dashboard.html';
 
             } catch (error) {
                 console.error('Signup error:', error);
-                showError(error.message || 'Failed to create account');
+                showError(error.message || 'Failed to create account. Please try again.');
                 btn.disabled = false;
                 btn.textContent = 'Create Account';
             }
@@ -165,6 +178,12 @@
             errorDiv.textContent = message;
             errorDiv.classList.remove('hidden');
         }
+
+        // Debug: Log when page loads
+        console.log('Signup page loaded');
+        console.log('Supabase URL:', SUPABASE_URL);
+        console.log('Supabase Key (first 20 chars):', SUPABASE_ANON_KEY.substring(0, 20) + '...');
     </script>
 </body>
-</html>
+    </html>
+    
