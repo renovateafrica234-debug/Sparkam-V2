@@ -61,9 +61,9 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-        // Initialize Supabase
-        const SUPABASE_URL = https://avlbrhnsjylaaokjofoo.supabase.co
-        const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8
+        // YOUR ACTUAL CREDENTIALS
+        const SUPABASE_URL = 'https://avlbrhnsjylaaokjofoo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8';
         
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -82,18 +82,27 @@
             errorDiv.classList.add('hidden');
 
             try {
+                console.log('Attempting login for:', email);
+                
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email,
                     password
                 });
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Login error:', error);
+                    throw error;
+                }
+
+                console.log('Login successful!', data.user.id);
 
                 // Update last login
                 await supabase
                     .from('users')
                     .update({ last_login: new Date().toISOString() })
                     .eq('id', data.user.id);
+
+                console.log('Redirecting to dashboard...');
 
                 // Success!
                 window.location.href = 'dashboard.html';
@@ -110,6 +119,11 @@
             errorDiv.textContent = message;
             errorDiv.classList.remove('hidden');
         }
+
+        // Debug: Log when page loads
+        console.log('Login page loaded');
+        console.log('Supabase URL:', SUPABASE_URL);
     </script>
 </body>
 </html>
+
