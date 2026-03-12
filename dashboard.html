@@ -6,7 +6,6 @@
     <title>Dashboard - Sparkam</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
@@ -110,7 +109,7 @@
                             <i class="fa-solid fa-check-circle text-green-400 mr-2"></i>
                             Campaign Ready!
                         </h2>
-                        <p class="text-gray-300 text-sm">Turn this strategy into a 30-day action plan</p>
+                        <p class="text-gray-300 text-sm">Your campaign has been saved to your account</p>
                     </div>
                     <div class="flex gap-3">
                         <button onclick="executeWorkflow()" id="workflow-btn" 
@@ -127,89 +126,72 @@
             
             <div id="campaign-results"></div>
         </div>
-
-        <!-- Recent Campaigns -->
-        <div id="recent-campaigns" class="glass rounded-3xl p-8 mt-8" style="display: none;">
-            <h2 class="text-2xl font-black mb-6">
-                <i class="fa-solid fa-clock-rotate-left text-purple-500 mr-2"></i>
-                Your Recent Campaigns
-            </h2>
-            <div id="campaigns-list"></div>
-        </div>
     </div>
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
         const SUPABASE_URL = 'https://avlbrhnsjylaaokjofoo.supabase.co';
-        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE'; // REPLACE WITH YOUR ANON KEY
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8';
         
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
         let currentCampaign = null;
+        let userProfile = null;
+
+        console.log('🚀 Dashboard loaded');
 
         // Check authentication on page load
         async function init() {
+            console.log('🔐 Checking authentication...');
+            
             const { data: { user } } = await supabase.auth.getUser();
             
             if (!user) {
-                // Not logged in, redirect to login
+                console.log('❌ Not logged in, redirecting to login...');
                 window.location.href = 'login.html';
                 return;
             }
 
+            console.log('✅ User authenticated:', user.id);
             currentUser = user;
             await loadUserProfile();
-            await loadUserCampaigns();
         }
 
         // Load user profile
         async function loadUserProfile() {
+            console.log('📊 Loading user profile...');
+            
             const { data, error } = await supabase
                 .from('users')
                 .select('*')
                 .eq('id', currentUser.id)
                 .single();
 
+            if (error) {
+                console.error('Error loading profile:', error);
+                return;
+            }
+
             if (data) {
+                userProfile = data;
+                console.log('✅ Profile loaded:', data.artist_name);
+                
                 document.getElementById('user-name').textContent = data.artist_name;
                 document.getElementById('welcome-name').textContent = data.artist_name;
                 document.getElementById('user-tier').textContent = data.tier.toUpperCase() + (data.is_beta_tester ? ' (FREE BETA)' : '');
             }
         }
 
-        // Load user's campaigns
-        async function loadUserCampaigns() {
-            const { data, error } = await supabase
-                .from('campaigns')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .order('created_at', { ascending: false })
-                .limit(5);
-
-            if (data && data.length > 0) {
-                document.getElementById('recent-campaigns').style.display = 'block';
-                const listHtml = data.map(c => `
-                    <div class="section-card rounded-xl p-4 mb-4">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h3 class="font-bold text-lg">"${c.track_title}"</h3>
-                                <p class="text-sm text-gray-400">${c.genre} • ${c.currency}${c.budget.toLocaleString()} • ${new Date(c.created_at).toLocaleDateString()}</p>
-                            </div>
-                            <button onclick="window.viewCampaign('${c.id}')" class="px-4 py-2 spark-btn rounded-lg text-sm font-bold">
-                                View
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-                document.getElementById('campaigns-list').innerHTML = listHtml;
-            }
-        }
-
         // Generate campaign
         document.getElementById('campaign-form').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            if (!userProfile) {
+                alert('Profile not loaded yet, please wait...');
+                return;
+            }
             
             const formData = {
                 trackTitle: document.getElementById('trackTitle').value.trim(),
@@ -222,12 +204,14 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING (10-15 sec)...';
             
             try {
+                console.log('🎵 Generating campaign...');
+                
                 // Call API to generate campaign
                 const response = await fetch('/api/generate-campaign', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        artistName: (await loadUserProfile()).artist_name || 'Artist',
+                        artistName: userProfile.artist_name,
                         ...formData
                     })
                 });
@@ -235,12 +219,14 @@
                 const data = await response.json();
                 
                 if (data.success) {
+                    console.log('✅ Campaign generated, saving to database...');
+                    
                     // Save campaign to Supabase
                     const { data: savedCampaign, error } = await supabase
                         .from('campaigns')
                         .insert([{
                             user_id: currentUser.id,
-                            artist_name: currentUser.user_metadata.artist_name,
+                            artist_name: userProfile.artist_name,
                             track_title: formData.trackTitle,
                             genre: formData.genre,
                             budget: formData.budget,
@@ -250,13 +236,14 @@
                         .select()
                         .single();
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Error saving campaign:', error);
+                        throw error;
+                    }
 
+                    console.log('✅ Campaign saved to database!');
                     currentCampaign = savedCampaign;
                     displayCampaign(savedCampaign);
-                    
-                    // Reload campaigns list
-                    await loadUserCampaigns();
                 } else {
                     alert('Error: ' + (data.error || 'Failed'));
                 }
@@ -325,65 +312,22 @@
         }
 
         window.logout = async function() {
+            console.log('👋 Logging out...');
             await supabase.auth.signOut();
             window.location.href = 'login.html';
         }
 
         window.executeWorkflow = async function() {
-            if (!currentCampaign) return;
-            
-            const btn = document.getElementById('workflow-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating Workflow...';
-            
-            try {
-                const response = await fetch('/api/generate-workflow', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ campaign: currentCampaign })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Save workflow to Supabase
-                    const { data: savedWorkflow, error } = await supabase
-                        .from('workflows')
-                        .insert([{
-                            user_id: currentUser.id,
-                            campaign_id: currentCampaign.id,
-                            tasks: data.workflow.tasks,
-                            completed_tasks: [],
-                            budget_spent: 0,
-                            progress: 0,
-                            status: 'in_progress'
-                        }])
-                        .select()
-                        .single();
-
-                    if (error) throw error;
-
-                    localStorage.setItem('sparkam_current_workflow', JSON.stringify(savedWorkflow));
-                    window.location.href = 'workflow.html';
-                } else {
-                    alert('Error: ' + (data.error || 'Failed to create workflow'));
-                }
-                
-            } catch (error) {
-                alert('Error: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-rocket mr-2"></i>Execute Workflow';
-            }
+            alert('Workflow feature - coming next!');
         }
 
         window.downloadPDF = function() {
-            alert('PDF download functionality');
+            alert('PDF download - coming next!');
         }
 
         // Initialize on load
         init();
     </script>
 </body>
-    </html>
-    
+                    </html>
+                        
