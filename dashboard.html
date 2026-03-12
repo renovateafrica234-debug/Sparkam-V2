@@ -39,8 +39,11 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="text-2xl font-black gradient-text">SPARKAM</div>
             <div class="flex items-center gap-6">
-                <span class="text-sm text-gray-400">Beta Tester</span>
-                <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400">ESSENTIAL (FREE)</span>
+                <span id="user-name" class="text-sm text-gray-400">Loading...</span>
+                <span id="user-tier" class="px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400">ESSENTIAL (FREE)</span>
+                <button onclick="logout()" class="text-sm text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i>Logout
+                </button>
             </div>
         </div>
     </nav>
@@ -49,7 +52,7 @@
         
         <div class="mb-8">
             <h1 class="text-4xl font-black mb-2">
-                Welcome, <span class="gradient-text">Artist</span>!
+                Welcome back, <span id="welcome-name" class="gradient-text">Artist</span>!
             </h1>
             <p class="text-gray-400">Generate AI-powered campaigns instantly</p>
         </div>
@@ -62,11 +65,6 @@
             </h2>
 
             <form id="campaign-form" class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-bold mb-2">Artist Name</label>
-                    <input type="text" id="artistName" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" placeholder="Your name" required>
-                </div>
-                
                 <div>
                     <label class="block text-sm font-bold mb-2">Track Title</label>
                     <input type="text" id="trackTitle" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" placeholder="Track name" required>
@@ -95,7 +93,7 @@
                     <input type="number" id="budget" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" value="150000" min="10000" required>
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="flex items-end">
                     <button type="submit" id="spark-btn" class="w-full spark-btn py-4 rounded-xl font-bold text-lg uppercase">
                         <i class="fa-solid fa-bolt mr-2"></i>SPARK IT
                     </button>
@@ -105,7 +103,6 @@
 
         <!-- Results -->
         <div id="results-section" class="glass rounded-3xl p-8" style="display: none;">
-            <!-- Campaign Ready Header with Workflow Button -->
             <div class="bg-gradient-to-r from-green-500/20 to-cyan-500/20 rounded-2xl p-6 mb-6 border-2 border-green-500/50">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div>
@@ -130,16 +127,91 @@
             
             <div id="campaign-results"></div>
         </div>
+
+        <!-- Recent Campaigns -->
+        <div id="recent-campaigns" class="glass rounded-3xl p-8 mt-8" style="display: none;">
+            <h2 class="text-2xl font-black mb-6">
+                <i class="fa-solid fa-clock-rotate-left text-purple-500 mr-2"></i>
+                Your Recent Campaigns
+            </h2>
+            <div id="campaigns-list"></div>
+        </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = 'https://avlbrhnsjylaaokjofoo.supabase.co';
+        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE'; // REPLACE WITH YOUR ANON KEY
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
         let currentCampaign = null;
 
+        // Check authentication on page load
+        async function init() {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) {
+                // Not logged in, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+
+            currentUser = user;
+            await loadUserProfile();
+            await loadUserCampaigns();
+        }
+
+        // Load user profile
+        async function loadUserProfile() {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+
+            if (data) {
+                document.getElementById('user-name').textContent = data.artist_name;
+                document.getElementById('welcome-name').textContent = data.artist_name;
+                document.getElementById('user-tier').textContent = data.tier.toUpperCase() + (data.is_beta_tester ? ' (FREE BETA)' : '');
+            }
+        }
+
+        // Load user's campaigns
+        async function loadUserCampaigns() {
+            const { data, error } = await supabase
+                .from('campaigns')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            if (data && data.length > 0) {
+                document.getElementById('recent-campaigns').style.display = 'block';
+                const listHtml = data.map(c => `
+                    <div class="section-card rounded-xl p-4 mb-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-lg">"${c.track_title}"</h3>
+                                <p class="text-sm text-gray-400">${c.genre} • ${c.currency}${c.budget.toLocaleString()} • ${new Date(c.created_at).toLocaleDateString()}</p>
+                            </div>
+                            <button onclick="window.viewCampaign('${c.id}')" class="px-4 py-2 spark-btn rounded-lg text-sm font-bold">
+                                View
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('campaigns-list').innerHTML = listHtml;
+            }
+        }
+
+        // Generate campaign
         document.getElementById('campaign-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = {
-                artistName: document.getElementById('artistName').value.trim(),
                 trackTitle: document.getElementById('trackTitle').value.trim(),
                 genre: document.getElementById('genre').value,
                 budget: parseInt(document.getElementById('budget').value)
@@ -150,22 +222,47 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING (10-15 sec)...';
             
             try {
+                // Call API to generate campaign
                 const response = await fetch('/api/generate-campaign', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify({
+                        artistName: (await loadUserProfile()).artist_name || 'Artist',
+                        ...formData
+                    })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    currentCampaign = data.campaign;
-                    displayCampaign(data.campaign);
+                    // Save campaign to Supabase
+                    const { data: savedCampaign, error } = await supabase
+                        .from('campaigns')
+                        .insert([{
+                            user_id: currentUser.id,
+                            artist_name: currentUser.user_metadata.artist_name,
+                            track_title: formData.trackTitle,
+                            genre: formData.genre,
+                            budget: formData.budget,
+                            currency: data.campaign.currency,
+                            strategy: data.campaign.strategy
+                        }])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+
+                    currentCampaign = savedCampaign;
+                    displayCampaign(savedCampaign);
+                    
+                    // Reload campaigns list
+                    await loadUserCampaigns();
                 } else {
                     alert('Error: ' + (data.error || 'Failed'));
                 }
                 
             } catch (error) {
+                console.error('Error:', error);
                 alert('Error: ' + error.message);
             } finally {
                 btn.disabled = false;
@@ -181,7 +278,7 @@
             
             let html = `
                 <div class="bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl p-6 mb-6 border border-pink-500/20">
-                    <h3 class="text-2xl font-bold mb-3">"${campaign.trackTitle}" by ${campaign.artistName}</h3>
+                    <h3 class="text-2xl font-bold mb-3">"${campaign.track_title}"</h3>
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <div class="text-gray-400 text-xs">Genre</div>
@@ -222,77 +319,17 @@
                 `;
             }
 
-            if (strategy.budget_breakdown) {
-                const breakdown = strategy.budget_breakdown;
-                const sections = [
-                    { key: 'micro_influencers', name: 'Influencers', icon: '👥' },
-                    { key: 'content_creation', name: 'Content', icon: '🎬' },
-                    { key: 'social_ads', name: 'Ads', icon: '📱' },
-                    { key: 'playlist_pitching', name: 'Playlists', icon: '🎵' },
-                    { key: 'community_misc', name: 'Community', icon: '🌟' }
-                ];
-
-                html += `<div class="section-card rounded-xl p-6 mb-6">
-                    <h4 class="font-bold text-lg mb-4"><i class="fa-solid fa-coins text-yellow-400 mr-2"></i>Budget Allocation</h4>
-                    <div class="grid md:grid-cols-3 gap-4">`;
-                
-                sections.forEach(sec => {
-                    if (breakdown[sec.key]) {
-                        html += `
-                            <div class="bg-black/40 rounded-lg p-4 border border-white/5">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-lg">${sec.icon}</span>
-                                    <span class="text-xs text-gray-400">${sec.name}</span>
-                                </div>
-                                <div class="font-black text-xl text-pink-400">${breakdown[sec.key]}</div>
-                            </div>
-                        `;
-                    }
-                });
-                
-                html += `</div></div>`;
-            }
-
-            const sectionsList = [
-                { key: 'market_research', icon: '📊', title: 'Market Research' },
-                { key: 'influencer_strategy', icon: '👥', title: 'Influencer Strategy' },
-                { key: 'content_strategy', icon: '📱', title: 'Content Strategy' },
-                { key: 'playlist_strategy', icon: '🎵', title: 'Playlist Strategy' },
-                { key: 'action_plan', icon: '📅', title: 'Week-by-Week Plan' },
-                { key: 'roi_projections', icon: '💰', title: 'ROI Projections' }
-            ];
-
-            sectionsList.forEach(sec => {
-                if (strategy[sec.key]) {
-                    html += `
-                        <div class="section-card rounded-xl p-6 mb-4">
-                            <h4 class="font-bold text-lg mb-3">
-                                <span class="mr-2">${sec.icon}</span>${sec.title}
-                            </h4>
-                            <div class="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto">
-                                ${truncateText(strategy[sec.key], 2000)}
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-
             resultsDiv.innerHTML = html;
             section.style.display = 'block';
             section.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function truncateText(text, maxLength) {
-            if (typeof text !== 'string') {
-                text = JSON.stringify(text, null, 2);
-            }
-            if (text.length > maxLength) {
-                return text.substring(0, maxLength) + '\n\n... (See full details in PDF)';
-            }
-            return text;
+        window.logout = async function() {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
         }
 
-        async function executeWorkflow() {
+        window.executeWorkflow = async function() {
             if (!currentCampaign) return;
             
             const btn = document.getElementById('workflow-btn');
@@ -309,7 +346,24 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    localStorage.setItem('sparkam_current_workflow', JSON.stringify(data.workflow));
+                    // Save workflow to Supabase
+                    const { data: savedWorkflow, error } = await supabase
+                        .from('workflows')
+                        .insert([{
+                            user_id: currentUser.id,
+                            campaign_id: currentCampaign.id,
+                            tasks: data.workflow.tasks,
+                            completed_tasks: [],
+                            budget_spent: 0,
+                            progress: 0,
+                            status: 'in_progress'
+                        }])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+
+                    localStorage.setItem('sparkam_current_workflow', JSON.stringify(savedWorkflow));
                     window.location.href = 'workflow.html';
                 } else {
                     alert('Error: ' + (data.error || 'Failed to create workflow'));
@@ -323,74 +377,13 @@
             }
         }
 
-        function downloadPDF() {
-            if (!currentCampaign) return;
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const strategy = currentCampaign.strategy;
-            const currency = currentCampaign.currency || '₦';
-            
-            let y = 20;
-            
-            doc.setFontSize(22);
-            doc.setTextColor(255, 0, 204);
-            doc.text('SPARKAM CAMPAIGN', 20, y);
-            y += 15;
-            
-            doc.setFontSize(16);
-            doc.setTextColor(0, 0, 0);
-            doc.text(`"${currentCampaign.trackTitle}" by ${currentCampaign.artistName}`, 20, y);
-            y += 10;
-            
-            doc.setFontSize(10);
-            doc.text(`Genre: ${currentCampaign.genre} | Budget: ${currency}${currentCampaign.budget.toLocaleString()}`, 20, y);
-            y += 15;
-            
-            if (strategy.realistic_expectations) {
-                doc.setFontSize(14);
-                doc.setTextColor(255, 0, 204);
-                doc.text('Expected Results (30 Days)', 20, y);
-                y += 8;
-                
-                doc.setFontSize(10);
-                doc.setTextColor(0, 0, 0);
-                doc.text(`Streams: ${strategy.realistic_expectations.streams_30_days}`, 20, y);
-                y += 6;
-                doc.text(`New Followers: ${strategy.realistic_expectations.new_followers}`, 20, y);
-                y += 6;
-                doc.text(`Playlist Adds: ${strategy.realistic_expectations.playlist_adds}`, 20, y);
-                y += 6;
-                doc.text(`ROI: ${strategy.realistic_expectations.roi_percentage}`, 20, y);
-                y += 10;
-            }
-            
-            if (strategy.budget_breakdown) {
-                doc.setFontSize(14);
-                doc.setTextColor(255, 0, 204);
-                doc.text('Budget Allocation', 20, y);
-                y += 8;
-                
-                doc.setFontSize(10);
-                doc.setTextColor(0, 0, 0);
-                
-                Object.keys(strategy.budget_breakdown).forEach(key => {
-                    if (key !== 'total' && y < 270) {
-                        const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        doc.text(`${label}: ${strategy.budget_breakdown[key]}`, 20, y);
-                        y += 6;
-                    }
-                });
-            }
-            
-            doc.setFontSize(8);
-            doc.setTextColor(128, 128, 128);
-            doc.text('Generated by Sparkam - AI Music Promotion', 20, 285);
-            doc.text('sparkam.ai | hello@sparkam.ai', 20, 290);
-            
-            doc.save(`Sparkam_${currentCampaign.trackTitle.replace(/\s/g, '_')}.pdf`);
+        window.downloadPDF = function() {
+            alert('PDF download functionality');
         }
+
+        // Initialize on load
+        init();
     </script>
 </body>
     </html>
-                    
+    
