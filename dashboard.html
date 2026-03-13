@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Sparkam</title>
+    <title>Dashboard - Sparkam (DEBUG)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -30,9 +30,31 @@
             background: rgba(0, 0, 0, 0.3);
             border-left: 3px solid #ff00cc;
         }
+        #debug-log {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 2px solid #ff00cc;
+            padding: 10px;
+            font-size: 11px;
+            font-family: monospace;
+            z-index: 9999;
+        }
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .log-success { color: #00ff00; }
+        .log-error { color: #ff0000; }
+        .log-info { color: #00ccff; }
+        .log-warn { color: #ffaa00; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen pb-52">
 
     <!-- Navigation -->
     <nav class="glass border-b border-white/10 sticky top-0 z-40">
@@ -55,6 +77,7 @@
                 Welcome back, <span id="welcome-name" class="gradient-text">Artist</span>!
             </h1>
             <p class="text-gray-400">Generate AI-powered campaigns instantly</p>
+            <p class="text-xs text-yellow-400 mt-2">🐛 DEBUG MODE - Errors shown at bottom</p>
         </div>
 
         <!-- Campaign Form -->
@@ -129,38 +152,62 @@
         </div>
     </div>
 
+    <!-- DEBUG LOG -->
+    <div id="debug-log">
+        <div style="color: #ff00cc; font-weight: bold; margin-bottom: 5px;">🐛 DEBUG LOG:</div>
+    </div>
+
     <script type="module">
+        // DEBUG LOGGER
+        const debugLog = document.getElementById('debug-log');
+        function log(msg, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry log-' + type;
+            entry.textContent = new Date().toLocaleTimeString() + ' - ' + msg;
+            debugLog.appendChild(entry);
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(msg);
+        }
+
+        // Catch all errors
+        window.onerror = function(msg, url, line, col, error) {
+            log('ERROR: ' + msg + ' (line ' + line + ')', 'error');
+            return false;
+        };
+
+        log('Page loaded', 'success');
+
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        log('Supabase imported', 'success');
 
         const SUPABASE_URL = 'https://avlbrhnsjylaaokjofoo.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8';
         
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        log('Supabase client created', 'success');
 
         let currentUser = null;
         let currentCampaign = null;
         let userProfile = null;
 
-        console.log('🚀 Dashboard loaded');
-
         async function init() {
-            console.log('🔐 Checking authentication...');
+            log('Checking authentication...', 'info');
             
             const { data: { user } } = await supabase.auth.getUser();
             
             if (!user) {
-                console.log('❌ Not logged in, redirecting to login...');
+                log('Not logged in, redirecting...', 'warn');
                 window.location.href = 'login.html';
                 return;
             }
 
-            console.log('✅ User authenticated:', user.id);
+            log('User authenticated: ' + user.id, 'success');
             currentUser = user;
             await loadUserProfile();
         }
 
         async function loadUserProfile() {
-            console.log('📊 Loading user profile...');
+            log('Loading user profile...', 'info');
             
             const { data, error } = await supabase
                 .from('users')
@@ -169,13 +216,13 @@
                 .single();
 
             if (error) {
-                console.error('Error loading profile:', error);
+                log('Profile error: ' + error.message, 'error');
                 return;
             }
 
             if (data) {
                 userProfile = data;
-                console.log('✅ Profile loaded:', data.artist_name);
+                log('Profile loaded: ' + data.artist_name, 'success');
                 
                 document.getElementById('user-name').textContent = data.artist_name;
                 document.getElementById('welcome-name').textContent = data.artist_name;
@@ -185,8 +232,10 @@
 
         document.getElementById('campaign-form').addEventListener('submit', async function(e) {
             e.preventDefault();
+            log('Form submitted', 'info');
             
             if (!userProfile) {
+                log('Profile not loaded yet', 'warn');
                 alert('Profile not loaded yet, please wait...');
                 return;
             }
@@ -197,12 +246,14 @@
                 budget: parseInt(document.getElementById('budget').value)
             };
             
+            log('Form data: ' + JSON.stringify(formData), 'info');
+            
             const btn = document.getElementById('spark-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING (10-15 sec)...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING...';
             
             try {
-                console.log('🎵 Generating campaign...');
+                log('Calling /api/generate-campaign...', 'info');
                 
                 const response = await fetch('/api/generate-campaign', {
                     method: 'POST',
@@ -213,10 +264,19 @@
                     })
                 });
                 
+                log('API Response status: ' + response.status, response.ok ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    const text = await response.text();
+                    log('API Error response: ' + text.substring(0, 200), 'error');
+                    throw new Error('API returned ' + response.status);
+                }
+                
                 const data = await response.json();
+                log('API returned data: ' + (data.success ? 'SUCCESS' : 'FAILED'), data.success ? 'success' : 'error');
                 
                 if (data.success) {
-                    console.log('✅ Campaign generated, saving to database...');
+                    log('Saving to database...', 'info');
                     
                     const { data: savedCampaign, error } = await supabase
                         .from('campaigns')
@@ -233,19 +293,19 @@
                         .single();
 
                     if (error) {
-                        console.error('Error saving campaign:', error);
+                        log('Database error: ' + error.message, 'error');
                         throw error;
                     }
 
-                    console.log('✅ Campaign saved to database!');
+                    log('Saved to database!', 'success');
                     currentCampaign = savedCampaign;
                     displayCampaign(savedCampaign);
                 } else {
-                    alert('Error: ' + (data.error || 'Failed'));
+                    throw new Error(data.error || 'Failed');
                 }
                 
             } catch (error) {
-                console.error('Error:', error);
+                log('FATAL ERROR: ' + error.message, 'error');
                 alert('Error: ' + error.message);
             } finally {
                 btn.disabled = false;
@@ -254,6 +314,7 @@
         });
 
         function displayCampaign(campaign) {
+            log('Displaying campaign...', 'info');
             const section = document.getElementById('results-section');
             const resultsDiv = document.getElementById('campaign-results');
             const strategy = campaign.strategy;
@@ -345,15 +406,17 @@
             resultsDiv.innerHTML = html;
             section.style.display = 'block';
             section.scrollIntoView({ behavior: 'smooth' });
+            log('Campaign displayed!', 'success');
         }
 
         window.logout = async function() {
-            console.log('👋 Logging out...');
+            log('Logging out...', 'info');
             await supabase.auth.signOut();
             window.location.href = 'login.html';
         }
 
         window.executeWorkflow = async function() {
+            log('Execute workflow clicked', 'info');
             if (!currentCampaign) {
                 alert('Please generate a campaign first!');
                 return;
@@ -364,6 +427,7 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating...';
             
             try {
+                log('Calling /api/generate-workflow...', 'info');
                 const response = await fetch('/api/generate-workflow', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -371,71 +435,4 @@
                 });
                 
                 const data = await response.json();
-                
-                if (data.success) {
-                    const { data: savedWorkflow, error } = await supabase
-                        .from('workflows')
-                        .insert([{
-                            user_id: currentUser.id,
-                            campaign_id: currentCampaign.id,
-                            tasks: data.workflow.tasks,
-                            completed_tasks: [],
-                            budget_spent: 0,
-                            progress: 0,
-                            status: 'in_progress'
-                        }])
-                        .select()
-                        .single();
-
-                    if (error) throw error;
-
-                    localStorage.setItem('sparkam_current_workflow', JSON.stringify(savedWorkflow));
-                    window.location.href = 'workflow.html';
-                } else {
-                    alert('Error: ' + (data.error || 'Failed'));
-                }
-                
-            } catch (error) {
-                alert('Error: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-rocket mr-2"></i>Execute Workflow';
-            }
-        }
-
-        window.downloadPDF = function() {
-            if (!currentCampaign) {
-                alert('Please generate a campaign first!');
-                return;
-            }
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const strategy = currentCampaign.strategy;
-            const currency = currentCampaign.currency || '₦';
-            let y = 20;
-            
-            doc.setFontSize(20);
-            doc.text('SPARKAM CAMPAIGN', 20, y);
-            y += 10;
-            
-            doc.setFontSize(14);
-            doc.text('"' + currentCampaign.track_title + '" by ' + currentCampaign.artist_name, 20, y);
-            y += 15;
-            
-            if (strategy.realistic_expectations) {
-                doc.setFontSize(12);
-                doc.text('Expected Results:', 20, y);
-                y += 7;
-                doc.setFontSize(10);
-                doc.text('Streams: ' + strategy.realistic_expectations.streams_30_days, 20, y);
-                y += 6;
-                doc.text('Followers: ' + strategy.realistic_expectations.new_followers, 20, y);
-                y += 6;
-                doc.text('Playlists: ' + strategy.realistic_expectations.playlist_adds, 20, y);
-                y += 6;
-                doc.text('ROI: ' + strategy.realistic_expectations.roi_percentage, 20, y);
-                y += 10;
-            }
-            
-            if (st
+                log('Workflow API response: ' + (data.success ? 'SUCCESS' : 'FAILED'), data.success ? 'success' : 
