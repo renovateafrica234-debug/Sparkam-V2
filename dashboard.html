@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
@@ -109,7 +110,7 @@
                             <i class="fa-solid fa-check-circle text-green-400 mr-2"></i>
                             Campaign Ready!
                         </h2>
-                        <p class="text-gray-300 text-sm">Your campaign has been saved to your account</p>
+                        <p class="text-gray-300 text-sm">Your campaign has been saved</p>
                     </div>
                     <div class="flex gap-3">
                         <button onclick="executeWorkflow()" id="workflow-btn" 
@@ -128,31 +129,38 @@
         </div>
     </div>
 
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
+    <script>
+        console.log('✅ Script loaded!');
+        
         const SUPABASE_URL = 'https://avlbrhnsjylaaokjofoo.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8';
         
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null;
         let currentCampaign = null;
         let userProfile = null;
 
+        console.log('✅ Supabase initialized');
+
         async function init() {
+            console.log('🔐 Checking auth...');
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
+                console.log('❌ Not logged in');
                 window.location.href = 'login.html';
                 return;
             }
+            console.log('✅ User logged in:', user.id);
             currentUser = user;
             await loadUserProfile();
         }
 
         async function loadUserProfile() {
+            console.log('📊 Loading profile...');
             const { data } = await supabase.from('users').select('*').eq('id', currentUser.id).single();
             if (data) {
                 userProfile = data;
+                console.log('✅ Profile loaded:', data.artist_name);
                 document.getElementById('user-name').textContent = data.artist_name;
                 document.getElementById('welcome-name').textContent = data.artist_name;
             }
@@ -171,7 +179,12 @@
 
         document.getElementById('campaign-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            if (!userProfile) return;
+            console.log('🚀 Form submitted!');
+            
+            if (!userProfile) {
+                alert('Profile not loaded yet');
+                return;
+            }
             
             hideError();
             
@@ -181,19 +194,14 @@
                 budget: parseInt(document.getElementById('budget').value)
             };
             
+            console.log('📝 Form data:', formData);
+            
             const btn = document.getElementById('spark-btn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING...';
             
-            console.log('🚀 Starting campaign generation...');
-            console.log('Form data:', formData);
-            console.log('Artist:', userProfile.artist_name);
-            
             try {
-                console.log('📡 Calling /api/generate-campaign...');
-                
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+                console.log('📡 Calling API...');
                 
                 const response = await fetch('/api/generate-campaign', {
                     method: 'POST',
@@ -201,26 +209,22 @@
                     body: JSON.stringify({
                         artistName: userProfile.artist_name,
                         ...formData
-                    }),
-                    signal: controller.signal
+                    })
                 });
                 
-                clearTimeout(timeoutId);
-                
-                console.log('📡 Response status:', response.status);
-                console.log('📡 Response headers:', [...response.headers.entries()]);
+                console.log('📡 Response received:', response.status);
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('❌ Response not OK:', errorText);
-                    throw new Error(`API returned ${response.status}: ${errorText.substring(0, 200)}`);
+                    const text = await response.text();
+                    console.error('❌ Response error:', text);
+                    throw new Error(`API error: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                console.log('✅ Response data:', data);
+                console.log('✅ Data received:', data);
                 
                 if (data.success) {
-                    console.log('💾 Saving to Supabase...');
+                    console.log('💾 Saving to database...');
                     
                     const { data: saved, error } = await supabase.from('campaigns').insert([{
                         user_id: currentUser.id,
@@ -233,26 +237,19 @@
                     }]).select().single();
 
                     if (error) {
-                        console.error('❌ Supabase error:', error);
+                        console.error('❌ Database error:', error);
                         throw error;
                     }
 
-                    console.log('✅ Saved to database!');
+                    console.log('✅ Saved!');
                     currentCampaign = saved;
                     displayCampaign(saved);
                 } else {
-                    throw new Error(data.error || 'Campaign generation failed');
+                    throw new Error(data.error || 'Failed');
                 }
             } catch (error) {
-                console.error('💥 FULL ERROR:', error);
-                
-                if (error.name === 'AbortError') {
-                    showError('⏱️ Request timed out after 60 seconds. The API might be slow. Try again or contact support.');
-                } else if (error.message.includes('Failed to fetch')) {
-                    showError('🌐 Network error: Cannot reach the API. Check your internet connection or try again.');
-                } else {
-                    showError(`❌ Error: ${error.message}`);
-                }
+                console.error('💥 ERROR:', error);
+                showError(error.message);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i>SPARK IT';
@@ -260,6 +257,7 @@
         });
 
         function displayCampaign(campaign) {
+            console.log('🎨 Displaying campaign...');
             const s = campaign.strategy;
             const c = campaign.currency || '₦';
             
@@ -317,26 +315,25 @@
             document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
         }
 
-        window.logout = async () => {
-            await supabase.auth.signOut();
+        function logout() {
+            supabase.auth.signOut();
             window.location.href = 'login.html';
         }
 
-        window.executeWorkflow = async () => {
+        function executeWorkflow() {
             if (!currentCampaign) return alert('Generate campaign first!');
             
             const btn = document.getElementById('workflow-btn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating...';
             
-            try {
-                const res = await fetch('/api/generate-workflow', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ campaign: currentCampaign })
-                });
-                
-                const data = await res.json();
+            fetch('/api/generate-workflow', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ campaign: currentCampaign })
+            })
+            .then(res => res.json())
+            .then(async data => {
                 if (data.success) {
                     const { data: wf } = await supabase.from('workflows').insert([{
                         user_id: currentUser.id,
@@ -350,15 +347,15 @@
                     localStorage.setItem('sparkam_current_workflow', JSON.stringify(wf));
                     window.location.href = 'workflow.html';
                 }
-            } catch(e) {
-                alert('Error: ' + e.message);
-            } finally {
+            })
+            .catch(e => alert('Error: ' + e.message))
+            .finally(() => {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-rocket mr-2"></i>Execute Workflow';
-            }
+            });
         }
 
-        window.downloadPDF = () => {
+        function downloadPDF() {
             if (!currentCampaign) return;
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -381,25 +378,11 @@
                 doc.text(`Playlists: ${s.realistic_expectations.playlist_adds}`, 20, y); y += 10;
             }
             
-            if (s.budget_breakdown) {
-                doc.setFontSize(12);
-                doc.text('Budget:', 20, y); y += 7;
-                doc.setFontSize(10);
-                Object.keys(s.budget_breakdown).forEach(k => {
-                    if (k !== 'total' && y < 270) {
-                        doc.text(`${k}: ${s.budget_breakdown[k]}`, 20, y); y += 6;
-                    }
-                });
-            }
-            
-            const sections = ['market_research', 'influencer_strategy', 'content_strategy', 'playlist_strategy'];
-            sections.forEach(key => {
-                if (s[key] && y < 250) {
-                    if (y > 250) { doc.addPage(); y = 20; }
-                    doc.setFontSize(12);
-                    doc.text(key.replace(/_/g, ' ').toUpperCase(), 20, y); y += 7;
-                    doc.setFontSize(9);
-                    let text = typeof s[key] === 'string' ? s[key] : JSON.stringify(s[key]);
-                    const lines = doc.splitTextToSize(text.substring(0, 800), 170);
-                    lines.forEach(line => {
-                        if (y > 270) {
+            doc.save(`Sparkam_${currentCampaign.track_title}.pdf`);
+        }
+
+        init();
+    </script>
+</body>
+    </html>
+                
