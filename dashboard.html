@@ -302,7 +302,6 @@
                 `;
             }
 
-            // ADDED: Budget breakdown
             if (strategy.budget_breakdown) {
                 html += `<div class="section-card rounded-xl p-6 mb-6">
                     <h4 class="font-bold text-lg mb-4">💰 Budget Allocation</h4>
@@ -321,7 +320,6 @@
                 html += `</div></div>`;
             }
 
-            // ADDED: All 6 strategy sections
             const sections = [
                 { key: 'market_research', icon: '📊', title: 'Market Research' },
                 { key: 'influencer_strategy', icon: '👥', title: 'Influencer Strategy' },
@@ -355,7 +353,6 @@
             window.location.href = 'login.html';
         }
 
-        // REPLACED: Working workflow function
         window.executeWorkflow = async function() {
             if (!currentCampaign) {
                 alert('Please generate a campaign first!');
@@ -406,7 +403,6 @@
             }
         }
 
-        // REPLACED: Working PDF function
         window.downloadPDF = function() {
             if (!currentCampaign) {
                 alert('Please generate a campaign first!');
@@ -424,7 +420,7 @@
             y += 10;
             
             doc.setFontSize(14);
-            doc.text(`"${currentCampaign.track_title}" by ${currentCampaign.artist_name}`, 20, y);
+            doc.text('"' + currentCampaign.track_title + '" by ' + currentCampaign.artist_name, 20, y);
             y += 15;
             
             if (strategy.realistic_expectations) {
@@ -432,9 +428,14 @@
                 doc.text('Expected Results:', 20, y);
                 y += 7;
                 doc.setFontSize(10);
-                doc.text(`Streams: ${strategy.realistic_expectations.streams_30_days}`, 20, y);
+                doc.text('Streams: ' + strategy.realistic_expectations.streams_30_days, 20, y);
                 y += 6;
-                doc.text(`Followers: ${strategy.realistic_expectations.new_followers}`, 20, y);
+                doc.text('Followers: ' + strategy.realistic_expectations.new_followers, 20, y);
                 y += 6;
-                doc.text(`Playlists: ${strategy.realistic_expectations.playlist_adds}`, 20, y);
-                
+                doc.text('Playlists: ' + strategy.realistic_expectations.playlist_adds, 20, y);
+                y += 6;
+                doc.text('ROI: ' + strategy.realistic_expectations.roi_percentage, 20, y);
+                y += 10;
+            }
+            
+            if (st
