@@ -6,6 +6,8 @@
     <title>Dashboard - Sparkam</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
@@ -33,7 +35,6 @@
 </head>
 <body class="min-h-screen">
 
-    <!-- Navigation -->
     <nav class="glass border-b border-white/10 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="text-2xl font-black gradient-text">SPARKAM</div>
@@ -56,7 +57,6 @@
             <p class="text-gray-400">Generate AI-powered campaigns instantly</p>
         </div>
 
-        <!-- Campaign Form -->
         <div class="glass rounded-3xl p-8 mb-8">
             <h2 class="text-2xl font-black mb-6">
                 <i class="fa-solid fa-bolt text-pink-500 mr-2"></i>
@@ -100,7 +100,6 @@
             </form>
         </div>
 
-        <!-- Results -->
         <div id="results-section" class="glass rounded-3xl p-8" style="display: none;">
             <div class="bg-gradient-to-r from-green-500/20 to-cyan-500/20 rounded-2xl p-6 mb-6 border-2 border-green-500/50">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -109,7 +108,7 @@
                             <i class="fa-solid fa-check-circle text-green-400 mr-2"></i>
                             Campaign Ready!
                         </h2>
-                        <p class="text-gray-300 text-sm">Your campaign has been saved to your account</p>
+                        <p class="text-gray-300 text-sm">Your campaign has been saved</p>
                     </div>
                     <div class="flex gap-3">
                         <button onclick="executeWorkflow()" id="workflow-btn" 
@@ -128,70 +127,37 @@
         </div>
     </div>
 
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
+    <script>
         const SUPABASE_URL = 'https://avlbrhnsjylaaokjofoo.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8';
         
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null;
         let currentCampaign = null;
         let userProfile = null;
 
-        console.log('🚀 Dashboard loaded');
-
-        // Check authentication on page load
         async function init() {
-            console.log('🔐 Checking authentication...');
-            
             const { data: { user } } = await supabase.auth.getUser();
-            
             if (!user) {
-                console.log('❌ Not logged in, redirecting to login...');
                 window.location.href = 'login.html';
                 return;
             }
-
-            console.log('✅ User authenticated:', user.id);
             currentUser = user;
             await loadUserProfile();
         }
 
-        // Load user profile
         async function loadUserProfile() {
-            console.log('📊 Loading user profile...');
-            
-            const { data, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', currentUser.id)
-                .single();
-
-            if (error) {
-                console.error('Error loading profile:', error);
-                return;
-            }
-
+            const { data } = await supabase.from('users').select('*').eq('id', currentUser.id).single();
             if (data) {
                 userProfile = data;
-                console.log('✅ Profile loaded:', data.artist_name);
-                
                 document.getElementById('user-name').textContent = data.artist_name;
                 document.getElementById('welcome-name').textContent = data.artist_name;
-                document.getElementById('user-tier').textContent = data.tier.toUpperCase() + (data.is_beta_tester ? ' (FREE BETA)' : '');
             }
         }
 
-        // Generate campaign
         document.getElementById('campaign-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            if (!userProfile) {
-                alert('Profile not loaded yet, please wait...');
-                return;
-            }
+            if (!userProfile) return;
             
             const formData = {
                 trackTitle: document.getElementById('trackTitle').value.trim(),
@@ -201,12 +167,9 @@
             
             const btn = document.getElementById('spark-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING (10-15 sec)...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING...';
             
             try {
-                console.log('🎵 Generating campaign...');
-                
-                // Call API to generate campaign
                 const response = await fetch('/api/generate-campaign', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -219,37 +182,20 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    console.log('✅ Campaign generated, saving to database...');
-                    
-                    // Save campaign to Supabase
-                    const { data: savedCampaign, error } = await supabase
-                        .from('campaigns')
-                        .insert([{
-                            user_id: currentUser.id,
-                            artist_name: userProfile.artist_name,
-                            track_title: formData.trackTitle,
-                            genre: formData.genre,
-                            budget: formData.budget,
-                            currency: data.campaign.currency,
-                            strategy: data.campaign.strategy
-                        }])
-                        .select()
-                        .single();
+                    const { data: saved } = await supabase.from('campaigns').insert([{
+                        user_id: currentUser.id,
+                        artist_name: userProfile.artist_name,
+                        track_title: formData.trackTitle,
+                        genre: formData.genre,
+                        budget: formData.budget,
+                        currency: data.campaign.currency,
+                        strategy: data.campaign.strategy
+                    }]).select().single();
 
-                    if (error) {
-                        console.error('Error saving campaign:', error);
-                        throw error;
-                    }
-
-                    console.log('✅ Campaign saved to database!');
-                    currentCampaign = savedCampaign;
-                    displayCampaign(savedCampaign);
-                } else {
-                    alert('Error: ' + (data.error || 'Failed'));
+                    currentCampaign = saved;
+                    displayCampaign(saved);
                 }
-                
             } catch (error) {
-                console.error('Error:', error);
                 alert('Error: ' + error.message);
             } finally {
                 btn.disabled = false;
@@ -258,74 +204,162 @@
         });
 
         function displayCampaign(campaign) {
-            const section = document.getElementById('results-section');
-            const resultsDiv = document.getElementById('campaign-results');
-            const strategy = campaign.strategy;
-            const currency = campaign.currency || '₦';
+            const s = campaign.strategy;
+            const c = campaign.currency || '₦';
             
             let html = `
                 <div class="bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl p-6 mb-6 border border-pink-500/20">
                     <h3 class="text-2xl font-bold mb-3">"${campaign.track_title}"</h3>
                     <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <div class="text-gray-400 text-xs">Genre</div>
-                            <div class="font-bold">${campaign.genre}</div>
-                        </div>
-                        <div>
-                            <div class="text-gray-400 text-xs">Total Budget</div>
-                            <div class="font-bold text-pink-400">${currency}${campaign.budget.toLocaleString()}</div>
-                        </div>
-                        <div>
-                            <div class="text-gray-400 text-xs">Campaign Type</div>
-                            <div class="font-bold text-xs">${strategy.campaign_type || 'Indie'}</div>
-                        </div>
+                        <div><div class="text-gray-400 text-xs">Genre</div><div class="font-bold">${campaign.genre}</div></div>
+                        <div><div class="text-gray-400 text-xs">Budget</div><div class="font-bold text-pink-400">${c}${campaign.budget.toLocaleString()}</div></div>
+                        <div><div class="text-gray-400 text-xs">Type</div><div class="font-bold text-xs">${s.campaign_type||'Indie'}</div></div>
                     </div>
                 </div>
             `;
 
-            if (strategy.realistic_expectations) {
+            if (s.realistic_expectations) {
                 html += `
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">Streams (30d)</div>
-                            <div class="text-2xl font-black text-pink-400">${strategy.realistic_expectations.streams_30_days}</div>
-                        </div>
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">New Followers</div>
-                            <div class="text-2xl font-black text-purple-400">${strategy.realistic_expectations.new_followers}</div>
-                        </div>
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">Playlists</div>
-                            <div class="text-2xl font-black text-blue-400">${strategy.realistic_expectations.playlist_adds}</div>
-                        </div>
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">ROI</div>
-                            <div class="text-2xl font-black text-green-400">${strategy.realistic_expectations.roi_percentage}</div>
-                        </div>
+                        <div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">Streams</div><div class="text-2xl font-black text-pink-400">${s.realistic_expectations.streams_30_days}</div></div>
+                        <div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">Followers</div><div class="text-2xl font-black text-purple-400">${s.realistic_expectations.new_followers}</div></div>
+                        <div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">Playlists</div><div class="text-2xl font-black text-blue-400">${s.realistic_expectations.playlist_adds}</div></div>
+                        <div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">ROI</div><div class="text-2xl font-black text-green-400">${s.realistic_expectations.roi_percentage}</div></div>
                     </div>
                 `;
             }
 
-            resultsDiv.innerHTML = html;
-            section.style.display = 'block';
-            section.scrollIntoView({ behavior: 'smooth' });
+            if (s.budget_breakdown) {
+                html += `<div class="section-card rounded-xl p-6 mb-6"><h4 class="font-bold text-lg mb-4">💰 Budget Allocation</h4><div class="grid md:grid-cols-3 gap-4">`;
+                Object.keys(s.budget_breakdown).forEach(k => {
+                    if (k !== 'total') {
+                        const label = k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        html += `<div class="bg-black/40 rounded-lg p-4"><div class="text-xs text-gray-400">${label}</div><div class="font-black text-xl text-pink-400">${s.budget_breakdown[k]}</div></div>`;
+                    }
+                });
+                html += `</div></div>`;
+            }
+
+            const sections = [
+                { key: 'market_research', icon: '📊', title: 'Market Research' },
+                { key: 'influencer_strategy', icon: '👥', title: 'Influencer Strategy' },
+                { key: 'content_strategy', icon: '📱', title: 'Content Strategy' },
+                { key: 'playlist_strategy', icon: '🎵', title: 'Playlist Strategy' },
+                { key: 'action_plan', icon: '📅', title: 'Action Plan' },
+                { key: 'roi_projections', icon: '💰', title: 'ROI Projections' }
+            ];
+
+            sections.forEach(sec => {
+                if (s[sec.key]) {
+                    let text = typeof s[sec.key] === 'string' ? s[sec.key] : JSON.stringify(s[sec.key], null, 2);
+                    html += `<div class="section-card rounded-xl p-6 mb-4"><h4 class="font-bold text-lg mb-3">${sec.icon} ${sec.title}</h4><div class="text-sm text-gray-300 whitespace-pre-wrap">${text}</div></div>`;
+                }
+            });
+
+            document.getElementById('campaign-results').innerHTML = html;
+            document.getElementById('results-section').style.display = 'block';
+            document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
         }
 
-        window.logout = async function() {
-            console.log('👋 Logging out...');
-            await supabase.auth.signOut();
+        function logout() {
+            supabase.auth.signOut();
             window.location.href = 'login.html';
         }
 
-        window.executeWorkflow = async function() {
-            alert('Workflow feature - coming next!');
+        async function executeWorkflow() {
+            if (!currentCampaign) return alert('Generate campaign first!');
+            
+            const btn = document.getElementById('workflow-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating...';
+            
+            try {
+                const res = await fetch('/api/generate-workflow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ campaign: currentCampaign })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    const { data: wf } = await supabase.from('workflows').insert([{
+                        user_id: currentUser.id,
+                        campaign_id: currentCampaign.id,
+                        tasks: data.workflow.tasks,
+                        completed_tasks: [],
+                        budget_spent: 0,
+                        progress: 0
+                    }]).select().single();
+
+                    localStorage.setItem('sparkam_current_workflow', JSON.stringify(wf));
+                    window.location.href = 'workflow.html';
+                }
+            } catch(e) {
+                alert('Error: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-rocket mr-2"></i>Execute Workflow';
+            }
         }
 
-        window.downloadPDF = function() {
-            alert('PDF download - coming next!');
+        function downloadPDF() {
+            if (!currentCampaign) return alert('Generate campaign first!');
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const s = currentCampaign.strategy;
+            const c = currentCampaign.currency || '₦';
+            let y = 20;
+            
+            doc.setFontSize(20);
+            doc.text('SPARKAM CAMPAIGN', 20, y); y += 10;
+            doc.setFontSize(14);
+            doc.text(`"${currentCampaign.track_title}" by ${currentCampaign.artist_name}`, 20, y); y += 15;
+            
+            if (s.realistic_expectations) {
+                doc.setFontSize(12);
+                doc.text('Expected Results:', 20, y); y += 7;
+                doc.setFontSize(10);
+                doc.text(`Streams: ${s.realistic_expectations.streams_30_days}`, 20, y); y += 6;
+                doc.text(`Followers: ${s.realistic_expectations.new_followers}`, 20, y); y += 6;
+                doc.text(`Playlists: ${s.realistic_expectations.playlist_adds}`, 20, y); y += 6;
+                doc.text(`ROI: ${s.realistic_expectations.roi_percentage}`, 20, y); y += 10;
+            }
+            
+            if (s.budget_breakdown) {
+                doc.setFontSize(12);
+                doc.text('Budget Allocation:', 20, y); y += 7;
+                doc.setFontSize(10);
+                Object.keys(s.budget_breakdown).forEach(k => {
+                    if (k !== 'total' && y < 270) {
+                        const label = k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        doc.text(`${label}: ${s.budget_breakdown[k]}`, 20, y); y += 6;
+                    }
+                });
+                y += 5;
+            }
+            
+            const secList = ['market_research', 'influencer_strategy', 'content_strategy', 'playlist_strategy', 'action_plan', 'roi_projections'];
+            secList.forEach(key => {
+                if (s[key]) {
+                    if (y > 250) { doc.addPage(); y = 20; }
+                    doc.setFontSize(12);
+                    const title = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    doc.text(title, 20, y); y += 7;
+                    doc.setFontSize(9);
+                    let text = typeof s[key] === 'string' ? s[key] : JSON.stringify(s[key], null, 2);
+                    const lines = doc.splitTextToSize(text.substring(0, 1000), 170);
+                    lines.forEach(line => {
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        doc.text(line, 20, y); y += 5;
+                    });
+                    y += 5;
+                }
+            });
+            
+            doc.save(`Sparkam_${currentCampaign.track_title.replace(/\s/g,'_')}.pdf`);
         }
 
-        // Initialize on load
         init();
     </script>
 </body>
