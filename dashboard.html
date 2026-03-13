@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Sparkam (DEBUG)</title>
+    <title>Dashboard - Sparkam</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
@@ -30,33 +31,10 @@
             background: rgba(0, 0, 0, 0.3);
             border-left: 3px solid #ff00cc;
         }
-        #debug-log {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 200px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.95);
-            border-top: 2px solid #ff00cc;
-            padding: 10px;
-            font-size: 11px;
-            font-family: monospace;
-            z-index: 9999;
-        }
-        .log-entry {
-            padding: 3px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .log-success { color: #00ff00; }
-        .log-error { color: #ff0000; }
-        .log-info { color: #00ccff; }
-        .log-warn { color: #ffaa00; }
     </style>
 </head>
-<body class="min-h-screen pb-52">
+<body class="min-h-screen">
 
-    <!-- Navigation -->
     <nav class="glass border-b border-white/10 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="text-2xl font-black gradient-text">SPARKAM</div>
@@ -77,10 +55,8 @@
                 Welcome back, <span id="welcome-name" class="gradient-text">Artist</span>!
             </h1>
             <p class="text-gray-400">Generate AI-powered campaigns instantly</p>
-            <p class="text-xs text-yellow-400 mt-2">🐛 DEBUG MODE - Errors shown at bottom</p>
         </div>
 
-        <!-- Campaign Form -->
         <div class="glass rounded-3xl p-8 mb-8">
             <h2 class="text-2xl font-black mb-6">
                 <i class="fa-solid fa-bolt text-pink-500 mr-2"></i>
@@ -124,7 +100,6 @@
             </form>
         </div>
 
-        <!-- Results -->
         <div id="results-section" class="glass rounded-3xl p-8" style="display: none;">
             <div class="bg-gradient-to-r from-green-500/20 to-cyan-500/20 rounded-2xl p-6 mb-6 border-2 border-green-500/50">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -133,7 +108,7 @@
                             <i class="fa-solid fa-check-circle text-green-400 mr-2"></i>
                             Campaign Ready!
                         </h2>
-                        <p class="text-gray-300 text-sm">Your campaign has been saved to your account</p>
+                        <p class="text-gray-300 text-sm">Your campaign has been saved</p>
                     </div>
                     <div class="flex gap-3">
                         <button onclick="executeWorkflow()" id="workflow-btn" 
@@ -152,78 +127,29 @@
         </div>
     </div>
 
-    <!-- DEBUG LOG -->
-    <div id="debug-log">
-        <div style="color: #ff00cc; font-weight: bold; margin-bottom: 5px;">🐛 DEBUG LOG:</div>
-    </div>
-
-    <script type="module">
-        // DEBUG LOGGER
-        const debugLog = document.getElementById('debug-log');
-        function log(msg, type = 'info') {
-            const entry = document.createElement('div');
-            entry.className = 'log-entry log-' + type;
-            entry.textContent = new Date().toLocaleTimeString() + ' - ' + msg;
-            debugLog.appendChild(entry);
-            debugLog.scrollTop = debugLog.scrollHeight;
-            console.log(msg);
-        }
-
-        // Catch all errors
-        window.onerror = function(msg, url, line, col, error) {
-            log('ERROR: ' + msg + ' (line ' + line + ')', 'error');
-            return false;
-        };
-
-        log('Page loaded', 'success');
-
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-        log('Supabase imported', 'success');
-
+    <script>
         const SUPABASE_URL = 'https://avlbrhnsjylaaokjofoo.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8';
         
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        log('Supabase client created', 'success');
-
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let currentUser = null;
         let currentCampaign = null;
         let userProfile = null;
 
         async function init() {
-            log('Checking authentication...', 'info');
-            
             const { data: { user } } = await supabase.auth.getUser();
-            
             if (!user) {
-                log('Not logged in, redirecting...', 'warn');
                 window.location.href = 'login.html';
                 return;
             }
-
-            log('User authenticated: ' + user.id, 'success');
             currentUser = user;
             await loadUserProfile();
         }
 
         async function loadUserProfile() {
-            log('Loading user profile...', 'info');
-            
-            const { data, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', currentUser.id)
-                .single();
-
-            if (error) {
-                log('Profile error: ' + error.message, 'error');
-                return;
-            }
-
+            const { data } = await supabase.from('users').select('*').eq('id', currentUser.id).single();
             if (data) {
                 userProfile = data;
-                log('Profile loaded: ' + data.artist_name, 'success');
-                
                 document.getElementById('user-name').textContent = data.artist_name;
                 document.getElementById('welcome-name').textContent = data.artist_name;
                 document.getElementById('user-tier').textContent = data.tier.toUpperCase() + (data.is_beta_tester ? ' (FREE BETA)' : '');
@@ -232,13 +158,7 @@
 
         document.getElementById('campaign-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            log('Form submitted', 'info');
-            
-            if (!userProfile) {
-                log('Profile not loaded yet', 'warn');
-                alert('Profile not loaded yet, please wait...');
-                return;
-            }
+            if (!userProfile) return;
             
             const formData = {
                 trackTitle: document.getElementById('trackTitle').value.trim(),
@@ -246,66 +166,41 @@
                 budget: parseInt(document.getElementById('budget').value)
             };
             
-            log('Form data: ' + JSON.stringify(formData), 'info');
-            
             const btn = document.getElementById('spark-btn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING...';
             
             try {
-                log('Calling /api/generate-campaign...', 'info');
-                
                 const response = await fetch('/api/generate-campaign', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         artistName: userProfile.artist_name,
-                        ...formData
+                        trackTitle: formData.trackTitle,
+                        genre: formData.genre,
+                        budget: formData.budget
                     })
                 });
                 
-                log('API Response status: ' + response.status, response.ok ? 'success' : 'error');
-                
-                if (!response.ok) {
-                    const text = await response.text();
-                    log('API Error response: ' + text.substring(0, 200), 'error');
-                    throw new Error('API returned ' + response.status);
-                }
-                
                 const data = await response.json();
-                log('API returned data: ' + (data.success ? 'SUCCESS' : 'FAILED'), data.success ? 'success' : 'error');
                 
                 if (data.success) {
-                    log('Saving to database...', 'info');
-                    
-                    const { data: savedCampaign, error } = await supabase
-                        .from('campaigns')
-                        .insert([{
-                            user_id: currentUser.id,
-                            artist_name: userProfile.artist_name,
-                            track_title: formData.trackTitle,
-                            genre: formData.genre,
-                            budget: formData.budget,
-                            currency: data.campaign.currency,
-                            strategy: data.campaign.strategy
-                        }])
-                        .select()
-                        .single();
+                    const { data: saved } = await supabase.from('campaigns').insert([{
+                        user_id: currentUser.id,
+                        artist_name: userProfile.artist_name,
+                        track_title: formData.trackTitle,
+                        genre: formData.genre,
+                        budget: formData.budget,
+                        currency: data.campaign.currency,
+                        strategy: data.campaign.strategy
+                    }]).select().single();
 
-                    if (error) {
-                        log('Database error: ' + error.message, 'error');
-                        throw error;
-                    }
-
-                    log('Saved to database!', 'success');
-                    currentCampaign = savedCampaign;
-                    displayCampaign(savedCampaign);
+                    currentCampaign = saved;
+                    displayCampaign(saved);
                 } else {
-                    throw new Error(data.error || 'Failed');
+                    alert('Error: ' + (data.error || 'Failed'));
                 }
-                
             } catch (error) {
-                log('FATAL ERROR: ' + error.message, 'error');
                 alert('Error: ' + error.message);
             } finally {
                 btn.disabled = false;
@@ -314,74 +209,38 @@
         });
 
         function displayCampaign(campaign) {
-            log('Displaying campaign...', 'info');
-            const section = document.getElementById('results-section');
-            const resultsDiv = document.getElementById('campaign-results');
-            const strategy = campaign.strategy;
-            const currency = campaign.currency || '₦';
+            const s = campaign.strategy;
+            const c = campaign.currency || '₦';
             
-            let html = `
-                <div class="bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl p-6 mb-6 border border-pink-500/20">
-                    <h3 class="text-2xl font-bold mb-3">"${campaign.track_title}"</h3>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <div class="text-gray-400 text-xs">Genre</div>
-                            <div class="font-bold">${campaign.genre}</div>
-                        </div>
-                        <div>
-                            <div class="text-gray-400 text-xs">Total Budget</div>
-                            <div class="font-bold text-pink-400">${currency}${campaign.budget.toLocaleString()}</div>
-                        </div>
-                        <div>
-                            <div class="text-gray-400 text-xs">Campaign Type</div>
-                            <div class="font-bold text-xs">${strategy.campaign_type || 'Indie'}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            let html = '<div class="bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl p-6 mb-6 border border-pink-500/20">';
+            html += '<h3 class="text-2xl font-bold mb-3">"' + campaign.track_title + '"</h3>';
+            html += '<div class="grid grid-cols-3 gap-4">';
+            html += '<div><div class="text-gray-400 text-xs">Genre</div><div class="font-bold">' + campaign.genre + '</div></div>';
+            html += '<div><div class="text-gray-400 text-xs">Budget</div><div class="font-bold text-pink-400">' + c + campaign.budget.toLocaleString() + '</div></div>';
+            html += '<div><div class="text-gray-400 text-xs">Type</div><div class="font-bold text-xs">' + (s.campaign_type || 'Indie') + '</div></div>';
+            html += '</div></div>';
 
-            if (strategy.realistic_expectations) {
-                html += `
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">Streams (30d)</div>
-                            <div class="text-2xl font-black text-pink-400">${strategy.realistic_expectations.streams_30_days}</div>
-                        </div>
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">New Followers</div>
-                            <div class="text-2xl font-black text-purple-400">${strategy.realistic_expectations.new_followers}</div>
-                        </div>
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">Playlists</div>
-                            <div class="text-2xl font-black text-blue-400">${strategy.realistic_expectations.playlist_adds}</div>
-                        </div>
-                        <div class="section-card rounded-xl p-4">
-                            <div class="text-gray-400 text-xs mb-1">ROI</div>
-                            <div class="text-2xl font-black text-green-400">${strategy.realistic_expectations.roi_percentage}</div>
-                        </div>
-                    </div>
-                `;
+            if (s.realistic_expectations) {
+                html += '<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">';
+                html += '<div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">Streams</div><div class="text-2xl font-black text-pink-400">' + s.realistic_expectations.streams_30_days + '</div></div>';
+                html += '<div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">Followers</div><div class="text-2xl font-black text-purple-400">' + s.realistic_expectations.new_followers + '</div></div>';
+                html += '<div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">Playlists</div><div class="text-2xl font-black text-blue-400">' + s.realistic_expectations.playlist_adds + '</div></div>';
+                html += '<div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">ROI</div><div class="text-2xl font-black text-green-400">' + s.realistic_expectations.roi_percentage + '</div></div>';
+                html += '</div>';
             }
 
-            if (strategy.budget_breakdown) {
-                html += `<div class="section-card rounded-xl p-6 mb-6">
-                    <h4 class="font-bold text-lg mb-4">💰 Budget Allocation</h4>
-                    <div class="grid md:grid-cols-3 gap-4">`;
-                
-                Object.keys(strategy.budget_breakdown).forEach(key => {
-                    if (key !== 'total') {
-                        const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        html += `<div class="bg-black/40 rounded-lg p-4">
-                            <div class="text-xs text-gray-400">${label}</div>
-                            <div class="font-black text-xl text-pink-400">${strategy.budget_breakdown[key]}</div>
-                        </div>`;
+            if (s.budget_breakdown) {
+                html += '<div class="section-card rounded-xl p-6 mb-6"><h4 class="font-bold text-lg mb-4">💰 Budget Allocation</h4><div class="grid md:grid-cols-3 gap-4">';
+                for (var k in s.budget_breakdown) {
+                    if (k !== 'total') {
+                        var label = k.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+                        html += '<div class="bg-black/40 rounded-lg p-4"><div class="text-xs text-gray-400">' + label + '</div><div class="font-black text-xl text-pink-400">' + s.budget_breakdown[k] + '</div></div>';
                     }
-                });
-                
-                html += `</div></div>`;
+                }
+                html += '</div></div>';
             }
 
-            const sections = [
+            var sections = [
                 { key: 'market_research', icon: '📊', title: 'Market Research' },
                 { key: 'influencer_strategy', icon: '👥', title: 'Influencer Strategy' },
                 { key: 'content_strategy', icon: '📱', title: 'Content Strategy' },
@@ -390,49 +249,116 @@
                 { key: 'roi_projections', icon: '💰', title: 'ROI Projections' }
             ];
 
-            sections.forEach(sec => {
-                if (strategy[sec.key]) {
-                    let text = typeof strategy[sec.key] === 'string' 
-                        ? strategy[sec.key] 
-                        : JSON.stringify(strategy[sec.key], null, 2);
-                    
-                    html += `<div class="section-card rounded-xl p-6 mb-4">
-                        <h4 class="font-bold text-lg mb-3">${sec.icon} ${sec.title}</h4>
-                        <div class="text-sm text-gray-300 whitespace-pre-wrap">${text}</div>
-                    </div>`;
+            for (var i = 0; i < sections.length; i++) {
+                var sec = sections[i];
+                if (s[sec.key]) {
+                    var text = typeof s[sec.key] === 'string' ? s[sec.key] : JSON.stringify(s[sec.key], null, 2);
+                    html += '<div class="section-card rounded-xl p-6 mb-4"><h4 class="font-bold text-lg mb-3">' + sec.icon + ' ' + sec.title + '</h4><div class="text-sm text-gray-300 whitespace-pre-wrap">' + text + '</div></div>';
                 }
-            });
+            }
 
-            resultsDiv.innerHTML = html;
-            section.style.display = 'block';
-            section.scrollIntoView({ behavior: 'smooth' });
-            log('Campaign displayed!', 'success');
+            document.getElementById('campaign-results').innerHTML = html;
+            document.getElementById('results-section').style.display = 'block';
+            document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
         }
 
-        window.logout = async function() {
-            log('Logging out...', 'info');
-            await supabase.auth.signOut();
+        function logout() {
+            supabase.auth.signOut();
             window.location.href = 'login.html';
         }
 
-        window.executeWorkflow = async function() {
-            log('Execute workflow clicked', 'info');
-            if (!currentCampaign) {
-                alert('Please generate a campaign first!');
-                return;
-            }
+        async function executeWorkflow() {
+            if (!currentCampaign) return alert('Generate campaign first!');
             
-            const btn = document.getElementById('workflow-btn');
+            var btn = document.getElementById('workflow-btn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating...';
             
             try {
-                log('Calling /api/generate-workflow...', 'info');
-                const response = await fetch('/api/generate-workflow', {
+                var response = await fetch('/api/generate-workflow', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ campaign: currentCampaign })
                 });
                 
-                const data = await response.json();
-                log('Workflow API response: ' + (data.success ? 'SUCCESS' : 'FAILED'), data.success ? 'success' : 
+                var data = await response.json();
+                if (data.success) {
+                    var result = await supabase.from('workflows').insert([{
+                        user_id: currentUser.id,
+                        campaign_id: currentCampaign.id,
+                        tasks: data.workflow.tasks,
+                        completed_tasks: [],
+                        budget_spent: 0,
+                        progress: 0
+                    }]).select().single();
+
+                    localStorage.setItem('sparkam_current_workflow', JSON.stringify(result.data));
+                    window.location.href = 'workflow.html';
+                }
+            } catch(e) {
+                alert('Error: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-rocket mr-2"></i>Execute Workflow';
+            }
+        }
+
+        function downloadPDF() {
+            if (!currentCampaign) return alert('Generate campaign first!');
+            
+            var jsPDF = window.jspdf.jsPDF;
+            var doc = new jsPDF();
+            var s = currentCampaign.strategy;
+            var y = 20;
+            
+            doc.setFontSize(20);
+            doc.text('SPARKAM CAMPAIGN', 20, y); y += 10;
+            doc.setFontSize(14);
+            doc.text(currentCampaign.track_title, 20, y); y += 15;
+            
+            if (s.realistic_expectations) {
+                doc.setFontSize(12);
+                doc.text('Expected Results:', 20, y); y += 7;
+                doc.setFontSize(10);
+                doc.text('Streams: ' + s.realistic_expectations.streams_30_days, 20, y); y += 6;
+                doc.text('Followers: ' + s.realistic_expectations.new_followers, 20, y); y += 6;
+                doc.text('Playlists: ' + s.realistic_expectations.playlist_adds, 20, y); y += 10;
+            }
+            
+            if (s.budget_breakdown) {
+                doc.setFontSize(12);
+                doc.text('Budget:', 20, y); y += 7;
+                doc.setFontSize(10);
+                for (var k in s.budget_breakdown) {
+                    if (k !== 'total' && y < 270) {
+                        doc.text(k + ': ' + s.budget_breakdown[k], 20, y); y += 6;
+                    }
+                }
+            }
+            
+            var secList = ['market_research', 'influencer_strategy', 'content_strategy', 'playlist_strategy'];
+            for (var i = 0; i < secList.length; i++) {
+                var key = secList[i];
+                if (s[key] && y < 250) {
+                    if (y > 250) { doc.addPage(); y = 20; }
+                    doc.setFontSize(12);
+                    doc.text(key.toUpperCase(), 20, y); y += 7;
+                    doc.setFontSize(9);
+                    var text = typeof s[key] === 'string' ? s[key] : JSON.stringify(s[key]);
+                    var lines = doc.splitTextToSize(text.substring(0, 800), 170);
+                    for (var j = 0; j < lines.length; j++) {
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        doc.text(lines[j], 20, y); y += 5;
+                    }
+                    y += 5;
+                }
+            }
+            
+            doc.save('Sparkam_' + currentCampaign.track_title.replace(/\s/g, '_') + '.pdf');
+        }
+
+        init();
+    </script>
+</body>
+        </html>
+    
