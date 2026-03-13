@@ -97,6 +97,8 @@
                     </button>
                 </div>
             </form>
+            
+            <div id="error-display" class="mt-4 p-4 bg-red-500/20 border border-red-500 rounded-xl text-red-300 text-sm" style="display: none;"></div>
         </div>
 
         <div id="results-section" class="glass rounded-3xl p-8" style="display: none;">
@@ -156,9 +158,22 @@
             }
         }
 
+        function showError(message) {
+            const errorDiv = document.getElementById('error-display');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            console.error('ERROR:', message);
+        }
+
+        function hideError() {
+            document.getElementById('error-display').style.display = 'none';
+        }
+
         document.getElementById('campaign-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             if (!userProfile) return;
+            
+            hideError();
             
             const formData = {
                 trackTitle: document.getElementById('trackTitle').value.trim(),
@@ -170,20 +185,44 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING...';
             
+            console.log('🚀 Starting campaign generation...');
+            console.log('Form data:', formData);
+            console.log('Artist:', userProfile.artist_name);
+            
             try {
+                console.log('📡 Calling /api/generate-campaign...');
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+                
                 const response = await fetch('/api/generate-campaign', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         artistName: userProfile.artist_name,
                         ...formData
-                    })
+                    }),
+                    signal: controller.signal
                 });
                 
+                clearTimeout(timeoutId);
+                
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response headers:', [...response.headers.entries()]);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Response not OK:', errorText);
+                    throw new Error(`API returned ${response.status}: ${errorText.substring(0, 200)}`);
+                }
+                
                 const data = await response.json();
+                console.log('✅ Response data:', data);
                 
                 if (data.success) {
-                    const { data: saved } = await supabase.from('campaigns').insert([{
+                    console.log('💾 Saving to Supabase...');
+                    
+                    const { data: saved, error } = await supabase.from('campaigns').insert([{
                         user_id: currentUser.id,
                         artist_name: userProfile.artist_name,
                         track_title: formData.trackTitle,
@@ -193,11 +232,27 @@
                         strategy: data.campaign.strategy
                     }]).select().single();
 
+                    if (error) {
+                        console.error('❌ Supabase error:', error);
+                        throw error;
+                    }
+
+                    console.log('✅ Saved to database!');
                     currentCampaign = saved;
                     displayCampaign(saved);
+                } else {
+                    throw new Error(data.error || 'Campaign generation failed');
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                console.error('💥 FULL ERROR:', error);
+                
+                if (error.name === 'AbortError') {
+                    showError('⏱️ Request timed out after 60 seconds. The API might be slow. Try again or contact support.');
+                } else if (error.message.includes('Failed to fetch')) {
+                    showError('🌐 Network error: Cannot reach the API. Check your internet connection or try again.');
+                } else {
+                    showError(`❌ Error: ${error.message}`);
+                }
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i>SPARK IT';
@@ -259,6 +314,7 @@
 
             document.getElementById('campaign-results').innerHTML = html;
             document.getElementById('results-section').style.display = 'block';
+            document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
         }
 
         window.logout = async () => {
@@ -346,18 +402,4 @@
                     let text = typeof s[key] === 'string' ? s[key] : JSON.stringify(s[key]);
                     const lines = doc.splitTextToSize(text.substring(0, 800), 170);
                     lines.forEach(line => {
-                        if (y > 270) { doc.addPage(); y = 20; }
-                        doc.text(line, 20, y); y += 5;
-                    });
-                    y += 5;
-                }
-            });
-            
-            doc.save(`Sparkam_${currentCampaign.track_title}.pdf`);
-        }
-
-        init();
-    </script>
-</body>
-    </html>
-    
+                        if (y > 270) {
