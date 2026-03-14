@@ -8,271 +8,113 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body {
-            background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
-            font-family: 'Inter', sans-serif;
-            color: white;
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .gradient-text {
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .spark-btn {
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-        }
-        .section-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 3px solid #ff00cc;
-        }
-    </style>
 </head>
-<body class="min-h-screen">
+<body style="background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%); color: white; padding: 20px;">
 
-    <nav class="glass border-b border-white/10 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-black gradient-text">SPARKAM</div>
-            <div class="flex items-center gap-6">
-                <span id="user-name" class="text-sm text-gray-400">Loading...</span>
-                <span id="user-tier" class="px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400">ESSENTIAL (FREE)</span>
-                <button onclick="logout()" class="text-sm text-gray-400 hover:text-white">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i>Logout
-                </button>
-            </div>
-        </div>
-    </nav>
+    <h1>Dashboard</h1>
+    <p>Welcome, <span id="user-name">Loading...</span></p>
+    
+    <form id="campaign-form" style="margin: 20px 0;">
+        <input type="text" id="trackTitle" placeholder="Track Title" required style="padding: 10px; margin: 5px;"><br>
+        <select id="genre" required style="padding: 10px; margin: 5px;">
+            <option value="">Select genre</option>
+            <option value="Afropop">Afropop</option>
+            <option value="Afrobeats">Afrobeats</option>
+        </select><br>
+        <input type="number" id="budget" value="150000" required style="padding: 10px; margin: 5px;"><br>
+        <button type="submit" id="spark-btn" style="padding: 10px 20px; margin: 5px;">SPARK IT</button>
+    </form>
 
-    <div class="max-w-7xl mx-auto px-6 py-8">
-        
-        <div class="mb-8">
-            <h1 class="text-4xl font-black mb-2">
-                Welcome back, <span id="welcome-name" class="gradient-text">Artist</span>!
-            </h1>
-            <p class="text-gray-400">Generate AI-powered campaigns instantly</p>
-        </div>
-
-        <div class="glass rounded-3xl p-8 mb-8">
-            <h2 class="text-2xl font-black mb-6">
-                <i class="fa-solid fa-bolt text-pink-500 mr-2"></i>
-                Generate Campaign
-            </h2>
-
-            <form id="campaign-form" class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-bold mb-2">Track Title</label>
-                    <input type="text" id="trackTitle" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" placeholder="Track name" required>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-bold mb-2">Genre</label>
-                    <select id="genre" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" required>
-                        <option value="">Select genre</option>
-                        <option value="Afropop">Afropop</option>
-                        <option value="Afrobeats">Afrobeats</option>
-                        <option value="Alté">Alté</option>
-                        <option value="Hip-Hop">Hip-Hop</option>
-                        <option value="R&B">R&B</option>
-                        <option value="Pop">Pop</option>
-                        <option value="Indie">Indie</option>
-                        <option value="Electronic">Electronic</option>
-                        <option value="Rock">Rock</option>
-                        <option value="Gospel">Gospel</option>
-                        <option value="Amapiano">Amapiano</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-bold mb-2">Budget (₦ or $)</label>
-                    <input type="number" id="budget" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-pink-500" value="150000" min="10000" required>
-                </div>
-
-                <div class="flex items-end">
-                    <button type="submit" id="spark-btn" class="w-full spark-btn py-4 rounded-xl font-bold text-lg uppercase">
-                        <i class="fa-solid fa-bolt mr-2"></i>SPARK IT
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <div id="results-section" class="glass rounded-3xl p-8" style="display: none;">
-            <div class="bg-gradient-to-r from-green-500/20 to-cyan-500/20 rounded-2xl p-6 mb-6 border-2 border-green-500/50">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h2 class="text-2xl font-black mb-2">
-                            <i class="fa-solid fa-check-circle text-green-400 mr-2"></i>
-                            Campaign Ready!
-                        </h2>
-                        <p class="text-gray-300 text-sm">Your campaign has been saved</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <button onclick="executeWorkflow()" id="workflow-btn" 
-                                class="px-8 py-4 bg-gradient-to-r from-green-500 to-cyan-500 rounded-xl font-black text-lg hover:opacity-90 transition shadow-lg">
-                            <i class="fa-solid fa-rocket mr-2"></i>Execute Workflow
-                        </button>
-                        <button onclick="downloadPDF()" 
-                                class="px-6 py-4 spark-btn rounded-xl font-bold shadow-lg">
-                            <i class="fa-solid fa-download mr-2"></i>PDF
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="campaign-results"></div>
-        </div>
+    <div id="results" style="display: none; margin: 20px 0; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+        <h2>Campaign Ready!</h2>
+        <div id="campaign-data"></div>
+        <button onclick="executeWorkflow()" style="padding: 10px; margin: 5px;">Execute Workflow</button>
+        <button onclick="downloadPDF()" style="padding: 10px; margin: 5px;">Download PDF</button>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://avlbrhnsjylaaokjofoo.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8';
+        var supabase = window.supabase.createClient(
+            'https://avlbrhnsjylaaokjofoo.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bGJyaG5zanlsYWFva2pvZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMDIwODYsImV4cCI6MjA4ODg3ODA4Nn0.veYbgIVokeEVx_2M0AXAYF50g5IWVdymVFjtLKz5_d8'
+        );
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        let currentUser = null;
-        let currentCampaign = null;
-        let userProfile = null;
+        var currentUser = null;
+        var currentCampaign = null;
+        var userProfile = null;
 
         async function init() {
-            const { data: { user } } = await supabase.auth.getUser();
+            var result = await supabase.auth.getUser();
+            var user = result.data.user;
+            
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
+            
             currentUser = user;
-            await loadUserProfile();
-        }
-
-        async function loadUserProfile() {
-            const { data } = await supabase.from('users').select('*').eq('id', currentUser.id).single();
-            if (data) {
-                userProfile = data;
-                document.getElementById('user-name').textContent = data.artist_name;
-                document.getElementById('welcome-name').textContent = data.artist_name;
-                document.getElementById('user-tier').textContent = data.tier.toUpperCase() + (data.is_beta_tester ? ' (FREE BETA)' : '');
+            
+            var profileResult = await supabase.from('users').select('*').eq('id', user.id).single();
+            if (profileResult.data) {
+                userProfile = profileResult.data;
+                document.getElementById('user-name').textContent = profileResult.data.artist_name;
             }
         }
 
         document.getElementById('campaign-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            if (!userProfile) return;
             
-            const formData = {
-                trackTitle: document.getElementById('trackTitle').value.trim(),
-                genre: document.getElementById('genre').value,
-                budget: parseInt(document.getElementById('budget').value)
-            };
-            
-            const btn = document.getElementById('spark-btn');
+            var btn = document.getElementById('spark-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>GENERATING...';
+            btn.textContent = 'GENERATING...';
             
             try {
-                const response = await fetch('/api/generate-campaign', {
+                var response = await fetch('/api/generate-campaign', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         artistName: userProfile.artist_name,
-                        trackTitle: formData.trackTitle,
-                        genre: formData.genre,
-                        budget: formData.budget
+                        trackTitle: document.getElementById('trackTitle').value,
+                        genre: document.getElementById('genre').value,
+                        budget: parseInt(document.getElementById('budget').value)
                     })
                 });
                 
-                const data = await response.json();
+                var data = await response.json();
                 
                 if (data.success) {
-                    const { data: saved } = await supabase.from('campaigns').insert([{
+                    var saveResult = await supabase.from('campaigns').insert([{
                         user_id: currentUser.id,
                         artist_name: userProfile.artist_name,
-                        track_title: formData.trackTitle,
-                        genre: formData.genre,
-                        budget: formData.budget,
+                        track_title: document.getElementById('trackTitle').value,
+                        genre: document.getElementById('genre').value,
+                        budget: parseInt(document.getElementById('budget').value),
                         currency: data.campaign.currency,
                         strategy: data.campaign.strategy
                     }]).select().single();
 
-                    currentCampaign = saved;
-                    displayCampaign(saved);
-                } else {
-                    alert('Error: ' + (data.error || 'Failed'));
+                    currentCampaign = saveResult.data;
+                    
+                    var html = '<h3>' + currentCampaign.track_title + '</h3>';
+                    html += '<p>Budget: ' + currentCampaign.currency + currentCampaign.budget + '</p>';
+                    
+                    if (currentCampaign.strategy.realistic_expectations) {
+                        html += '<p>Streams: ' + currentCampaign.strategy.realistic_expectations.streams_30_days + '</p>';
+                        html += '<p>Followers: ' + currentCampaign.strategy.realistic_expectations.new_followers + '</p>';
+                    }
+                    
+                    document.getElementById('campaign-data').innerHTML = html;
+                    document.getElementById('results').style.display = 'block';
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i>SPARK IT';
+                btn.textContent = 'SPARK IT';
             }
         });
 
-        function displayCampaign(campaign) {
-            const s = campaign.strategy;
-            const c = campaign.currency || '₦';
-            
-            let html = '<div class="bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl p-6 mb-6 border border-pink-500/20">';
-            html += '<h3 class="text-2xl font-bold mb-3">"' + campaign.track_title + '"</h3>';
-            html += '<div class="grid grid-cols-3 gap-4">';
-            html += '<div><div class="text-gray-400 text-xs">Genre</div><div class="font-bold">' + campaign.genre + '</div></div>';
-            html += '<div><div class="text-gray-400 text-xs">Budget</div><div class="font-bold text-pink-400">' + c + campaign.budget.toLocaleString() + '</div></div>';
-            html += '<div><div class="text-gray-400 text-xs">Type</div><div class="font-bold text-xs">' + (s.campaign_type || 'Indie') + '</div></div>';
-            html += '</div></div>';
-
-            if (s.realistic_expectations) {
-                html += '<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">';
-                html += '<div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">Streams</div><div class="text-2xl font-black text-pink-400">' + s.realistic_expectations.streams_30_days + '</div></div>';
-                html += '<div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">Followers</div><div class="text-2xl font-black text-purple-400">' + s.realistic_expectations.new_followers + '</div></div>';
-                html += '<div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">Playlists</div><div class="text-2xl font-black text-blue-400">' + s.realistic_expectations.playlist_adds + '</div></div>';
-                html += '<div class="section-card rounded-xl p-4"><div class="text-gray-400 text-xs mb-1">ROI</div><div class="text-2xl font-black text-green-400">' + s.realistic_expectations.roi_percentage + '</div></div>';
-                html += '</div>';
-            }
-
-            if (s.budget_breakdown) {
-                html += '<div class="section-card rounded-xl p-6 mb-6"><h4 class="font-bold text-lg mb-4">💰 Budget Allocation</h4><div class="grid md:grid-cols-3 gap-4">';
-                for (var k in s.budget_breakdown) {
-                    if (k !== 'total') {
-                        var label = k.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
-                        html += '<div class="bg-black/40 rounded-lg p-4"><div class="text-xs text-gray-400">' + label + '</div><div class="font-black text-xl text-pink-400">' + s.budget_breakdown[k] + '</div></div>';
-                    }
-                }
-                html += '</div></div>';
-            }
-
-            var sections = [
-                { key: 'market_research', icon: '📊', title: 'Market Research' },
-                { key: 'influencer_strategy', icon: '👥', title: 'Influencer Strategy' },
-                { key: 'content_strategy', icon: '📱', title: 'Content Strategy' },
-                { key: 'playlist_strategy', icon: '🎵', title: 'Playlist Strategy' },
-                { key: 'action_plan', icon: '📅', title: 'Action Plan' },
-                { key: 'roi_projections', icon: '💰', title: 'ROI Projections' }
-            ];
-
-            for (var i = 0; i < sections.length; i++) {
-                var sec = sections[i];
-                if (s[sec.key]) {
-                    var text = typeof s[sec.key] === 'string' ? s[sec.key] : JSON.stringify(s[sec.key], null, 2);
-                    html += '<div class="section-card rounded-xl p-6 mb-4"><h4 class="font-bold text-lg mb-3">' + sec.icon + ' ' + sec.title + '</h4><div class="text-sm text-gray-300 whitespace-pre-wrap">' + text + '</div></div>';
-                }
-            }
-
-            document.getElementById('campaign-results').innerHTML = html;
-            document.getElementById('results-section').style.display = 'block';
-            document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function logout() {
-            supabase.auth.signOut();
-            window.location.href = 'login.html';
-        }
-
         async function executeWorkflow() {
-            if (!currentCampaign) return alert('Generate campaign first!');
-            
-            var btn = document.getElementById('workflow-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating...';
+            if (!currentCampaign) return;
             
             try {
                 var response = await fetch('/api/generate-workflow', {
@@ -282,8 +124,9 @@
                 });
                 
                 var data = await response.json();
+                
                 if (data.success) {
-                    var result = await supabase.from('workflows').insert([{
+                    var wfResult = await supabase.from('workflows').insert([{
                         user_id: currentUser.id,
                         campaign_id: currentCampaign.id,
                         tasks: data.workflow.tasks,
@@ -292,73 +135,26 @@
                         progress: 0
                     }]).select().single();
 
-                    localStorage.setItem('sparkam_current_workflow', JSON.stringify(result.data));
+                    localStorage.setItem('sparkam_current_workflow', JSON.stringify(wfResult.data));
                     window.location.href = 'workflow.html';
                 }
-            } catch(e) {
-                alert('Error: ' + e.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-rocket mr-2"></i>Execute Workflow';
+            } catch (error) {
+                alert('Workflow error: ' + error.message);
             }
         }
 
         function downloadPDF() {
-            if (!currentCampaign) return alert('Generate campaign first!');
+            if (!currentCampaign) return;
             
             var jsPDF = window.jspdf.jsPDF;
             var doc = new jsPDF();
-            var s = currentCampaign.strategy;
-            var y = 20;
             
-            doc.setFontSize(20);
-            doc.text('SPARKAM CAMPAIGN', 20, y); y += 10;
-            doc.setFontSize(14);
-            doc.text(currentCampaign.track_title, 20, y); y += 15;
-            
-            if (s.realistic_expectations) {
-                doc.setFontSize(12);
-                doc.text('Expected Results:', 20, y); y += 7;
-                doc.setFontSize(10);
-                doc.text('Streams: ' + s.realistic_expectations.streams_30_days, 20, y); y += 6;
-                doc.text('Followers: ' + s.realistic_expectations.new_followers, 20, y); y += 6;
-                doc.text('Playlists: ' + s.realistic_expectations.playlist_adds, 20, y); y += 10;
-            }
-            
-            if (s.budget_breakdown) {
-                doc.setFontSize(12);
-                doc.text('Budget:', 20, y); y += 7;
-                doc.setFontSize(10);
-                for (var k in s.budget_breakdown) {
-                    if (k !== 'total' && y < 270) {
-                        doc.text(k + ': ' + s.budget_breakdown[k], 20, y); y += 6;
-                    }
-                }
-            }
-            
-            var secList = ['market_research', 'influencer_strategy', 'content_strategy', 'playlist_strategy'];
-            for (var i = 0; i < secList.length; i++) {
-                var key = secList[i];
-                if (s[key] && y < 250) {
-                    if (y > 250) { doc.addPage(); y = 20; }
-                    doc.setFontSize(12);
-                    doc.text(key.toUpperCase(), 20, y); y += 7;
-                    doc.setFontSize(9);
-                    var text = typeof s[key] === 'string' ? s[key] : JSON.stringify(s[key]);
-                    var lines = doc.splitTextToSize(text.substring(0, 800), 170);
-                    for (var j = 0; j < lines.length; j++) {
-                        if (y > 270) { doc.addPage(); y = 20; }
-                        doc.text(lines[j], 20, y); y += 5;
-                    }
-                    y += 5;
-                }
-            }
-            
-            doc.save('Sparkam_' + currentCampaign.track_title.replace(/\s/g, '_') + '.pdf');
+            doc.text('SPARKAM CAMPAIGN', 20, 20);
+            doc.text(currentCampaign.track_title, 20, 30);
+            doc.save('Sparkam_Campaign.pdf');
         }
 
         init();
     </script>
 </body>
-        </html>
-    
+</html>
