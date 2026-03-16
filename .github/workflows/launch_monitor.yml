@@ -5,16 +5,18 @@ on:
     - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:        # Allows manual trigger
 
+# THIS BLOCK FORCES THE RUNNER TO USE NODE 24
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   run-monitor:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        # Updated to v6 for Node 24 support
         uses: actions/checkout@v6
 
       - name: Set up Python
-        # Updated to v6 for Node 24 support
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
