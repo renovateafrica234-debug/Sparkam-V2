@@ -1,352 +1,448 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sparkam - Your AI Music Marketing Manager</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #0f051a 0%, #1a0520 100%);
-            font-family: 'Inter', sans-serif;
-            color: white;
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .gradient-text {
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .spark-btn {
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .spark-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(255, 0, 204, 0.3);
-        }
-        .feature-card {
-            transition: transform 0.3s;
-        }
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sparkam — Your AI Music Marketing Manager</title>
+  <meta name="description" content="Sparkam's AI brain generates professional 30-day music marketing campaigns in 2 minutes. Built for independent Nigerian artists." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #06040e;
+      --bg2:    #0d0a1f;
+      --pink:   #ff1f7a;
+      --purple: #8b3dff;
+      --violet: #c23dff;
+      --text:   #ede8f8;
+      --muted:  #8a82a8;
+      --border: rgba(139,61,255,0.2);
+      --card:   rgba(255,255,255,0.04);
+      --r:      16px;
+      --head:   'Syne', Georgia, serif;
+      --body:   'DM Sans', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    .orb { position: fixed; border-radius: 50%; filter: blur(90px); pointer-events: none; z-index: 0; }
+    .orb-a { width: 500px; height: 500px; background: rgba(255,31,122,0.13);  top: -160px; left: -120px; }
+    .orb-b { width: 400px; height: 400px; background: rgba(139,61,255,0.12); top: 35%; right: -100px; }
+    .orb-c { width: 300px; height: 300px; background: rgba(194,61,255,0.09); bottom: 5%; left: 15%; }
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
+    section { position: relative; z-index: 2; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200; padding: 16px 0;
+      transition: background .3s, border-color .3s;
+    }
+    nav.stuck {
+      background: rgba(6,4,14,.88); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .logo {
+      font-family: var(--head); font-weight: 800; font-size: 1.45rem;
+      letter-spacing: -.02em; text-decoration: none;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; flex-shrink: 0;
+    }
+    .nav-mid { display: flex; gap: 28px; align-items: center; }
+    .nav-mid a { color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 500; transition: color .2s; }
+    .nav-mid a:hover { color: var(--text); }
+    .nav-right { display: flex; gap: 10px; align-items: center; }
+    .btn-ghost {
+      color: var(--muted); text-decoration: none; font-size: .88rem; font-weight: 500;
+      padding: 8px 16px; border-radius: 100px; border: 1px solid var(--border);
+      transition: border-color .2s, color .2s; white-space: nowrap;
+    }
+    .btn-ghost:hover { border-color: rgba(139,61,255,.5); color: var(--text); }
+    .btn-pill {
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      color: #fff; font-family: var(--body); font-weight: 600; font-size: .88rem;
+      padding: 9px 20px; border-radius: 100px; text-decoration: none;
+      box-shadow: 0 0 20px rgba(255,31,122,.28); transition: opacity .2s, transform .2s;
+      white-space: nowrap;
+    }
+    .btn-pill:hover { opacity: .88; transform: translateY(-1px); }
+    @media (max-width: 640px) { .nav-mid { display: none; } .btn-ghost { display: none; } }
+
+    /* HERO — no opacity:0 on any hero element */
+    .hero {
+      min-height: 100svh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 130px 24px 80px;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,31,122,.1); border: 1px solid rgba(255,31,122,.25);
+      color: var(--pink); font-size: .75rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; padding: 6px 16px; border-radius: 100px; margin-bottom: 28px;
+    }
+    .dot { width: 6px; height: 6px; background: var(--pink); border-radius: 50%; animation: blink 2s ease infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    h1.hero-h {
+      font-family: var(--head); font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 800; line-height: 1.08; letter-spacing: -.03em; max-width: 820px;
+    }
+    .grad {
+      background: linear-gradient(135deg, var(--pink) 0%, var(--violet) 55%, var(--purple) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub { color: var(--muted); font-size: clamp(.97rem, 2vw, 1.12rem); max-width: 560px; margin: 18px auto 0; line-height: 1.75; }
+
+    .ctas { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 34px; }
+    .btn-main {
+      background: linear-gradient(135deg, var(--pink), var(--purple)); color: #fff;
+      font-family: var(--body); font-weight: 600; font-size: 1rem; padding: 14px 30px;
+      border-radius: 100px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 0 40px rgba(255,31,122,.35), 0 4px 24px rgba(0,0,0,.4);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-main:hover { transform: translateY(-2px); box-shadow: 0 0 60px rgba(255,31,122,.5); }
+    .btn-out {
+      color: var(--text); font-family: var(--body); font-weight: 500; font-size: 1rem;
+      padding: 14px 30px; border-radius: 100px; text-decoration: none;
+      border: 1px solid var(--border); background: var(--card);
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: border-color .2s, background .2s;
+    }
+    .btn-out:hover { border-color: rgba(139,61,255,.5); background: rgba(139,61,255,.08); }
+
+    .stats {
+      display: flex; flex-wrap: wrap; justify-content: center; margin-top: 56px;
+      border: 1px solid var(--border); border-radius: var(--r); overflow: hidden;
+    }
+    .stat { padding: 16px 32px; text-align: center; border-right: 1px solid var(--border); flex: 1; min-width: 110px; }
+    .stat:last-child { border-right: none; }
+    .sn {
+      font-family: var(--head); font-size: 1.9rem; font-weight: 800; line-height: 1.1;
+      background: linear-gradient(135deg, var(--pink), var(--violet));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .sl { font-size: .72rem; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; margin-top: 2px; }
+
+    .scroll-cue { margin-top: 52px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--muted); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+    .scroll-ln { width: 1px; height: 36px; background: linear-gradient(to bottom, var(--pink), transparent); animation: pl 2s ease infinite; }
+    @keyframes pl { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+    /* Sections */
+    .sec-lbl { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--pink); margin-bottom: 10px; }
+    .sec-ttl { font-family: var(--head); font-size: clamp(1.7rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -.025em; line-height: 1.15; }
+    .sec-sub { color: var(--muted); max-width: 520px; margin: 10px auto 0; font-size: 1.02rem; }
+
+    /* Scroll reveal — JS controls this; fallback = visible */
+    .reveal { transition: opacity .65s ease, transform .65s ease; }
+
+    /* TRUST */
+    .trust { padding: 44px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .trust-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 32px; }
+    .ti { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .88rem; }
+    .ti strong { color: var(--text); }
+
+    /* HOW */
+    .how { padding: 90px 0; }
+    .how-hd { text-align: center; margin-bottom: 52px; }
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px,1fr)); gap: 2px; background: var(--border); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+    .step { background: var(--bg); padding: 38px 30px; position: relative; overflow: hidden; transition: background .3s; }
+    .step:hover { background: var(--bg2); }
+    .step::after { content: attr(data-n); position: absolute; right: 18px; top: 14px; font-family: var(--head); font-size: 5rem; font-weight: 800; color: rgba(255,255,255,.03); line-height: 1; pointer-events: none; }
+    .snum { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--pink), var(--purple)); display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 700; color: #fff; margin-bottom: 18px; box-shadow: 0 0 18px rgba(255,31,122,.3); }
+    .step h3 { font-family: var(--head); font-weight: 700; font-size: 1.12rem; margin-bottom: 8px; }
+    .step p { color: var(--muted); font-size: .9rem; line-height: 1.65; }
+    .stag { display: inline-block; margin-top: 14px; padding: 3px 11px; background: rgba(255,31,122,.1); border: 1px solid rgba(255,31,122,.2); color: var(--pink); font-size: .73rem; border-radius: 100px; font-weight: 600; }
+
+    /* PRICING */
+    .pricing { padding: 90px 0; }
+    .pricing-hd { text-align: center; margin-bottom: 52px; }
+    .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px,1fr)); gap: 18px; align-items: stretch; }
+    .plan { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 34px 26px; display: flex; flex-direction: column; position: relative; transition: border-color .3s, transform .3s; }
+    .plan:hover { border-color: rgba(139,61,255,.4); transform: translateY(-3px); }
+    .plan.hot { background: linear-gradient(145deg, rgba(139,61,255,.12), rgba(255,31,122,.07)); border-color: rgba(139,61,255,.4); box-shadow: 0 0 40px rgba(139,61,255,.14); }
+    .pbadge { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--pink), var(--purple)); color: #fff; font-size: .68rem; font-weight: 700; letter-spacing: .08em; padding: 3px 13px; border-radius: 100px; white-space: nowrap; text-transform: uppercase; }
+    .ptier { font-family: var(--head); font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .pprice { font-family: var(--head); font-size: 2.3rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+    .pprice span { font-size: .88rem; font-weight: 400; color: var(--muted); }
+    .pusd { color: var(--muted); font-size: .82rem; margin-top: 4px; margin-bottom: 20px; }
+    .plan hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+    .plan ul { list-style: none; flex: 1; display: flex; flex-direction: column; gap: 9px; margin-bottom: 26px; }
+    .plan li { display: flex; gap: 9px; font-size: .88rem; color: var(--muted); }
+    .plan li::before { content: '✓'; color: var(--pink); font-weight: 700; flex-shrink: 0; }
+    .btn-tier { display: block; text-align: center; text-decoration: none; padding: 12px; border-radius: 100px; font-weight: 600; font-size: .93rem; transition: opacity .2s, transform .2s; }
+    .btn-tier:hover { opacity: .85; transform: translateY(-1px); }
+    .btn-fill { background: linear-gradient(135deg, var(--pink), var(--purple)); color: #fff; box-shadow: 0 0 28px rgba(255,31,122,.28); }
+    .btn-line { border: 1px solid var(--border); color: var(--text); }
+    .btn-line:hover { border-color: rgba(139,61,255,.5); }
+
+    /* FEATURES */
+    .feats { padding: 80px 0 100px; }
+    .feats-hd { text-align: center; margin-bottom: 52px; }
+    .fg { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 14px; }
+    .fc { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 30px 26px; position: relative; overflow: hidden; transition: border-color .3s, transform .3s; }
+    .fc::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--pink), var(--purple)); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
+    .fc:hover { border-color: rgba(139,61,255,.35); transform: translateY(-3px); }
+    .fc:hover::after { transform: scaleX(1); }
+    .fi { font-size: 1.7rem; margin-bottom: 14px; display: block; }
+    .fc h3 { font-family: var(--head); font-weight: 700; font-size: 1rem; margin-bottom: 7px; }
+    .fc p { color: var(--muted); font-size: .87rem; line-height: 1.6; }
+
+    /* CTA */
+    .ctab { padding: 90px 0; text-align: center; }
+    .ctabox { background: linear-gradient(145deg, rgba(139,61,255,.12), rgba(255,31,122,.08)); border: 1px solid rgba(139,61,255,.3); border-radius: 24px; padding: 70px 40px; position: relative; overflow: hidden; }
+    .ctabox::before { content: ''; position: absolute; inset: 0; border-radius: 24px; background: radial-gradient(circle at 50% 0%, rgba(255,31,122,.1), transparent 70%); pointer-events: none; }
+    .ctabox h2 { font-family: var(--head); font-size: clamp(1.7rem,4vw,2.8rem); font-weight: 800; letter-spacing: -.025em; margin-bottom: 12px; }
+    .ctabox p { color: var(--muted); font-size: 1.02rem; max-width: 480px; margin: 0 auto 30px; }
+
+    /* FOOTER */
+    footer { padding: 52px 0 32px; border-top: 1px solid var(--border); }
+    .fg2 { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 44px; margin-bottom: 44px; }
+    .fb p { color: var(--muted); font-size: .86rem; margin-top: 10px; line-height: 1.65; max-width: 210px; }
+    .fcol h4 { font-family: var(--head); font-weight: 700; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--text); margin-bottom: 14px; }
+    .fcol a { display: block; color: var(--muted); text-decoration: none; font-size: .87rem; margin-bottom: 8px; transition: color .2s; }
+    .fcol a:hover { color: var(--text); }
+    .wf { display: flex; flex-direction: column; gap: 7px; }
+    .wi { background: rgba(255,255,255,.05); border: 1px solid var(--border); color: var(--text); padding: 9px 13px; border-radius: 10px; font-family: var(--body); font-size: .87rem; outline: none; transition: border-color .2s; }
+    .wi:focus { border-color: rgba(255,31,122,.5); }
+    .wi::placeholder { color: var(--muted); }
+    .wb { background: linear-gradient(135deg, var(--pink), var(--purple)); color: #fff; font-family: var(--body); font-weight: 600; font-size: .87rem; padding: 9px; border-radius: 10px; border: none; cursor: pointer; transition: opacity .2s; }
+    .wb:hover { opacity: .85; }
+    .fbot { border-top: 1px solid var(--border); padding-top: 26px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .fbot p, .fbot a { color: var(--muted); font-size: .8rem; text-decoration: none; }
+    .fbot a:hover { color: var(--text); }
+    .flinks { display: flex; gap: 18px; }
+    @media (max-width: 860px) { .fg2 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 540px) { .fg2 { grid-template-columns: 1fr; gap: 28px; } .fbot { flex-direction: column; align-items: flex-start; } .ctabox { padding: 44px 22px; } .stat { padding: 14px 16px; } .sn { font-size: 1.6rem; } }
+  </style>
 </head>
 <body>
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-50 glass">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-black gradient-text">SPARKAM</div>
-            <div class="hidden md:flex gap-8 items-center">
-                <a href="#how-it-works" class="text-gray-300 hover:text-white transition">How It Works</a>
-                <a href="#pricing" class="text-gray-300 hover:text-white transition">Pricing</a>
-                <a href="#features" class="text-gray-300 hover:text-white transition">Features</a>
-                <a href="/signup.html" class="spark-btn px-6 py-2 rounded-full font-bold text-sm">Get Started Free</a>
-            </div>
+  <canvas id="stars"></canvas>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+
+  <nav id="nav">
+    <div class="wrap nav-row">
+      <a href="/" class="logo">SPARKAM</a>
+      <div class="nav-mid">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#features">Features</a>
+      </div>
+      <div class="nav-right">
+        <a href="dashboard.html" class="btn-ghost">Log In</a>
+        <a href="signup.html" class="btn-pill">Get Started Free</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="badge"><span class="dot"></span>AI-Powered Music Promotion</div>
+    <h1 class="hero-h">Your Mini Record Label<br /><span class="grad">For Independent Artists</span></h1>
+    <p class="hero-sub">Sparkam's AI brain generates a complete 30-day marketing campaign in 2 minutes. TikTok, Instagram, Spotify — 90+ content pieces, playlist strategies, and influencer targets.</p>
+    <div class="ctas">
+      <a href="signup.html?tier=free" class="btn-main">⚡ Start Free Trial</a>
+      <a href="#how-it-works" class="btn-out">See How It Works →</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="sn">2 min</div><div class="sl">Campaign Generation</div></div>
+      <div class="stat"><div class="sn">90+</div><div class="sl">Content Pieces</div></div>
+      <div class="stat"><div class="sn">24/7</div><div class="sl">AI Assistant</div></div>
+      <div class="stat"><div class="sn">₦49K</div><div class="sl">Starting Price</div></div>
+    </div>
+    <div class="scroll-cue"><span>Scroll</span><div class="scroll-ln"></div></div>
+  </section>
+
+  <div class="trust reveal">
+    <div class="wrap">
+      <div class="trust-row">
+        <div class="ti">🎵 Built for <strong>&nbsp;Afrobeats, Afropop & Alté</strong></div>
+        <div class="ti">🤖 Powered by <strong>&nbsp;Claude AI</strong></div>
+        <div class="ti">🇳🇬 Made by <strong>&nbsp;Renovate Africa</strong></div>
+        <div class="ti">⚡ <strong>No record deal&nbsp;</strong> required</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="how" id="how-it-works">
+    <div class="wrap">
+      <div class="how-hd reveal">
+        <span class="sec-lbl">Process</span>
+        <h2 class="sec-ttl">How <span class="grad">Sparkam</span> Works</h2>
+        <p class="sec-sub">From track upload to campaign execution in 3 simple steps</p>
+      </div>
+      <div class="steps reveal">
+        <div class="step" data-n="01"><div class="snum">1</div><h3>Upload Track Info</h3><p>Enter your artist name, track title, genre, and budget. The form takes 30 seconds to fill.</p><span class="stag">⏱ 30 seconds</span></div>
+        <div class="step" data-n="02"><div class="snum">2</div><h3>AI Generates Strategy</h3><p>AI creates a full 30-day campaign with TikTok hooks, Instagram captions, Spotify pitch, and influencer targets.</p><span class="stag">⚡ 120 seconds</span></div>
+        <div class="step" data-n="03"><div class="snum">3</div><h3>Execute & Track</h3><p>Download your campaign PDF, execute with Claude AI guidance, or let Sparkam auto-post across platforms.</p><span class="stag">🚀 Pro tier</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing" id="pricing">
+    <div class="wrap">
+      <div class="pricing-hd reveal">
+        <span class="sec-lbl">Pricing</span>
+        <h2 class="sec-ttl">Choose Your Plan</h2>
+        <p class="sec-sub">Affordable pricing for independent artists. No hidden fees.</p>
+      </div>
+      <div class="plans reveal">
+        <div class="plan">
+          <div class="ptier">Essential</div>
+          <div class="pprice">₦49,000<span> / mo</span></div>
+          <div class="pusd">~$49 USD</div><hr />
+          <ul><li>Unlimited campaigns</li><li>90 branded content pieces</li><li>Unlimited Claude AI chat</li><li>TikTok + Instagram strategies</li><li>Spotify playlist pitch</li></ul>
+          <a href="pricing.html" class="btn-tier btn-line">Get Started</a>
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="min-h-screen flex items-center justify-center px-6 pt-20">
-        <div class="max-w-6xl mx-auto text-center">
-            <div class="mb-6">
-                <span class="glass px-4 py-2 rounded-full text-sm font-bold text-pink-400 border border-pink-500/30">
-                    🤖 AI-Powered Music Promotion
-                </span>
-            </div>
-            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">
-                Your Mini Record Label<br/>
-                <span class="gradient-text">For Independent Artists</span>
-            </h1>
-            <p class="text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
-                Sparkam's autonomous AI brain generates professional marketing campaigns in 2 minutes. 
-                Claude music assistant guides you 24/7. Get 90 content pieces, playlist strategies, 
-                and influencer targets—all for the price of one consultant session.
-            </p>
-            
-            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                <a href="/signup.html?tier=free" class="spark-btn px-8 py-4 rounded-xl font-bold text-lg">
-                    Start Free Trial
-                </a>
-                <a href="#how-it-works" class="glass px-8 py-4 rounded-xl font-bold text-lg border-2 border-pink-500/50 hover:bg-pink-500/10 transition">
-                    See How It Works
-                </a>
-            </div>
-
-            <div class="flex flex-wrap justify-center gap-8 text-center">
-                <div>
-                    <div class="text-3xl font-black gradient-text">2 min</div>
-                    <div class="text-sm text-gray-400">Campaign Generation</div>
-                </div>
-                <div>
-                    <div class="text-3xl font-black gradient-text">90+</div>
-                    <div class="text-sm text-gray-400">Content Pieces</div>
-                </div>
-                <div>
-                    <div class="text-3xl font-black gradient-text">24/7</div>
-                    <div class="text-sm text-gray-400">AI Assistant</div>
-                </div>
-                <div>
-                    <div class="text-3xl font-black gradient-text">₦49K</div>
-                    <div class="text-sm text-gray-400">Starting Price</div>
-                </div>
-            </div>
+        <div class="plan hot">
+          <div class="pbadge">Most Popular</div>
+          <div class="ptier">Pro</div>
+          <div class="pprice">₦99,000<span> / mo</span></div>
+          <div class="pusd">~$99 USD</div><hr />
+          <ul><li>Everything in Essential</li><li>Auto-posting to socials</li><li>Weekly 15-min strategy calls</li><li>Priority campaign generation</li><li>Advanced analytics</li></ul>
+          <a href="pricing.html" class="btn-tier btn-fill">Go Pro</a>
         </div>
-    </section>
-
-    <!-- How It Works -->
-    <section id="how-it-works" class="py-20 px-6">
-        <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-black mb-4">
-                    How <span class="gradient-text">Sparkam</span> Works
-                </h2>
-                <p class="text-gray-400 text-lg">
-                    From track upload to campaign execution in 3 simple steps
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="glass rounded-3xl p-8 text-center feature-card">
-                    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-2xl font-black">1</div>
-                    <h3 class="text-2xl font-black mb-4">Upload Track Info</h3>
-                    <p class="text-gray-400">Enter your artist name, track title, genre, and budget. Takes 30 seconds.</p>
-                </div>
-                <div class="glass rounded-3xl p-8 text-center feature-card">
-                    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-2xl font-black">2</div>
-                    <h3 class="text-2xl font-black mb-4">AI Generates Strategy</h3>
-                    <p class="text-gray-400">AI creates a complete 30-day campaign in 120 seconds with TikTok, Instagram, and Spotify strategies.</p>
-                </div>
-                <div class="glass rounded-3xl p-8 text-center feature-card">
-                    <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-2xl font-black">3</div>
-                    <h3 class="text-2xl font-black mb-4">Execute & Track</h3>
-                    <p class="text-gray-400">Download your campaign, execute with Claude AI guidance, or let us auto-post (Pro tier).</p>
-                </div>
-            </div>
+        <div class="plan">
+          <div class="ptier">Platinum</div>
+          <div class="pprice">₦199,000<span> / mo</span></div>
+          <div class="pusd">~$199 USD</div><hr />
+          <ul><li>Everything in Pro</li><li>Dedicated account manager</li><li>VIP support</li><li>Custom brand voice training</li><li>Label-level reporting</li></ul>
+          <a href="pricing.html" class="btn-tier btn-line">Go Platinum</a>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Pricing -->
-    <section id="pricing" class="py-20 px-6">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-black mb-4">
-                    Choose Your <span class="gradient-text">Plan</span>
-                </h2>
-                <p class="text-gray-400 text-lg">Affordable pricing for independent artists</p>
-            </div>
+  <section class="feats" id="features">
+    <div class="wrap">
+      <div class="feats-hd reveal">
+        <span class="sec-lbl">Features</span>
+        <h2 class="sec-ttl">Everything You Need to <span class="grad">Succeed</span></h2>
+        <p class="sec-sub">All the tools of a major label marketing team, at indie prices.</p>
+      </div>
+      <div class="fg reveal">
+        <div class="fc"><span class="fi">🎵</span><h3>Nigerian Market Expert</h3><p>Trained on Afrobeats, Afropop, and Alté strategies. Knows what resonates with Nigerian audiences.</p></div>
+        <div class="fc"><span class="fi">⚡</span><h3>2-Minute Generation</h3><p>Complete 30-day campaign in 120 seconds. No waiting, no consultants, no guesswork.</p></div>
+        <div class="fc"><span class="fi">🤖</span><h3>Claude AI Chat</h3><p>24/7 music marketing advisor. Ask anything from release timing to playlist strategy.</p></div>
+        <div class="fc"><span class="fi">📱</span><h3>Platform-Native Content</h3><p>TikTok hooks, Instagram captions, Twitter threads, and Spotify pitches — each written for its platform.</p></div>
+        <div class="fc"><span class="fi">🎯</span><h3>Influencer Targeting</h3><p>Curated list of Nigerian influencers and playlist curators matched to your genre and budget.</p></div>
+        <div class="fc"><span class="fi">📄</span><h3>Downloadable PDF Pack</h3><p>Export your full campaign as a branded PDF. Share it with your team or execute it yourself.</p></div>
+      </div>
+    </div>
+  </section>
 
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="glass rounded-3xl p-6">
-                    <div class="text-center mb-6">
-                        <h3 class="text-xl font-black mb-2">ESSENTIAL</h3>
-                        <div class="text-4xl font-black mb-2">₦49,000</div>
-                        <p class="text-gray-400 text-sm">per month</p>
-                    </div>
-                    <ul class="space-y-3 mb-6 text-sm">
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
-                            <span>Unlimited campaigns</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
-                            <span>90 branded content pieces</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
-                            <span>Unlimited Claude AI chat</span>
-                        </li>
-                    </ul>
-                    <a href="/pricing.html" class="block w-full py-3 border-2 border-pink-500 rounded-xl text-center font-bold">Get Started</a>
-                </div>
+  <section class="ctab">
+    <div class="wrap">
+      <div class="ctabox reveal">
+        <h2>Ready to <span class="grad">Spark</span> Your Music?</h2>
+        <p>Join independent Nigerian artists promoting smarter. No record deal required.</p>
+        <a href="signup.html?tier=free" class="btn-main" style="display:inline-flex;">⚡ Start Free Trial — No Card Needed</a>
+      </div>
+    </div>
+  </section>
 
-                <div class="glass rounded-3xl p-6 border-2 border-pink-500/50 relative">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                        <span class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-full text-xs font-black">MOST POPULAR</span>
-                    </div>
-                    <div class="text-center mb-6">
-                        <h3 class="text-xl font-black mb-2">PRO</h3>
-                        <div class="text-4xl font-black mb-2">₦99,000</div>
-                        <p class="text-gray-400 text-sm">per month</p>
-                    </div>
-                    <ul class="space-y-3 mb-6 text-sm">
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-check text-pink-400 mt-1"></i>
-                            <span>Everything in Essential</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-check text-pink-400 mt-1"></i>
-                            <span>Auto-posting to socials</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-check text-pink-400 mt-1"></i>
-                            <span>Weekly 15-min calls</span>
-                        </li>
-                    </ul>
-                    <a href="/pricing.html" class="block w-full py-3 spark-btn rounded-xl text-center font-bold">Go Pro</a>
-                </div>
-
-                <div class="glass rounded-3xl p-6">
-                    <div class="text-center mb-6">
-                        <h3 class="text-xl font-black mb-2">PLATINUM</h3>
-                        <div class="text-4xl font-black mb-2">₦199,000</div>
-                        <p class="text-gray-400 text-sm">per month</p>
-                    </div>
-                    <ul class="space-y-3 mb-6 text-sm">
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-check text-purple-400 mt-1"></i>
-                            <span>Everything in Pro</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-check text-purple-400 mt-1"></i>
-                            <span>Dedicated manager</span>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <i class="fa-solid fa-check text-purple-400 mt-1"></i>
-                            <span>VIP support</span>
-                        </li>
-                    </ul>
-                    <a href="/pricing.html" class="block w-full py-3 border-2 border-purple-500 rounded-xl text-center font-bold">Go Platinum</a>
-                </div>
-            </div>
+  <footer>
+    <div class="wrap">
+      <div class="fg2">
+        <div class="fb"><a href="/" class="logo">SPARKAM</a><p>Your AI-powered mini record label for independent artists. Built by Renovate Africa.</p></div>
+        <div class="fcol">
+          <h4>Product</h4>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#features">Features</a>
+          <a href="dashboard.html">Dashboard</a>
         </div>
-    </section>
-
-    <!-- Features -->
-    <section id="features" class="py-20 px-6">
-        <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-black mb-4">
-                    Everything You Need to <span class="gradient-text">Succeed</span>
-                </h2>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="glass rounded-2xl p-6 feature-card">
-                    <div class="text-4xl mb-4">🎵</div>
-                    <h3 class="text-xl font-bold mb-2">Nigerian Market Expert</h3>
-                    <p class="text-gray-400 text-sm">Trained on Afrobeats, Afropop, Alté strategies.</p>
-                </div>
-                <div class="glass rounded-2xl p-6 feature-card">
-                    <div class="text-4xl mb-4">⚡</div>
-                    <h3 class="text-xl font-bold mb-2">2-Minute Generation</h3>
-                    <p class="text-gray-400 text-sm">Complete 30-day campaign in 120 seconds.</p>
-                </div>
-                <div class="glass rounded-2xl p-6 feature-card">
-                    <div class="text-4xl mb-4">🤖</div>
-                    <h3 class="text-xl font-bold mb-2">Claude AI Chat</h3>
-                    <p class="text-gray-400 text-sm">24/7 music marketing advisor.</p>
-                </div>
-            </div>
+        <div class="fcol">
+          <h4>Company</h4>
+          <a href="/about.html">About</a>
+          <a href="mailto:hello@sparkam.ai">Contact</a>
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms</a>
         </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="py-16 px-6 border-t border-white/10">
-        <div class="max-w-6xl mx-auto">
-            <div class="grid md:grid-cols-4 gap-12 mb-12">
-                <div>
-                    <div class="text-2xl font-black gradient-text mb-4">SPARKAM</div>
-                    <p class="text-gray-400 text-sm mb-6">Your AI-powered mini record label for independent artists.</p>
-                    <div class="flex gap-4">
-                        <a href="https://instagram.com/sparkam.ai" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500 flex items-center justify-center transition">
-                            <i class="fa-brands fa-instagram text-lg"></i>
-                        </a>
-                        <a href="https://twitter.com/sparkam_ai" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500 flex items-center justify-center transition">
-                            <i class="fa-brands fa-twitter text-lg"></i>
-                        </a>
-                        <a href="https://tiktok.com/@sparkam.ai" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500 flex items-center justify-center transition">
-                            <i class="fa-brands fa-tiktok text-lg"></i>
-                        </a>
-                        <a href="https://linkedin.com/company/sparkam" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-pink-500/20 border border-white/10 hover:border-pink-500 flex items-center justify-center transition">
-                            <i class="fa-brands fa-linkedin text-lg"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="font-bold mb-4 text-white">Product</h4>
-                    <ul class="space-y-3 text-gray-400 text-sm">
-                        <li><a href="#how-it-works" class="hover:text-pink-500 transition">How It Works</a></li>
-                        <li><a href="#pricing" class="hover:text-pink-500 transition">Pricing</a></li>
-                        <li><a href="#features" class="hover:text-pink-500 transition">Features</a></li>
-                        <li><a href="/dashboard.html" class="hover:text-pink-500 transition">Dashboard</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-bold mb-4 text-white">Company</h4>
-                    <ul class="space-y-3 text-gray-400 text-sm">
-                        <li><a href="/about.html" class="hover:text-pink-500 transition">About</a></li>
-                        <li><a href="mailto:hello@sparkam.ai" class="hover:text-pink-500 transition">Contact</a></li>
-                        <li><a href="/privacy.html" class="hover:text-pink-500 transition">Privacy</a></li>
-                        <li><a href="/terms.html" class="hover:text-pink-500 transition">Terms</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-bold mb-4 text-white">Join Waitlist</h4>
-                    <p class="text-gray-400 text-sm mb-4">Get early access</p>
-                    <form id="waitlist-form" class="space-y-3">
-                        <input type="email" id="waitlist-email" placeholder="your@email.com" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:border-pink-500 outline-none" required>
-                        <button type="submit" class="w-full spark-btn py-2 rounded-lg text-sm font-bold">Join Waitlist</button>
-                    </form>
-                    <div class="mt-4 text-gray-400 text-xs">
-                        <i class="fa-solid fa-envelope mr-2"></i>
-                        <a href="mailto:hello@sparkam.ng" class="hover:text-pink-500">hello@sparkam.ai</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pt-8 border-t border-white/10">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p class="text-gray-500 text-sm text-center md:text-left">
-                        &copy; 2026 Sparkam. Created by 
-                        <a href="https://renovateafrica.com" target="_blank" class="text-pink-500 hover:text-pink-400 font-bold">Renovate Africa</a>
-                        . All rights reserved.
-                    </p>
-                    <div class="flex gap-6 text-sm text-gray-500">
-                        <a href="/privacy.html" class="hover:text-pink-500 transition">Privacy</a>
-                        <a href="/terms.html" class="hover:text-pink-500 transition">Terms</a>
-                        <a href="mailto:hello@sparkam.ai" class="hover:text-pink-500 transition">Support</a>
-                    </div>
-                </div>
-            </div>
+        <div class="fcol">
+          <h4>Get Early Access</h4>
+          <div class="wf">
+            <input type="email" class="wi" placeholder="your@email.com" id="wl" />
+            <button class="wb" onclick="joinWL()">Join Waitlist →</button>
+          </div>
+          <a href="mailto:hello@sparkam.ai" style="margin-top:12px;font-size:.8rem;">hello@sparkam.ai</a>
         </div>
-    </footer>
+      </div>
+      <div class="fbot">
+        <p>© 2026 Sparkam. Created by <a href="https://renovateafrica.com">Renovate Africa</a>. All rights reserved.</p>
+        <div class="flinks">
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms</a>
+          <a href="mailto:hello@sparkam.ai">Support</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-    <script>
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) target.scrollIntoView({ behavior: 'smooth' });
-            });
+  <script>
+    /* Starfield */
+    (function(){
+      var cv=document.getElementById('stars'), cx=cv.getContext('2d'), W, H, S=[];
+      function resize(){ W=cv.width=window.innerWidth; H=cv.height=window.innerHeight; }
+      function make(){ S=[]; for(var i=0;i<200;i++) S.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+0.2,a:Math.random()*.7+.1,vy:Math.random()*.25+.04,vx:(Math.random()-.5)*.06}); }
+      function tick(){
+        cx.clearRect(0,0,W,H);
+        for(var i=0;i<S.length;i++){
+          var s=S[i]; s.y+=s.vy; s.x+=s.vx;
+          if(s.y>H){s.y=0;s.x=Math.random()*W;}
+          if(s.x<0)s.x=W; if(s.x>W)s.x=0;
+          cx.beginPath(); cx.arc(s.x,s.y,s.r,0,Math.PI*2);
+          cx.fillStyle='rgba(200,185,255,'+s.a+')'; cx.fill();
+        }
+        requestAnimationFrame(tick);
+      }
+      window.addEventListener('resize',function(){resize();make();});
+      resize(); make(); tick();
+    })();
+
+    /* Nav scroll */
+    var nav=document.getElementById('nav');
+    window.addEventListener('scroll',function(){ nav.classList.toggle('stuck',window.scrollY>30); },{passive:true});
+
+    /* Scroll reveal — safe: only hides elements if IntersectionObserver exists */
+    if('IntersectionObserver' in window){
+      var els=document.querySelectorAll('.reveal');
+      els.forEach(function(el){ el.style.opacity='0'; el.style.transform='translateY(26px)'; });
+      var io=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){
+            e.target.style.opacity='1';
+            e.target.style.transform='translateY(0)';
+            io.unobserve(e.target);
+          }
         });
+      },{threshold:0.08});
+      els.forEach(function(el){io.observe(el);});
+    }
 
-        // Waitlist form
-        document.getElementById('waitlist-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('waitlist-email').value;
-            const button = this.querySelector('button');
-            button.textContent = '✓ Joined!';
-            button.classList.add('bg-green-500');
-            this.reset();
-            setTimeout(() => {
-                button.textContent = 'Join Waitlist';
-                button.classList.remove('bg-green-500');
-            }, 3000);
-        });
-    </script>
+    /* Waitlist */
+    function joinWL(){
+      var i=document.getElementById('wl'), v=i.value.trim();
+      if(!v||!v.includes('@')){i.style.borderColor='#ff1f7a';return;}
+      i.style.borderColor=''; i.value=''; i.placeholder='✓ You\'re on the list!';
+    }
+  </script>
 </body>
-                        </html>
-                        
+</html>
